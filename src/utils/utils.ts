@@ -1,4 +1,5 @@
 import { isPast, format } from "date-fns";
+import { createToast } from "mosha-vue-toastify";
 import store from "@/store";
 import router from "@/router";
 
@@ -135,7 +136,6 @@ export const handleError = (error, commit, reject) => {
   let errMsg = "";
   // Resets errors in store
   commit("loadingModule/showLoading", false, { root: true });
-  commit("errorModule/error", null, { root: true });
   console.log("sucedio un error....");
   console.log("el error: ", error);
   // Checks if unauthorized
@@ -146,38 +146,29 @@ export const handleError = (error, commit, reject) => {
     return reject(error);
   }
   if (error.response.status === 401) {
-    router.push({ name: "Profile" });
-    commit(
-      "errorModule/error",
-      "Pide permisos : " + error.response.data.errors.msg.data,
-      { root: true }
-    );
+    store.dispatch("authModule/logout", { root: true });
+    console.log("se fue al loign");
   } else {
     console.log("se produjo else");
     // Any other error
     errMsg = error.response
       ? error.response.data.errors.msg
       : "SERVER_TIMEOUT_CONNECTION_ERROR";
-    setTimeout(() => {
-      return errMsg
-        ? commit("errorModule/error", errMsg, { root: true })
-        : commit("errorModule/showError", false, { root: true });
-    }, 0);
+    // setTimeout(
+    //   () =>
+    //     errMsg
+    //       ? commit('errorModule/error', errMsg, { root: true })
+    //       : commit('errorModule/showError', false, { root: true }),
+    //   0,
+    // );
+    createToast(errMsg, { timeout: 3000, type: "danger" });
   }
   reject(error);
+  return 0;
 };
 
-export const buildSuccess = (msg, commit) => {
-  commit("loadingModule/showLoading", false, { root: true });
-  commit("successModule/success", null, {
-    root: true,
-  });
-  setTimeout(() => {
-    return msg
-      ? commit("successModule/success", msg, { root: true })
-      : commit("successModule/showSuccess", false, { root: true });
-  }, 0);
-  commit("errorModule/error", null, { root: true });
+export const buildSuccess = (msg: String) => {
+  createToast(msg, { timeout: 3000, type: "success" });
 };
 
 // Checks if tokenExpiration in localstorage date is past, if so then trigger an update

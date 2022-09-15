@@ -14,3 +14,21 @@
 @import "./layout/horizontal";
 @import "./layout/dark";
 @import "./pages/dashboards";
+
+.whatsapp-color {
+  color: #25d366;
+}
+.instagram-color {
+  color: #e03f6c;
+}
+.messenger-color {
+  color: #02a7f7;
+}
+
+.selected {
+  background-color: #f5f5f5 !important;
+}
+
+.message {
+  white-space: pre-line;
+}

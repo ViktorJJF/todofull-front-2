@@ -16,6 +16,7 @@ const Lighttheme: ThemeDefinition = {
     warning: "#fec90f",
     error: "#fc4b6c",
     secondary: "#0cb9c5",
+    bot: "#f71b85",
   },
 };
 

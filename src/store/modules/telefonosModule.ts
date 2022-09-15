@@ -1,31 +1,32 @@
-import api from "@/services/api/chats";
-import {
-  buildSuccess,
-  handleError,
-  buildQueryWithPagination,
-} from "@/utils/utils.js";
+import api from "@/services/api/telefonos";
+import { buildSuccess, handleError } from "@/utils/utils.js";
 
 const module = {
   namespaced: true,
   state: {
-    chats: [],
-    messages: [],
-    selectedChat: null,
-    total: 0,
-    totalPages: 0,
+    telefonos: [],
   },
   actions: {
     list({ commit }, query) {
-      let finalQuery = buildQueryWithPagination(query);
-      commit("loadingModule/showLoading", true, { root: true });
       return new Promise((resolve, reject) => {
         api
-          .list(finalQuery)
+          .list(query)
+          .then((response) => {
+            commit("list", response.data.payload);
+            resolve(response.data.payload);
+          })
+          .catch((error) => {
+            handleError(error, commit, reject);
+          });
+      });
+    },
+    listOne({ commit }, id) {
+      return new Promise((resolve, reject) => {
+        commit("loadingModule/showLoading", true, { root: true });
+        api
+          .listOne(id)
           .then((response) => {
             commit("loadingModule/showLoading", false, { root: true });
-            commit("list", response.data.payload);
-            commit("totalItems", response.data.totalDocs);
-            commit("totalPages", response.data.totalPages);
             resolve(response.data.payload);
           })
           .catch((error) => {
@@ -84,58 +85,27 @@ const module = {
   },
   mutations: {
     list(state, data) {
-      state.chats = data;
-    },
-    totalItems(state, data) {
-      state.total = data;
-    },
-    totalPages(state, data) {
-      state.totalPages = data;
+      state.telefonos = data;
     },
     create(state, data) {
-      state.chats.push(data);
+      state.telefonos.push(data);
     },
     update(state, { id, data }) {
-      let indexToUpdate = state.chats.findIndex((member) => member._id == id);
-      state.chats.splice(indexToUpdate, 1, {
+      let indexToUpdate = state.telefonos.findIndex(
+        (member) => member._id == id
+      );
+      state.telefonos.splice(indexToUpdate, 1, {
         ...data,
       });
     },
     delete(state, id) {
-      let indexToDelete = state.chats.findIndex((member) => member._id == id);
-      state.chats.splice(indexToDelete, 1);
-      state.total -= 1;
-    },
-    setChats(state, data) {
-      state.chats = data;
-    },
-    setSelectedChat(state, data) {
-      state.selectedChat = data;
-    },
-    addChat(state, data) {
-      console.log("🚀 NUEVO CHAT A STORE", data);
-      state.chats.unshift(data);
-    },
-    deletedMessage(state, data) {
-      let message = state.messages.find((el) => el.mid === data.mid);
-      if (message) {
-        console.log("BORRANDO MENSAJE");
-        message.isActive = false;
-      }
-    },
-
-    setMessages(state, data) {
-      state.messages = data;
-    },
-    addMessage(state, data) {
-      state.messages.push(data);
+      let indexToDelete = state.telefonos.findIndex(
+        (member) => member._id == id
+      );
+      state.telefonos.splice(indexToDelete, 1);
     },
   },
-  getters: {
-    getChatById: (state) => (chatId) => {
-      return state.chats.filter((chat) => chat._id === chatId);
-    },
-  },
+  getters: {},
 };
 
 export default module;

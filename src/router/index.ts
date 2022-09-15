@@ -1,13 +1,23 @@
 import { createRouter, createWebHistory } from "vue-router";
+import store from "@/store/index.ts";
 
 const router = createRouter({
   //history: createWebHistory(import.meta.env.BASE_URL),
   history: createWebHistory("/"),
   routes: [
     {
+      path: "/login",
+      name: "login",
+      component: () => import("@/views/authentication/FullLogin.vue"),
+    },
+    {
       path: "/",
       redirect: "/dashboards/analytical",
       component: () => import("@/layouts/full/FullLayout.vue"),
+      meta: {
+        requiresAuth: true,
+      },
+      name: "dashboard",
       children: [
         {
           name: "Analytical",
@@ -372,6 +382,16 @@ const router = createRouter({
       ],
     },
   ],
+});
+
+router.beforeEach((to, from, next) => {
+  // checkForUpdates();
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+  const isTokenSet = store.getters["authModule/isTokenSet"];
+  if (requiresAuth && !isTokenSet) {
+    return next({ name: "login" });
+  }
+  return next();
 });
 
 export default router;

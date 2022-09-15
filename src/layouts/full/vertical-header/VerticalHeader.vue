@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { useStore } from "vuex";
 import { ref, watch } from "vue";
 import { useCustomizerStore } from "../../../stores/customizer";
 import { message, notification, profile } from "./data";
 const customizer = useCustomizerStore();
+
+const store = useStore();
 
 const showSearch = ref(false);
 const href = ref(undefined);
@@ -17,6 +20,14 @@ watch(priority, (newPriority) => {
   // yes, console.log() is a side effect
   priority.value = newPriority;
 });
+function logout() {
+  store
+    .dispatch("authModule/logout")
+    .then(() => {})
+    .catch((err) => {
+      console.log("algo salio mal en logout:", err);
+    });
+}
 </script>
 
 <template>
@@ -225,9 +236,9 @@ watch(priority, (newPriority) => {
         <v-btn
           block
           color="secondary"
-          to="/authentication/boxedlogin"
           variant="contained"
           class="mt-4 py-4"
+          @click="logout"
           >Logout</v-btn
         >
       </v-list>

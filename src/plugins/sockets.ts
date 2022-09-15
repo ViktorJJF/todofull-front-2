@@ -33,6 +33,11 @@ socket.on("NEW_MESSAGE", (data) => {
     });
     scrollBottom();
   }
+  // updating last message
+  const chatToUpdate = chats.find((chat) => chat._id === data.chatId);
+  if (chatToUpdate) {
+    chatToUpdate.lastMessage.text = data.text;
+  }
   // actualizando ultima fecha mensaje recibido
   let lastChat = chats.find((el) => el._id === data.chatId);
   // console.log('🚀 Aqui *** -> lastChat', lastChat);
@@ -42,6 +47,7 @@ socket.on("NEW_MESSAGE", (data) => {
 });
 
 socket.on("NEW_CHAT", (data) => {
+  console.log("🚀 Aqui *** -> data", data);
   store.commit("chatsModule/addChat", data);
 });
 

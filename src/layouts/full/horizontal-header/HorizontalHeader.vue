@@ -14,6 +14,9 @@ const userprofile = ref(profile);
 function searchbox() {
   showSearch.value = !showSearch.value;
 }
+function logout() {
+  console.log("HACIENDO LOGOUT");
+}
 </script>
 
 <template>
@@ -98,7 +101,8 @@ function searchbox() {
                 <v-img
                   :src="`src/assets/images/users/${item.image}`"
                   :alt="item.image"
-                  width="50" ></v-img></v-avatar
+                  width="50"
+                ></v-img></v-avatar
             ></v-list-item-avatar>
           </template>
         </v-list-item>
@@ -223,7 +227,13 @@ function searchbox() {
             </v-list-item-avatar>
           </template>
         </v-list-item>
-        <v-btn block color="secondary" href="/authentication/boxedlogin" variant="contained" class="mt-4 py-4"
+        <v-btn
+          block
+          color="secondary"
+          href="/authentication/boxedlogin"
+          variant="contained"
+          class="mt-4 py-4"
+          @click="logout"
           >Logout</v-btn
         >
       </v-list>
