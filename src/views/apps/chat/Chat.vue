@@ -452,6 +452,12 @@
                 append-icon="mdi-email"
                 v-model="userForm.city"
               ></v-text-field>
+              <v-textarea
+                clearable
+                clear-icon="mdi-close-circle"
+                label="Notas"
+                v-model="userForm.notes"
+              ></v-textarea>
               <bold>Etiquetas</bold>
               <TodofullLabelsSelector
                 :initialData="userForm.todofullLabels"
@@ -536,6 +542,7 @@ export default {
         phone: "",
         email: "",
         city: "",
+        notes: "",
         todofullLabels: [],
       },
     };
@@ -586,9 +593,21 @@ export default {
         this.userForm.email = chat.leadId.email;
         this.userForm.city = chat.leadId.city;
         this.userForm.todofullLabels = chat.leadId.todofullLabels;
+        this.userForm.notes = chat.leadId.nota;
+        this.userForm.phone = "";
       }
       if (chat.cleanLeadId) {
-        this.userForm = await getDataFromLeadDetail(chat.cleanLeadId);
+        this.userForm.phone = chat.cleanLeadId.telefono;
+        const detail = chat.cleanLeadId.details.find(
+          (el) => el.fuente === chat.leadId.fuente
+        );
+        if (detail) {
+          this.userForm.name = detail.nombre;
+          this.userForm.email = detail.email;
+          this.userForm.city = detail.ciudad;
+          this.userForm.notes = detail.nota;
+        }
+
         this.userForm.todofullLabels = chat.cleanLeadId.todofullLabels;
       }
       this.updateLabels += 1;
@@ -755,17 +774,25 @@ export default {
                 nombre: this.userForm.name,
                 email: this.userForm.email,
                 ciudad: this.userForm.city,
-                nota: this.userForm.nota,
+                nota: this.userForm.notes,
                 pais: this.selectedChat.leadId.pais,
               },
             ],
           }
         );
-        // actualizando referencia a lead
-        await this.$store.dispatch("leadsModule/update", {
-          id: this.selectedChat.leadId._id,
-          data: { cleanLeadId: createdItem._id },
-        });
+        // actualizando referencia a lead y chat
+        await Promise.all([
+          this.$store.dispatch("leadsModule/update", {
+            id: this.selectedChat.leadId._id,
+            data: { cleanLeadId: createdItem._id },
+            notifyUser: false,
+          }),
+          this.$store.dispatch("chatsModule/update", {
+            id: this.selectedChat._id,
+            data: { cleanLeadId: createdItem._id },
+            notifyUser: false,
+          }),
+        ]);
       } else {
         await this.$store.dispatch("leadsModule/update", {
           id: this.selectedChat.leadId._id,
@@ -773,6 +800,7 @@ export default {
             name: this.userForm.name,
             email: this.userForm.email,
             city: this.userForm.city,
+            nota: this.userForm.notes,
             todofullLabels: this.userForm.todofullLabels,
           },
         });

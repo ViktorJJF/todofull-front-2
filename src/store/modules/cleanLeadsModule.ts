@@ -16,7 +16,7 @@ const module = {
           .then((response) => {
             let cleanLeads = response.data.payload;
             for (const cleanLead of cleanLeads) {
-              cleanLead.details = cleanLead.details.sort(function(a, b) {
+              cleanLead.details = cleanLead.details.sort(function (a, b) {
                 return new Date(b.updatedAt) - new Date(a.updatedAt);
               });
             }
@@ -51,7 +51,7 @@ const module = {
           .create(data)
           .then((res) => {
             commit("loadingModule/showLoading", true, { root: true });
-            buildSuccess("Registro guardado con éxito", commit);
+            buildSuccess("Lead guardado con éxito", commit);
             commit("create", res.data.payload);
             resolve(res.data.payload);
           })
