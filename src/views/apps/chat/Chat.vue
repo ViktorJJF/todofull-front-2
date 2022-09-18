@@ -18,7 +18,7 @@
               color="white"
             >
               <v-icon class="whatsapp-color">mdi-whatsapp</v-icon>
-              <v-tooltip activator="parent" anchor="bottom">Activo</v-tooltip>
+              <v-tooltip activator="parent" anchor="bottom">Whatsapp</v-tooltip>
             </v-btn>
             <v-btn
               small
@@ -58,7 +58,7 @@
                 variant="outlined"
                 density="compact"
                 hide-details
-                v-model="handleSearchInput"
+                v-model="searchContact"
               ></v-text-field>
             </div>
             <v-sheet elevation="6">
@@ -76,7 +76,14 @@
               <v-window-item :value="0">
                 <v-list>
                   <!---/chat list -->
+                  <v-progress-circular
+                    v-if="!isDataReady"
+                    class="v-progress-linear"
+                    indeterminate
+                    color="primary"
+                  ></v-progress-circular>
                   <v-list-item
+                    v-else
                     v-for="(chat, i) in filteredChats"
                     :key="i"
                     class="mb-2"
@@ -263,13 +270,27 @@
                   </template>
                   <span>Tooltip</span>
                 </v-tooltip>
-                <AgentsSelector></AgentsSelector>
+                <AgentsSelector
+                  :telefonoId="
+                    selectedChat.cleanLeadId
+                      ? selectedChat.cleanLeadId?.telefonoId?._id
+                      : selectedChat.leadId?.telefonoId?._id
+                  "
+                  @onSelectedAgent="onSelectedAgent"
+                ></AgentsSelector>
               </div>
 
               <v-divider></v-divider>
               <!---chat Room-->
               <div class="chat-room pa-4">
+                <v-progress-circular
+                  v-show="!isChatMessageReady"
+                  class="v-progress-linear"
+                  indeterminate
+                  color="primary"
+                ></v-progress-circular>
                 <perfect-scrollbar
+                  v-show="isChatMessageReady"
                   class="chat-room-box-height"
                   id="content_section"
                 >
@@ -377,12 +398,6 @@
           <v-tab :value="0">
             <v-icon class="mb-1" start> mdi-account </v-icon>
           </v-tab>
-          <v-tab :value="1">
-            <v-icon class="mb-1" start> mdi-image </v-icon>
-          </v-tab>
-          <v-tab :value="2">
-            <v-icon class="mb-1" start> mdi-attachment </v-icon>
-          </v-tab>
         </v-tabs>
       </v-sheet>
       <v-window v-model="tabForm">
@@ -390,6 +405,18 @@
           <div style="background-color: #ffffff" class="mb-7">
             <v-card-text class="pa-5 border-bottom">
               <h3 class="title text-h6">Usuario</h3>
+              <h4>
+                Fuente:
+                {{
+                  $store.state.botsModule.bots.find(
+                    (el) => el.fanpageId == selectedChat.pageID
+                  )
+                    ? $store.state.botsModule.bots.find(
+                        (el) => el.fanpageId == selectedChat.pageID
+                      ).name
+                    : "Sin fuente"
+                }}
+              </h4>
             </v-card-text>
             <v-divider></v-divider>
             <v-card-text class="pa-5 border-bottom">
@@ -399,13 +426,15 @@
                 label="Nombres"
                 placeholder="Username"
                 append-icon="mdi-account"
+                v-model="userForm.name"
               ></v-text-field>
               <v-text-field
                 dense
                 outlined
                 label="Teléfonos"
                 placeholder="Username"
-                append-icon="mdi-account"
+                append-icon="mdi-cellphone"
+                v-model="userForm.phone"
               ></v-text-field>
               <v-text-field
                 dense
@@ -413,9 +442,29 @@
                 label="Correo"
                 placeholder="Email"
                 append-icon="mdi-email"
+                v-model="userForm.email"
               ></v-text-field>
+              <v-text-field
+                dense
+                outlined
+                label="Ciudad"
+                placeholder="Email"
+                append-icon="mdi-email"
+                v-model="userForm.city"
+              ></v-text-field>
+              <bold>Etiquetas</bold>
+              <TodofullLabelsSelector
+                :initialData="userForm.todofullLabels"
+                class="ma-3"
+                @onSelectTodofullLabels="onSelectTodofullLabels"
+                :key="updateLabels"
+              ></TodofullLabelsSelector>
               <div class="mt-4">
-                <v-btn color="success" outlined class="text-capitalize mr-2"
+                <v-btn
+                  color="success"
+                  @click="saveUserForm"
+                  outlined
+                  class="text-capitalize mr-2"
                   >Guardar</v-btn
                 >
               </div>
@@ -432,6 +481,8 @@
 <script  lang="ts">
 import { formatDistance } from "date-fns";
 import chatsService from "@/services/api/chats";
+import cleanLeadsService from "@/services/api/cleanLeads";
+import leadsService from "@/services/api/leads";
 import messagesService from "@/services/api/messages";
 import { scrollBottom, getDataFromLeadDetail } from "@/utils/utils";
 import socket from "@/plugins/sockets";
@@ -440,12 +491,14 @@ import { es } from "date-fns/locale";
 import BaseLeftRightPartVue from "@/components/BaseLeftRightPart.vue";
 import { buildSuccess } from "@/utils/utils.ts";
 import AgentsSelector from "@/components/AgentsSelector.vue";
+import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
 
 export default {
   components: {
     // InfiniteScroll,
     BaseLeftRightPartVue,
     AgentsSelector,
+    TodofullLabelsSelector,
   },
   // filters: {
   //   formatDate: function (value) {
@@ -473,7 +526,18 @@ export default {
       formCategories: ["Pendientes", "Resueltos", "Todos"],
       tabCategory: 2,
       tabForm: 0,
+      searchContact: "",
+      isDataReady: false,
+      isChatMessageReady: false,
+      updateLabels: 0,
       // userData
+      userForm: {
+        name: "",
+        phone: "",
+        email: "",
+        city: "",
+        todofullLabels: [],
+      },
     };
   },
   mounted() {
@@ -481,20 +545,28 @@ export default {
   },
   methods: {
     async initialize(page = 1) {
+      this.isDataReady = false;
       // traer listado de chats
+      let payload = {
+        page,
+        search: this.searchContact,
+        fieldsToSearch: this.fieldsToSearch,
+        sort: "updatedAt",
+        order: "desc",
+      };
+      if (this.activePlatforms.length > 0) {
+        payload.platforms = this.activePlatforms;
+      }
       await Promise.all([
-        this.$store.dispatch("chatsModule/list", {
-          page,
-          search: this.search,
-          fieldsToSearch: this.fieldsToSearch,
-          sort: "updatedAt",
-          order: "desc",
-        }),
+        this.$store.dispatch("botsModule/list"),
+        this.$store.dispatch("chatsModule/list", payload),
       ]);
       // this.$store.commit("chatsModule/setChats", this.chats);
       this.chats = this.$store.state.chatsModule.chats;
+      this.isDataReady = true;
     },
     async selectChat(chat) {
+      this.isChatMessageReady = false;
       this.selectedChat = chat;
       this.$store.commit("chatsModule/setSelectedChat", chat);
       this.messages = (
@@ -508,6 +580,18 @@ export default {
       this.messages = this.$store.state.chatsModule.messages;
       this.chat = chat;
       scrollBottom();
+      this.isChatMessageReady = true;
+      if (chat.leadId) {
+        this.userForm.name = chat.leadId.sourceName;
+        this.userForm.email = chat.leadId.email;
+        this.userForm.city = chat.leadId.city;
+        this.userForm.todofullLabels = chat.leadId.todofullLabels;
+      }
+      if (chat.cleanLeadId) {
+        this.userForm = await getDataFromLeadDetail(chat.cleanLeadId);
+        this.userForm.todofullLabels = chat.cleanLeadId.todofullLabels;
+      }
+      this.updateLabels += 1;
     },
     sendTextMessage(text, from = "Agente") {
       console.log("ENVIANDO MENSAJE: ", text, from);
@@ -586,20 +670,6 @@ export default {
     loadStory() {
       this.isErrorStory = false;
     },
-    async selectChat(chat) {
-      this.selectedChat = chat;
-      this.$store.commit("chatsModule/setSelectedChat", chat);
-      this.messages = (
-        await messagesService.listByChat({
-          chatId: chat._id,
-          sort: "createdAt",
-          order: "asc",
-        })
-      ).data.payload;
-      this.$store.commit("chatsModule/setMessages", this.messages);
-      this.messages = this.$store.state.chatsModule.messages;
-      scrollBottom();
-    },
     getChatUserData(chat: Object): Object {
       let userData = getDataFromLeadDetail(chat.cleanLeadId.details);
       return userData;
@@ -642,26 +712,86 @@ export default {
       } else {
         this.activePlatforms.push(platform);
       }
+      this.initialize();
+    },
+    onSelectedAgent(agent: String): void {
+      console.log("🚀 Aqui *** -> agent", agent);
+      if (this.selectedChat.cleanLeadId) {
+        // es lead (dejó datos)
+        this.selectedChat.cleanLeadId.telefonoId = agent;
+        cleanLeadsService.update(this.selectedChat.cleanLeadId._id, {
+          telefonoId: agent._id,
+        });
+      } else {
+        this.selectedChat.leadId.telefonoId = agent;
+        leadsService.update(this.selectedChat.leadId._id, {
+          telefonoId: agent._id,
+        });
+      }
+    },
+    onSelectTodofullLabels(selectedLabels) {
+      this.userForm.todofullLabels = selectedLabels;
+    },
+    async saveUserForm() {
+      if (this.userForm.phone) {
+        let createdItem = await this.$store.dispatch(
+          "cleanLeadsModule/create",
+          {
+            telefono: this.userForm.phone,
+            estado: this.selectedChat.leadId.telefonoId
+              ? "RE-CONECTAR"
+              : "SIN ASIGNAR",
+            telefonoId: this.selectedChat.leadId.telefonoId
+              ? this.selectedChat.leadId.telefonoId._id
+              : null,
+
+            todofullLabels: this.userForm.todofullLabels,
+            details: [
+              {
+                type: "CHATBOT",
+                contactId: this.selectedChat.leadId.contactId,
+                fuente: this.selectedChat.leadId.fuente,
+                appName: this.selectedChat.leadId.sourceName,
+                nombre: this.userForm.name,
+                email: this.userForm.email,
+                ciudad: this.userForm.city,
+                nota: this.userForm.nota,
+                pais: this.selectedChat.leadId.pais,
+              },
+            ],
+          }
+        );
+        // actualizando referencia a lead
+        await this.$store.dispatch("leadsModule/update", {
+          id: this.selectedChat.leadId._id,
+          data: { cleanLeadId: createdItem._id },
+        });
+      } else {
+        await this.$store.dispatch("leadsModule/update", {
+          id: this.selectedChat.leadId._id,
+          data: {
+            name: this.userForm.name,
+            email: this.userForm.email,
+            city: this.userForm.city,
+            todofullLabels: this.userForm.todofullLabels,
+          },
+        });
+      }
     },
   },
   computed: {
     filteredChats() {
-      return this.activePlatforms.length > 0
-        ? this.chats.filter((chat) =>
-            this.activePlatforms.includes(chat.platform)
-          )
-        : this.chats;
+      return this.chats;
     },
   },
   watch: {
     messages() {
-      console.log("NUEVO MENSAJE RECIBIDO");
       scrollBottom();
     },
-    async search() {
+    async searchContact() {
       clearTimeout(this.delayTimer);
       this.delayTimer = setTimeout(() => {
-        this.initialize(this.page);
+        this.initialize();
       }, 600);
     },
   },

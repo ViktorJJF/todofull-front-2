@@ -1,14 +1,30 @@
 <template>
-  <select>
-    <option v-for="telefono in telefonos" :key="telefono._id">
-      {{ telefono.agenteId.nombre }} ({{ telefono.numero }})
-    </option>
-  </select>
+  <div>
+    <select
+      style="width: auto"
+      @change="onSelectedAgent($event)"
+      v-model="telefonoId"
+    >
+      <option value="Sin valor">Sin agente</option>
+      <option
+        :value="telefono._id"
+        v-for="telefono in telefonos"
+        :key="telefono._id"
+      >
+        {{ telefono.agenteId.nombre }} ({{ telefono.numero }})
+      </option>
+    </select>
+  </div>
 </template>
 
 <script>
 export default {
-  props: ["telefonoId"],
+  props: {
+    telefonoId: {
+      type: String,
+      default: "Sin valor",
+    },
+  },
   data() {
     return {
       telefonos: [],
@@ -27,6 +43,12 @@ export default {
       this.telefonos = this.telefonos.filter(
         (telefono) => telefono.agenteId != null
       );
+    },
+    onSelectedAgent(event) {
+      const agent = this.telefonos.find(
+        (telefono) => telefono._id == event.target.value
+      );
+      this.$emit("onSelectedAgent", agent);
     },
   },
 };

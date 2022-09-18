@@ -32,3 +32,10 @@
 .message {
   white-space: pre-line;
 }
+
+.v-progress-linear {
+  top: 50%;
+  display: block;
+  width: 100px;
+  margin: auto auto;
+}
