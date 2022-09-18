@@ -1,15 +1,19 @@
 import axios from "axios";
+import config from "@/config";
+
 export default {
   list(query = { sort: "name", order: "1", limit: 10, page: 1 }) {
-    return axios.get("/api/chats", { params: query });
+    return axios.get(config.DASHBOARD_BASE_URL + "/api/chats", {
+      params: query,
+    });
   },
   update(id, payload) {
-    return axios.put(`/api/chats/${id}`, payload);
+    return axios.put(config.DASHBOARD_BASE_URL + `/api/chats/${id}`, payload);
   },
   create(payload) {
-    return axios.post("/api/chats", payload);
+    return axios.post(config.DASHBOARD_BASE_URL + "/api/chats", payload);
   },
   delete(id) {
-    return axios.delete(`/api/chats/${id}`);
+    return axios.delete(config.DASHBOARD_BASE_URL + `/api/chats/${id}`);
   },
 };

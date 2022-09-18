@@ -1,18 +1,30 @@
 import axios from "axios";
+import config from "@/config";
+
 export default {
   list(query) {
     if (query && !query.sort && !query.order) {
       (query.sort = "createdAt"), (query.order = "desc");
     }
-    return axios.get("/api/todofull-labels", { params: query });
+    return axios.get(config.DASHBOARD_BASE_URL + "/api/todofull-labels", {
+      params: query,
+    });
   },
   update(id, payload) {
-    return axios.put(`/api/todofull-labels/${id}`, payload);
+    return axios.put(
+      config.DASHBOARD_BASE_URL + `/api/todofull-labels/${id}`,
+      payload
+    );
   },
   create(payload) {
-    return axios.post("/api/todofull-labels", payload);
+    return axios.post(
+      config.DASHBOARD_BASE_URL + "/api/todofull-labels",
+      payload
+    );
   },
   delete(id) {
-    return axios.delete(`/api/todofull-labels/${id}`);
+    return axios.delete(
+      config.DASHBOARD_BASE_URL + `/api/todofull-labels/${id}`
+    );
   },
 };

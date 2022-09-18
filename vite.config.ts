@@ -7,15 +7,6 @@ import vuetify from "@vuetify/vite-plugin";
 export default defineConfig({
   server: {
     port: 3030,
-    proxy: {
-      "/api": {
-        target: "http://localhost:5000",
-        changeOrigin: true,
-        secure: false,
-        ws: true,
-        rewrite: (path) => path.replace(/^\//, ""),
-      },
-    },
   },
   plugins: [
     vue(),
