@@ -1,7 +1,15 @@
+import showdown from "showdown";
 import { isPast, format } from "date-fns";
 import { createToast } from "mosha-vue-toastify";
 import store from "@/store";
 import router from "@/router";
+
+// markdown
+const converter = new showdown.Converter({
+  openLinksInNewWindow: true,
+  simplifiedAutoLink: true,
+  excludeTrailingPunctuationFromURLs: true,
+});
 
 function sortByAttribute(a, b, attribute) {
   var textA = a[attribute].toUpperCase();
@@ -59,11 +67,11 @@ export function getRandomInt(min, max) {
 //     es: require('date-fns/locale/es')
 // }
 
-export const getFormat = (date, formatStr) => {
+export const getFormat = (date: String, formatStr: String): String => {
   // return format(date, formatStr, {
   //     locale: localesDateFns[window.__localeId__]
   // })
-  return format(date, formatStr);
+  return format(new Date(date), formatStr);
 };
 
 export const formatErrorMessages = (translationParent, msg) => {
@@ -297,7 +305,7 @@ export const scrollBottom = () => {
   setTimeout(() => {
     var objDiv = document.getElementById("content_section"); // es el id del contenedor del chat
     objDiv.scrollTop = objDiv.scrollHeight;
-  }, 200);
+  }, 600);
 };
 
 /**
@@ -353,4 +361,13 @@ export const getDataFromLeadDetail = (leadDetail) => {
     ? leadDetail.find((detail) => detail.pais && detail.pais.length > 0).pais
     : "";
   return { nombre, email, ciudad, nota, pais };
+};
+
+// extract file name from url between symbols / and ?
+export const getFileNameFromUrl = (url) => {
+  return url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("?"));
+};
+
+export const parseMarkdown = (text: String): String => {
+  return converter.makeHtml(text);
 };

@@ -82,52 +82,49 @@
                     indeterminate
                     color="primary"
                   ></v-progress-circular>
-                  <v-list-item
-                    v-else
-                    v-for="(chat, i) in filteredChats"
-                    :key="i"
-                    class="mb-2"
-                    :class="true ? 'active' : 's'"
-                    @click="() => selectChat(chat)"
-                    two-line
-                  >
+
+                  <div v-else class="conversation-area">
                     <!---/Icon -->
 
-                    <template v-slot:prepend>
-                      <v-list-item-avatar
-                        icon
-                        start
-                        class="v-list-item-avatar--start"
-                      >
-                        <v-avatar size="45">
-                          <v-img
-                            :src="
-                              getProfilePic(chat) ||
-                              `/assets/images/users/3.jpg`
-                            "
-                            width="45"
-                          ></v-img>
-                        </v-avatar>
-                      </v-list-item-avatar>
-                    </template>
-                    <!---/Icon -->
-                    <v-list-item-header>
-                      <!---/Title -->
-                      <v-list-item-title class="font-weight-medium">
-                        <i
-                          :class="`mr-2 mdi text-h7 ${getPlatformIconStyle(
-                            chat.platform
-                          )}`"
-                        ></i>
-                        {{ getChatUserName(chat) }}
-                      </v-list-item-title>
-                      <!---/Subtitle -->
-                      <v-list-item-subtitle class="text-truncate d-block">
-                        {{ chat.lastMessage ? chat.lastMessage.text : "" }}
-                      </v-list-item-subtitle>
-                      <!---/Title -->
-                    </v-list-item-header>
-                  </v-list-item>
+                    <div
+                      :class="{
+                        msg: true,
+                        online: true,
+                        'chat-active':
+                          selectedChat && chat._id == selectedChat._id,
+                      }"
+                      v-for="(chat, i) in filteredChats"
+                      :key="i"
+                      @click="() => selectChat(chat)"
+                    >
+                      <img
+                        class="msg-profile"
+                        :src="
+                          getProfilePic(chat) || `/assets/images/users/3.jpg`
+                        "
+                        width="45"
+                        alt=""
+                      />
+                      <div class="msg-detail">
+                        <div class="msg-username">
+                          <i
+                            :class="`mr-2 mdi text-h7 ${getPlatformIconStyle(
+                              chat.platform
+                            )}`"
+                          ></i>
+                          {{ getChatUserName(chat) }}
+                        </div>
+                        <div class="msg-content">
+                          <span class="msg-message">{{
+                            chat.lastMessage ? chat.lastMessage.text : ""
+                          }}</span>
+                          <span class="msg-date">{{
+                            formatDate(chat.updatedAt, "HH:mm")
+                          }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </v-list>
               </v-window-item>
               <v-window-item :value="1">
@@ -295,72 +292,108 @@
                   id="content_section"
                 >
                   <div
-                    class="d-flex align-center mb-4"
-                    light
-                    v-for="message in $store.state.chatsModule.messages"
-                    :key="message._id"
+                    v-for="formattedMessage in formattedMessages"
+                    :key="formattedMessage._id"
                     :class="{
-                      fromMe: message.from != 'Cliente',
-                      messageItem: true,
+                      'chat-msg': true,
+                      owner: formattedMessage.from != 'Cliente',
                     }"
                   >
-                    <div class="thumb">
-                      <v-avatar
-                        size="35"
-                        class="mx-2"
-                        v-if="message.from == 'Agente'"
-                      >
-                        <img
-                          src="/assets/images/users/3.jpg"
-                          width="35"
-                          alt="..."
-                        />
-                      </v-avatar>
-                      <v-avatar
-                        size="35"
-                        class="mx-2"
-                        v-if="message.from == 'Cliente'"
-                      >
-                        <img
-                          :src="
-                            getProfilePic(selectedChat) ||
-                            `/assets/images/users/3.jpg`
-                          "
-                          alt="..."
-                          width="35"
-                        />
-                      </v-avatar>
-                      <v-avatar
-                        size="35"
-                        class="mx-2"
-                        v-if="message.from == 'Chatbot'"
-                      >
-                        <img
-                          :src="`/assets/images/users/bot.jpg`"
-                          alt="..."
-                          width="35"
-                        />
-                      </v-avatar>
+                    <div class="chat-msg-profile">
+                      <img
+                        class="chat-msg-img"
+                        :src="
+                          formattedMessage.from == 'Chatbot'
+                            ? '/assets/images/users/bot.jpg'
+                            : formattedMessage.from == 'Agente'
+                            ? '/assets/images/users/3.jpg'
+                            : getProfilePic(selectedChat) ||
+                              `/assets/images/users/3.jpg`
+                        "
+                        alt=""
+                      />
+                      <div class="chat-msg-date">
+                        {{ formatDate(formattedMessage.date) }}
+                      </div>
                     </div>
-                    <v-chip
-                      :color="
-                        message.from == 'Cliente'
-                          ? ''
-                          : message.from == 'Chatbot'
-                          ? 'bot'
-                          : 'primary'
-                      "
-                    >
-                      {{ message.text }}
-                    </v-chip>
+                    <div class="chat-msg-content">
+                      <div
+                        class="mb-2"
+                        v-for="message in formattedMessage.messages"
+                        :key="message._id"
+                      >
+                        <div
+                          v-if="message.type === 'text' || !message.type"
+                          class="chat-msg-text"
+                          v-html="parseMarkdown(message.text)"
+                        ></div>
+                        <div
+                          v-if="message.type === 'image'"
+                          class="chat-msg-text"
+                        >
+                          <img :src="message.payload.url" />
+                        </div>
+                        <div
+                          v-if="message.type === 'file'"
+                          class="chat-msg-text"
+                        >
+                          <i class="mr-2 mdi text-h5 mdi-file"></i>
+                          <a target="_blank" :href="message.payload.url">{{
+                            getFileNameFromUrl(message.payload.url)
+                          }}</a>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </perfect-scrollbar>
               </div>
 
               <!---Send Message Footer-->
-              <div class="pa-4">
+              <div class="chat-area-footer">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="feather feather-image"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <path d="M21 15l-5-5L5 21"></path>
+                </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="feather feather-plus-circle"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 8v8M8 12h8"></path>
+                </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="feather feather-paperclip"
+                >
+                  <path
+                    d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"
+                  ></path>
+                </svg>
                 <v-textarea
                   v-model="text"
+                  class="mx-1"
                   name="input-4-1"
                   rows="2"
                   variant="outlined"
@@ -374,6 +407,33 @@
                   "
                   :disabled="selectedChat.isBotActive"
                 ></v-textarea>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="feather feather-smile"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"></path>
+                </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="feather feather-thumbs-up"
+                >
+                  <path
+                    d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"
+                  ></path>
+                </svg>
               </div>
             </template>
             <template v-else>
@@ -490,7 +550,13 @@ import chatsService from "@/services/api/chats";
 import cleanLeadsService from "@/services/api/cleanLeads";
 import leadsService from "@/services/api/leads";
 import messagesService from "@/services/api/messages";
-import { scrollBottom, getDataFromLeadDetail } from "@/utils/utils";
+import {
+  scrollBottom,
+  getDataFromLeadDetail,
+  getFileNameFromUrl,
+  parseMarkdown,
+  getFormat,
+} from "@/utils/utils";
 import socket from "@/plugins/sockets";
 import { es } from "date-fns/locale";
 // import InfiniteScroll from "@/components/InfiniteScroll.vue";
@@ -589,7 +655,7 @@ export default {
       scrollBottom();
       this.isChatMessageReady = true;
       if (chat.leadId) {
-        this.userForm.name = chat.leadId.sourceName;
+        this.userForm.name = chat.leadId.sourceName || chat.leadId.appName;
         this.userForm.email = chat.leadId.email;
         this.userForm.city = chat.leadId.city;
         this.userForm.todofullLabels = chat.leadId.todofullLabels;
@@ -620,6 +686,7 @@ export default {
         type: "text",
         chatId: this.selectedChat._id,
         isActive: true,
+        createdAt: new Date(),
       };
       // guardando en bd
       messagesService.create(payload);
@@ -699,8 +766,8 @@ export default {
         : chat.leadId
         ? chat.leadId.sourceName
         : "Usuario";
-      if (chat.leadId && chat.leadId.sourceName) {
-        return chat.leadId.sourceName;
+      if (chat.leadId && (chat.leadId.sourceName || chat.leadId.appName)) {
+        return chat.leadId.sourceName || chat.leadId.appName;
       }
       if (userData) {
         return userData.nombre;
@@ -770,7 +837,9 @@ export default {
                 type: "CHATBOT",
                 contactId: this.selectedChat.leadId.contactId,
                 fuente: this.selectedChat.leadId.fuente,
-                appName: this.selectedChat.leadId.sourceName,
+                appName:
+                  this.selectedChat.leadId.sourceName ||
+                  this.selectedChat.leadId.appName,
                 nombre: this.userForm.name,
                 email: this.userForm.email,
                 ciudad: this.userForm.city,
@@ -797,19 +866,47 @@ export default {
         await this.$store.dispatch("leadsModule/update", {
           id: this.selectedChat.leadId._id,
           data: {
-            name: this.userForm.name,
+            appName: this.userForm.name,
             email: this.userForm.email,
-            city: this.userForm.city,
+            ciudad: this.userForm.city,
             nota: this.userForm.notes,
             todofullLabels: this.userForm.todofullLabels,
           },
         });
       }
     },
+    getFileNameFromUrl(url: String): String {
+      return getFileNameFromUrl(url);
+    },
+    parseMarkdown(text: String): String {
+      return parseMarkdown(text);
+    },
+    formatDate(date: String, format = "dd/MM/yyyy HH:mm"): String {
+      return getFormat(date, format);
+    },
+    formatDateAgo(value: String): String {
+      let date = new Date(value);
+      return formatDistance(new Date(), date, { addSuffix: true, locale: es });
+    },
   },
   computed: {
     filteredChats() {
       return this.chats;
+    },
+    formattedMessages() {
+      return this.messages.reduce((acc, el) => {
+        // group messages
+        let group =
+          acc.length > 0 && acc[acc.length - 1].from === el.from
+            ? acc[acc.length - 1]
+            : null;
+        if (group) {
+          group.messages.push(el);
+        } else {
+          acc.push({ from: el.from, messages: [el], date: el.createdAt });
+        }
+        return acc;
+      }, []);
     },
   },
   watch: {

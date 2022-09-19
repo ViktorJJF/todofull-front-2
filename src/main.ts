@@ -5,6 +5,7 @@ import App from "./App.vue";
 import router from "./router";
 import vuetify from "./plugins/vuetify";
 import "@/scss/style.scss";
+import "@/scss/chat.scss";
 import PerfectScrollbar from "vue3-perfect-scrollbar";
 import VueApexCharts from "vue3-apexcharts";
 // @ts-ignore:next-line

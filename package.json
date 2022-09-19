@@ -15,6 +15,7 @@
     "date-fns": "^2.29.2",
     "mosha-vue-toastify": "^1.0.23",
     "pinia": "^2.0.11",
+    "showdown": "^2.1.0",
     "socket.io-client": "^4.5.1",
     "v-calendar": "^3.0.0-alpha.8",
     "vue": "^3.2.31",

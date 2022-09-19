@@ -4,7 +4,7 @@ import environment from "@/environment.ts";
 let socketUrl =
   environment === "development"
     ? "http://localhost:3000"
-    : "https://todofull.club";
+    : "https://chatbotmujeron.herokuapp.com";
 const socket = io(socketUrl);
 import store from "@/store/index.ts";
 import { scrollBottom } from "@/utils/utils.ts";
@@ -26,10 +26,12 @@ socket.on("NEW_MESSAGE", (data) => {
       mid: data.mid,
       text: data.text,
       from: data.from,
-      type: "text",
+      type: data.type || "text",
       chatId,
       isActive: true,
       payload: data.payload,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
     scrollBottom();
   }
