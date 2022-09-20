@@ -48,7 +48,9 @@
               color="white"
             >
               <v-icon class="messenger-color">mdi-facebook-messenger</v-icon>
-              <v-tooltip activator="parent" anchor="bottom">Tooltip</v-tooltip>
+              <v-tooltip activator="parent" anchor="bottom"
+                >Messenger</v-tooltip
+              >
             </v-btn>
           </template>
           <template v-slot:leftpart>
@@ -332,6 +334,38 @@
                           class="chat-msg-text"
                         >
                           <img :src="message.payload.url" />
+                        </div>
+                        <div
+                          v-if="message.type === 'template'"
+                          class="chat-msg-text"
+                        >
+                          <v-row justify="center">
+                            <div>
+                              <v-img
+                                class="rounded-corners"
+                                :src="
+                                  message.payload.product.elements[0].image_url
+                                "
+                                aspect-ratio="1"
+                                contain
+                              ></v-img>
+                              <v-card
+                                color="#F0F2F5"
+                                outlined
+                                class="pa-3"
+                                width="200"
+                              >
+                                <strong>{{
+                                  message.payload.product.elements[0].title
+                                }}</strong>
+                                <p>
+                                  {{
+                                    message.payload.product.elements[0].subtitle
+                                  }}
+                                </p>
+                              </v-card>
+                            </div>
+                          </v-row>
                         </div>
                         <div
                           v-if="message.type === 'file'"
@@ -801,18 +835,21 @@ export default {
       this.initialize();
     },
     onSelectedAgent(agent: String): void {
-      console.log("🚀 Aqui *** -> agent", agent);
       if (this.selectedChat.cleanLeadId) {
         // es lead (dejó datos)
         this.selectedChat.cleanLeadId.telefonoId = agent;
         cleanLeadsService.update(this.selectedChat.cleanLeadId._id, {
           telefonoId: agent._id,
+          estado: "RE-CONECTAR",
         });
+        buildSuccess("Nuevo agente asignado a lead");
       } else {
         this.selectedChat.leadId.telefonoId = agent;
         leadsService.update(this.selectedChat.leadId._id, {
           telefonoId: agent._id,
+          assignAgentChat: true, // this parameter is used to send telegram message for assign chat
         });
+        buildSuccess("Nuevo agente asignado a lead");
       }
     },
     onSelectTodofullLabels(selectedLabels) {
