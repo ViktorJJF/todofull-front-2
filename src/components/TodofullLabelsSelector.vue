@@ -1,27 +1,30 @@
 <template>
-  <v-combobox
-    :disabled="disabled"
-    placeholder="Selecciona las etiquetas"
-    class="mt-3"
-    :search-input.sync="searchLabel"
-    v-model="selectedTodofullLabels"
-    :items="todofullLabels"
-    multiple
-    no-data-text="No se encontraron etiquetas"
-    outlined
-    hide-details="true"
-    hint="hola que hace"
-  >
-    <template v-slot:selection="data">
-      <v-chip
-        close
-        @click:close="removeLabels(selectedTodofullLabels, item)"
-        color="primary"
-      >
-        <strong>{{ getLabelTitle(data.selection.value) }}</strong>
-      </v-chip>
-    </template>
-  </v-combobox>
+  <div>
+    {{ selectedTodofullLabels }}
+    <v-combobox
+      :disabled="disabled"
+      placeholder="Selecciona las etiquetas"
+      class="mt-3"
+      :search-input.sync="searchLabel"
+      v-model="selectedTodofullLabels"
+      :items="todofullLabels"
+      multiple
+      no-data-text="No se encontraron etiquetas"
+      outlined
+      hide-details="true"
+      hint="hola que hace"
+    >
+      <template v-slot:selection="data">
+        <v-chip
+          close
+          @click:close="removeLabels(selectedTodofullLabels, item)"
+          color="primary"
+        >
+          <strong>{{ getLabelTitle(data.selection.value) }}</strong>
+        </v-chip>
+      </template>
+    </v-combobox>
+  </div>
 </template>
 
 <script>
@@ -58,10 +61,15 @@ export default {
     selectedTodofullLabels: {
       handler(newValue, oldValue) {
         this.searchLabel = "";
-        this.$emit(
-          "onSelectTodofullLabels",
-          JSON.parse(JSON.stringify(newValue))
+        this.selectedTodofullLabels = this.selectedTodofullLabels.filter(
+          (el) => el
         );
+        if (this.isInitialDataExecuted) {
+          this.$emit(
+            "onSelectTodofullLabels",
+            JSON.parse(JSON.stringify(this.selectedTodofullLabels))
+          );
+        }
       },
       deep: true,
     },

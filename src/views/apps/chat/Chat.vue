@@ -63,171 +63,58 @@
                 v-model="searchContact"
               ></v-text-field>
             </div>
-            <v-sheet elevation="6">
-              <v-tabs
-                v-model="tabCategory"
-                background-color="primary"
-                class="d-flex align-center"
-              >
-                <v-tab v-for="category in chatCategories" :key="category">
-                  <span class="mb-1">{{ category }}</span>
-                </v-tab>
-              </v-tabs>
-            </v-sheet>
-            <v-window v-model="tabCategory">
-              <v-window-item :value="0">
-                <v-list>
-                  <!---/chat list -->
-                  <v-progress-circular
-                    v-if="!isDataReady"
-                    class="v-progress-linear"
-                    indeterminate
-                    color="primary"
-                  ></v-progress-circular>
 
-                  <div v-else class="conversation-area">
-                    <!---/Icon -->
+            <v-list>
+              <!---/chat list -->
+              <v-progress-circular
+                v-if="!isDataReady"
+                class="v-progress-linear"
+                indeterminate
+                color="primary"
+              ></v-progress-circular>
 
-                    <div
-                      :class="{
-                        msg: true,
-                        online: true,
-                        'chat-active':
-                          selectedChat && chat._id == selectedChat._id,
-                      }"
-                      v-for="(chat, i) in filteredChats"
-                      :key="i"
-                      @click="() => selectChat(chat)"
-                    >
-                      <img
-                        class="msg-profile"
-                        :src="
-                          getProfilePic(chat) || `/assets/images/users/3.jpg`
-                        "
-                        width="45"
-                        alt=""
-                      />
-                      <div class="msg-detail">
-                        <div class="msg-username">
-                          <i
-                            :class="`mr-2 mdi text-h7 ${getPlatformIconStyle(
-                              chat.platform
-                            )}`"
-                          ></i>
-                          {{ getChatUserName(chat) }}
-                        </div>
-                        <div class="msg-content">
-                          <span class="msg-message">{{
-                            chat.lastMessage ? chat.lastMessage.text : ""
-                          }}</span>
-                          <span class="msg-date">{{
-                            formatDate(chat.updatedAt, "HH:mm")
-                          }}</span>
-                        </div>
+              <div v-else class="">
+                <!---/Icon -->
+                <InfiniteScroll :key="updateScroll" @loadMore="loadMore">
+                  <div
+                    :class="{
+                      msg: true,
+                      online: true,
+                      'chat-active':
+                        selectedChat && chat._id == selectedChat._id,
+                    }"
+                    v-for="(chat, i) in filteredChats"
+                    :key="i"
+                    @click="() => selectChat(chat)"
+                  >
+                    <img
+                      class="msg-profile"
+                      :src="getProfilePic(chat) || `/assets/images/users/3.jpg`"
+                      width="45"
+                      alt=""
+                    />
+                    <div class="msg-detail">
+                      <div class="msg-username">
+                        <i
+                          :class="`mr-2 mdi text-h7 ${getPlatformIconStyle(
+                            chat.platform
+                          )}`"
+                        ></i>
+                        {{ getChatUserName(chat) }}
+                      </div>
+                      <div class="msg-content">
+                        <span class="msg-message">{{
+                          chat.lastMessage ? chat.lastMessage.text : ""
+                        }}</span>
+                        <span class="msg-date">{{
+                          formatDate(chat.updatedAt, "HH:mm")
+                        }}</span>
                       </div>
                     </div>
                   </div>
-                </v-list>
-              </v-window-item>
-              <v-window-item :value="1">
-                <v-list>
-                  <!---/chat list -->
-                  <v-list-item
-                    v-for="(chat, i) in filteredChats"
-                    :key="i"
-                    class="mb-2"
-                    :class="true ? 'active' : 's'"
-                    @click="() => selectChat(chat)"
-                    two-line
-                  >
-                    <!---/Icon -->
-                    <template v-slot:prepend>
-                      <v-list-item-avatar
-                        icon
-                        start
-                        class="v-list-item-avatar--start"
-                      >
-                        <v-avatar size="45">
-                          <v-img
-                            :src="
-                              getProfilePic(chat) ||
-                              `/assets/images/users/3.jpg`
-                            "
-                            width="45"
-                          ></v-img>
-                        </v-avatar>
-                      </v-list-item-avatar>
-                    </template>
-                    <!---/Icon -->
-                    <v-list-item-header>
-                      <!---/Title -->
-                      <v-list-item-title class="font-weight-medium">
-                        <i
-                          :class="`mr-2 mdi text-h7 ${getPlatformIconStyle(
-                            chat.platform
-                          )}`"
-                        ></i>
-                        {{ getChatUserName(chat) }}
-                      </v-list-item-title>
-                      <!---/Subtitle -->
-                      <v-list-item-subtitle class="text-truncate d-block">
-                        {{ chat.lastMessage ? chat.lastMessage.text : "" }}
-                      </v-list-item-subtitle>
-                      <!---/Title -->
-                    </v-list-item-header>
-                  </v-list-item>
-                </v-list>
-              </v-window-item>
-              <v-window-item :value="2">
-                <v-list>
-                  <!---/chat list -->
-                  <v-list-item
-                    v-for="(chat, i) in filteredChats"
-                    :key="i"
-                    class="mb-2"
-                    :class="true ? 'active' : 's'"
-                    @click="() => selectChat(chat)"
-                    two-line
-                  >
-                    <!---/Icon -->
-                    <template v-slot:prepend>
-                      <v-list-item-avatar
-                        icon
-                        start
-                        class="v-list-item-avatar--start"
-                      >
-                        <v-avatar size="45">
-                          <v-img
-                            :src="
-                              getProfilePic(chat) ||
-                              `/assets/images/users/3.jpg`
-                            "
-                            width="45"
-                          ></v-img>
-                        </v-avatar>
-                      </v-list-item-avatar>
-                    </template>
-                    <!---/Icon -->
-                    <v-list-item-header>
-                      <!---/Title -->
-                      <v-list-item-title class="font-weight-medium">
-                        <i
-                          :class="`mr-2 mdi text-h7 ${getPlatformIconStyle(
-                            chat.platform
-                          )}`"
-                        ></i>
-                        {{ getChatUserName(chat) }}
-                      </v-list-item-title>
-                      <!---/Subtitle -->
-                      <v-list-item-subtitle class="text-truncate d-block">
-                        {{ chat.lastMessage ? chat.lastMessage.text : "" }}
-                      </v-list-item-subtitle>
-                      <!---/Title -->
-                    </v-list-item-header>
-                  </v-list-item>
-                </v-list>
-              </v-window-item>
-            </v-window>
+                </InfiniteScroll>
+              </div>
+            </v-list>
           </template>
           <!---/Right chat list -->
           <template v-slot:rightpart>
@@ -598,6 +485,7 @@ import BaseLeftRightPartVue from "@/components/BaseLeftRightPart.vue";
 import { buildSuccess } from "@/utils/utils.ts";
 import AgentsSelector from "@/components/AgentsSelector.vue";
 import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
+import InfiniteScroll from "@/components/InfiniteScroll.vue";
 
 export default {
   components: {
@@ -605,6 +493,7 @@ export default {
     BaseLeftRightPartVue,
     AgentsSelector,
     TodofullLabelsSelector,
+    InfiniteScroll,
   },
   // filters: {
   //   formatDate: function (value) {
@@ -645,6 +534,7 @@ export default {
         notes: "",
         todofullLabels: [],
       },
+      updateScroll: 0,
     };
   },
   mounted() {
@@ -655,11 +545,12 @@ export default {
       this.isDataReady = false;
       // traer listado de chats
       let payload = {
-        page,
+        page: this.page || page,
         search: this.searchContact,
         fieldsToSearch: this.fieldsToSearch,
         sort: "updatedAt",
         order: "desc",
+        limit: 30,
       };
       if (this.activePlatforms.length > 0) {
         payload.platforms = this.activePlatforms;
@@ -683,6 +574,8 @@ export default {
           order: "asc",
         })
       ).data.payload;
+      chat = (await chatsService.listOne(chat._id)).data.payload;
+      console.log("🚀 Aqui *** -> chat", chat);
       this.$store.commit("chatsModule/setMessages", this.messages);
       this.messages = this.$store.state.chatsModule.messages;
       this.chat = chat;
@@ -853,7 +746,9 @@ export default {
       }
     },
     onSelectTodofullLabels(selectedLabels) {
-      this.userForm.todofullLabels = selectedLabels;
+      if (selectedLabels.length > 0) {
+        this.userForm.todofullLabels = selectedLabels;
+      }
     },
     async saveUserForm() {
       if (this.userForm.phone) {
@@ -861,9 +756,12 @@ export default {
           "cleanLeadsModule/create",
           {
             telefono: this.userForm.phone,
-            estado: this.selectedChat.leadId.telefonoId
-              ? "RE-CONECTAR"
-              : "SIN ASIGNAR",
+            estado:
+              (this.selectedChat.cleanLeadId
+                ? this.selectedChat.cleanLeadId.telefonoId
+                : null) || this.selectedChat.leadId.telefonoId
+                ? "RE-CONECTAR"
+                : "SIN ASIGNAR",
             telefonoId: this.selectedChat.leadId.telefonoId
               ? this.selectedChat.leadId.telefonoId._id
               : null,
@@ -924,6 +822,17 @@ export default {
     formatDateAgo(value: String): String {
       let date = new Date(value);
       return formatDistance(new Date(), date, { addSuffix: true, locale: es });
+    },
+    async loadMore() {
+      console.log("CARGANDO MAS...");
+      this.page += 1;
+      const response = await chatsService.list({
+        page: this.page,
+        limit: 10,
+        sort: "updatedAt",
+        order: "desc",
+      });
+      this.chats.push(...response.data.payload);
     },
   },
   computed: {

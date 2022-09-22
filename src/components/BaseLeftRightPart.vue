@@ -11,10 +11,8 @@ function toggleLpart() {
   <!---/Left chat list -->
   <div class="d-flex mainbox">
     <div class="left-part" :class="Lpart ? 'showLeftPart' : 'HideLeftPart'">
-      <perfect-scrollbar class="h-100">
-        <slot name="channels"></slot>
-        <slot name="leftpart"></slot>
-      </perfect-scrollbar>
+      <slot name="channels"></slot>
+      <slot name="leftpart"></slot>
     </div>
 
     <!---right chat conversation -->

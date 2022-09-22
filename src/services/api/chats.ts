@@ -7,6 +7,9 @@ export default {
       params: query,
     });
   },
+  listOne(id) {
+    return axios.get(config.DASHBOARD_BASE_URL + `/api/chats/${id}`);
+  },
   update(id, payload) {
     return axios.put(config.DASHBOARD_BASE_URL + `/api/chats/${id}`, payload);
   },
