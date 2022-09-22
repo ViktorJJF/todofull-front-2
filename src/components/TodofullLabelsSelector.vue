@@ -1,6 +1,5 @@
 <template>
   <div>
-    {{ selectedTodofullLabels }}
     <v-combobox
       :disabled="disabled"
       placeholder="Selecciona las etiquetas"

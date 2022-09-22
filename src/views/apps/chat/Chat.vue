@@ -752,6 +752,7 @@ export default {
     },
     async saveUserForm() {
       if (this.userForm.phone) {
+        console.log("EL PAIS: ", this.selectedChat.leadId.pais);
         let createdItem = await this.$store.dispatch(
           "cleanLeadsModule/create",
           {
