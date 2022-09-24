@@ -48,32 +48,28 @@ export default {
     };
   },
   watch: {
-    initialData: {
-      handler() {
-        if (!this.isInitialDataExecuted && this.initialData.length > 0) {
-          this.selectedTodofullLabels = this.initialData.map((el) => el._id);
-          this.isInitialDataExecuted = true;
-        }
-      },
-      immediate: true,
-    },
+    // initialData: {
+    //   handler() {
+    //     if (!this.isInitialDataExecuted && this.initialData.length > 0) {
+    //       this.selectedTodofullLabels = this.initialData.map((el) => el._id);
+    //       this.isInitialDataExecuted = true;
+    //     }
+    //   },
+    //   immediate: true,
+    // },
     selectedTodofullLabels: {
       handler(newValue, oldValue) {
         this.searchLabel = "";
-        this.selectedTodofullLabels = this.selectedTodofullLabels.filter(
-          (el) => el
+        this.$emit(
+          "onSelectTodofullLabels",
+          JSON.parse(JSON.stringify(this.selectedTodofullLabels))
         );
-        if (this.isInitialDataExecuted) {
-          this.$emit(
-            "onSelectTodofullLabels",
-            JSON.parse(JSON.stringify(this.selectedTodofullLabels))
-          );
-        }
       },
       deep: true,
     },
   },
   async mounted() {
+    this.selectedTodofullLabels = this.initialData.map((el) => el._id);
     if (this.$store.state.todofullLabelsModule.todofullLabels.length === 0) {
       await this.$store.dispatch("todofullLabelsModule/list", {
         sort: "name",

@@ -550,7 +550,7 @@ export default {
         fieldsToSearch: this.fieldsToSearch,
         sort: "updatedAt",
         order: "desc",
-        limit: 30,
+        limit: 50,
       };
       if (this.activePlatforms.length > 0) {
         payload.platforms = this.activePlatforms;
@@ -575,7 +575,6 @@ export default {
         })
       ).data.payload;
       chat = (await chatsService.listOne(chat._id)).data.payload;
-      console.log("🚀 Aqui *** -> chat", chat);
       this.$store.commit("chatsModule/setMessages", this.messages);
       this.messages = this.$store.state.chatsModule.messages;
       this.chat = chat;
@@ -584,7 +583,7 @@ export default {
       if (chat.leadId) {
         this.userForm.name = chat.leadId.sourceName || chat.leadId.appName;
         this.userForm.email = chat.leadId.email;
-        this.userForm.city = chat.leadId.city;
+        this.userForm.city = chat.leadId.ciudad;
         this.userForm.todofullLabels = chat.leadId.todofullLabels;
         this.userForm.notes = chat.leadId.nota;
         this.userForm.phone = "";
@@ -633,7 +632,6 @@ export default {
         chat.isBotActive = false;
         buildSuccess("Chatbot desactivado correctamente");
         const user = JSON.parse(localStorage.getItem("user"));
-        console.log("🚀 Aqui *** -> user", user);
         let message =
           "🤝👩🏻‍💼 Ahora estás conversando con el agente " +
           user.first_name +
@@ -753,6 +751,7 @@ export default {
     async saveUserForm() {
       if (this.userForm.phone) {
         console.log("EL PAIS: ", this.selectedChat.leadId.pais);
+        console.log("las etiquetas: ", this.userForm.todofullLabels);
         let createdItem = await this.$store.dispatch(
           "cleanLeadsModule/create",
           {
@@ -826,14 +825,16 @@ export default {
     },
     async loadMore() {
       console.log("CARGANDO MAS...");
-      this.page += 1;
-      const response = await chatsService.list({
-        page: this.page,
-        limit: 10,
-        sort: "updatedAt",
-        order: "desc",
-      });
-      this.chats.push(...response.data.payload);
+      if (this.searchContact.trim().length === 0) {
+        this.page += 1;
+        const response = await chatsService.list({
+          page: this.page,
+          limit: 10,
+          sort: "updatedAt",
+          order: "desc",
+        });
+        this.chats.push(...response.data.payload);
+      }
     },
   },
   computed: {
@@ -861,6 +862,7 @@ export default {
       scrollBottom();
     },
     async searchContact() {
+      this.page = 1;
       clearTimeout(this.delayTimer);
       this.delayTimer = setTimeout(() => {
         this.initialize();
