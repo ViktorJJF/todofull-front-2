@@ -115,8 +115,16 @@ const module = {
       state.selectedChat = data;
     },
     addChat(state, data) {
-      console.log("🚀 NUEVO CHAT A STORE", data);
-      state.chats.unshift(data);
+      const index = state.chats.findIndex((chat) => chat._id == data._id);
+      if (index == -1) {
+        state.chats.unshift({ ...data, pending_messages_count: 0 });
+      }
+    },
+    addChatToEnd(state, data) {
+      const index = state.chats.findIndex((chat) => chat._id == data._id);
+      if (index == -1) {
+        state.chats.push({ ...data, pending_messages_count: 0 });
+      }
     },
     deletedMessage(state, data) {
       let message = state.messages.find((el) => el.mid === data.mid);
@@ -136,6 +144,17 @@ const module = {
   getters: {
     getChatById: (state) => (chatId) => {
       return state.chats.filter((chat) => chat._id === chatId);
+    },
+    getSortedChats: (state) => {
+      return state.chats.sort((a, b) => {
+        if (a.updatedAt > b.updatedAt) {
+          return -1;
+        }
+        if (a.updatedAt < b.updatedAt) {
+          return 1;
+        }
+        return 0;
+      });
     },
   },
 };

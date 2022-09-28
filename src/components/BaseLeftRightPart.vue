@@ -33,7 +33,6 @@ function toggleLpart() {
 
 <style lang="scss">
 .mainbox {
-  position: relative;
   overflow: hidden;
 }
 .left-part {

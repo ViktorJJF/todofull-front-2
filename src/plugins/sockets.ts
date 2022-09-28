@@ -30,8 +30,8 @@ socket.on("NEW_MESSAGE", (data) => {
       chatId,
       isActive: true,
       payload: data.payload,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toUTCString(),
+      updatedAt: new Date().toUTCString(),
     });
     scrollBottom();
   }
@@ -39,18 +39,39 @@ socket.on("NEW_MESSAGE", (data) => {
   const chatToUpdate = chats.find((chat) => chat._id === data.chatId);
   if (chatToUpdate) {
     chatToUpdate.lastMessage.text = data.text;
+    chatToUpdate.updatedAt = new Date().toUTCString();
+    // aumentando contador mensajes sin leer
+    if (data.from === "Cliente") {
+      chatToUpdate.pending_messages_count += 1;
+    }
+    chatsModule.chats = chatsModule.chats.slice();
   }
-  // actualizando ultima fecha mensaje recibido
-  let lastChat = chats.find((el) => el._id === data.chatId);
-  // console.log('🚀 Aqui *** -> lastChat', lastChat);
-  // if (lastChat && lastChat.last_message) {
-  //   lastChat.last_message[0].createdAt = new Date();
-  // }
 });
 
 socket.on("NEW_CHAT", (data) => {
-  console.log("🚀 Aqui *** -> data", data);
   store.commit("chatsModule/addChat", data);
+});
+socket.on("RESTART_PENDING_MESSAGES", (data) => {
+  let chatsModule = store.state.chatsModule;
+  let chats = chatsModule.chats;
+  let chatToUpdate = chats.find((chat) => chat._id === data.chatId);
+  if (chatToUpdate) {
+    chatToUpdate.pending_messages_count = 0;
+  }
+});
+socket.on("UPDATE_CHAT", (data) => {
+  console.log("ACTUALIZANDO CHATS: ", data);
+  let chatsModule = store.state.chatsModule;
+  let chats = chatsModule.chats;
+  let chatToUpdateIndex = chats.findIndex((chat) => chat._id == data._id);
+  if (chatToUpdateIndex > -1) {
+    console.log("ENCONTRADO...");
+    // chats.splice(chatToUpdateIndex, 1, data);
+    chats[chatToUpdateIndex] = data;
+    chats = chats.slice();
+    console.log("🚀 Aqui *** -> chatToUpdate", chatToUpdateIndex);
+    console.log("🚀 Aqui *** -> chatsModule.chats", chatsModule.chats);
+  }
 });
 
 socket.on("DELETED_MESSAGE", (data) => {

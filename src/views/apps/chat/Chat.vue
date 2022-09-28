@@ -103,12 +103,26 @@
                         {{ getChatUserName(chat) }}
                       </div>
                       <div class="msg-content">
-                        <span class="msg-message">{{
-                          chat.lastMessage ? chat.lastMessage.text : ""
-                        }}</span>
+                        <span
+                          :class="{
+                            'msg-message': true,
+                            'bold-text': chat.pending_messages_count > 0,
+                          }"
+                          >{{
+                            chat.lastMessage ? chat.lastMessage.text : ""
+                          }}</span
+                        >
                         <span class="msg-date">{{
                           formatDate(chat.updatedAt, "HH:mm")
                         }}</span>
+                        <div
+                          v-if="chat.pending_messages_count > 0"
+                          :class="{
+                            'not-viewed': true,
+                          }"
+                        >
+                          {{ chat.pending_messages_count }}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -118,7 +132,7 @@
           </template>
           <!---/Right chat list -->
           <template v-slot:rightpart>
-            <template v-if="selectedChat">
+            <template v-if="Object.keys(selectedChat).length > 0">
               <!---chat header-->
               <div class="d-flex pa-4 align-center">
                 <v-avatar size="45" class="mr-3"
@@ -507,7 +521,7 @@ export default {
       chat: null,
       chats: [],
       messages: [],
-      selectedChat: null,
+      selectedChat: {},
       text: "",
       isAgentConnected: false,
       dialog: null,
@@ -564,6 +578,11 @@ export default {
       this.isDataReady = true;
     },
     async selectChat(chat) {
+      this.clearForm();
+      // socket para resetear contador de mensajes no leidos a todos los conectados
+      socket.emit("RESTART_PENDING_MESSAGES", {
+        chatId: chat._id,
+      });
       this.isChatMessageReady = false;
       this.selectedChat = chat;
       this.$store.commit("chatsModule/setSelectedChat", chat);
@@ -572,12 +591,15 @@ export default {
           chatId: chat._id,
           sort: "createdAt",
           order: "asc",
+          restart_pending_messages: true, // esto es para que se reinicien los mensajes pendientes
         })
       ).data.payload;
       chat = (await chatsService.listOne(chat._id)).data.payload;
       this.$store.commit("chatsModule/setMessages", this.messages);
       this.messages = this.$store.state.chatsModule.messages;
       this.chat = chat;
+      this.selectedChat = chat;
+      this.selectedChat.pending_messages_count = 0; // reiniciar contador mensajes sin leer
       scrollBottom();
       this.isChatMessageReady = true;
       if (chat.leadId) {
@@ -605,18 +627,6 @@ export default {
       this.updateLabels += 1;
     },
     sendTextMessage(text, from = "Agente") {
-      console.log("ENVIANDO MENSAJE: ", text, from);
-      let payload = {
-        text,
-        from,
-        type: "text",
-        chatId: this.selectedChat._id,
-        isActive: true,
-        createdAt: new Date(),
-      };
-      // guardando en bd
-      messagesService.create(payload);
-      this.messages.push(payload);
       this.text = "";
       socket.emit("AGENT_MESSAGE", {
         senderId: this.selectedChat.leadId.contactId,
@@ -627,9 +637,18 @@ export default {
       });
       scrollBottom();
     },
+    clearForm() {
+      this.userForm.name = "";
+      this.userForm.email = "";
+      this.userForm.city = "";
+      this.userForm.todofullLabels = [];
+      this.userForm.notes = "";
+      this.userForm.phone = "";
+    },
     connectAgent(chat) {
       if (chat.isBotActive) {
         chat.isBotActive = false;
+        this.selectedChat.isBotActive = false;
         buildSuccess("Chatbot desactivado correctamente");
         const user = JSON.parse(localStorage.getItem("user"));
         let message =
@@ -653,6 +672,7 @@ export default {
           pageID: this.selectedChat.pageID,
           platform: chat.platform,
         });
+        socket.emit("UPDATE_CHAT", { ...this.selectedChat });
       }
     },
     endConversation(chat) {
@@ -674,6 +694,7 @@ export default {
         pageID: this.selectedChat.pageID,
         platform: chat.platform,
       });
+      socket.emit("UPDATE_CHAT", { ...this.selectedChat });
     },
     errorStory() {
       this.isErrorStory = true;
@@ -757,9 +778,12 @@ export default {
           {
             telefono: this.userForm.phone,
             estado:
-              (this.selectedChat.cleanLeadId
-                ? this.selectedChat.cleanLeadId.telefonoId
-                : null) || this.selectedChat.leadId.telefonoId
+              this.selectedChat.cleanLeadId &&
+              this.selectedChat.cleanLeadId.estado
+                ? this.selectedChat.cleanLeadId.estado
+                : (this.selectedChat.cleanLeadId &&
+                    this.selectedChat.cleanLeadId.telefonoId) ||
+                  this.selectedChat.leadId.telefonoId
                 ? "RE-CONECTAR"
                 : "SIN ASIGNAR",
             telefonoId: this.selectedChat.leadId.telefonoId
@@ -824,22 +848,23 @@ export default {
       return formatDistance(new Date(), date, { addSuffix: true, locale: es });
     },
     async loadMore() {
-      console.log("CARGANDO MAS...");
       if (this.searchContact.trim().length === 0) {
         this.page += 1;
         const response = await chatsService.list({
           page: this.page,
-          limit: 10,
+          limit: 50,
           sort: "updatedAt",
           order: "desc",
         });
-        this.chats.push(...response.data.payload);
+        for (const chat of response.data.payload) {
+          this.$store.commit("chatsModule/addChatToEnd", chat);
+        }
       }
     },
   },
   computed: {
     filteredChats() {
-      return this.chats;
+      return this.$store.getters["chatsModule/getSortedChats"];
     },
     formattedMessages() {
       return this.messages.reduce((acc, el) => {
