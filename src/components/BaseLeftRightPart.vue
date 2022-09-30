@@ -36,9 +36,9 @@ function toggleLpart() {
   overflow: hidden;
 }
 .left-part {
-  width: 260px;
+  width: 360px;
   border-right: 1px solid rgba(0, 0, 0, 0.05);
-  height: calc(100vh - 200px);
+  height: calc(100vh - 100px);
   transition: 0.1s ease-in;
   flex-shrink: 0;
 }
@@ -55,7 +55,7 @@ function toggleLpart() {
 .right-part {
   width: 100%;
   position: relative;
-  height: calc(100vh - 200px);
+  height: calc(100vh - 100px);
 }
 .toggleLeft {
   position: absolute;

@@ -1,29 +1,28 @@
 <template>
-  <div>
-    <v-combobox
-      :disabled="disabled"
-      placeholder="Selecciona las etiquetas"
-      class="mt-3"
-      :search-input.sync="searchLabel"
-      v-model="selectedTodofullLabels"
-      :items="todofullLabels"
-      multiple
-      no-data-text="No se encontraron etiquetas"
-      outlined
-      hide-details="true"
-      hint="hola que hace"
-    >
-      <template v-slot:selection="data">
-        <v-chip
-          close
-          @click:close="removeLabels(selectedTodofullLabels, item)"
-          color="primary"
-        >
-          <strong>{{ getLabelTitle(data.selection.value) }}</strong>
-        </v-chip>
-      </template>
-    </v-combobox>
-  </div>
+  <v-combobox
+    hide-details
+    variant="outlined"
+    :disabled="disabled"
+    placeholder="Selecciona las etiquetas"
+    class="mt-3"
+    :search-input.sync="searchLabel"
+    v-model="selectedTodofullLabels"
+    :items="todofullLabels"
+    multiple
+    no-data-text="No se encontraron etiquetas"
+    outlined
+    hint="hola que hace"
+  >
+    <template v-slot:selection="data">
+      <v-chip
+        close
+        @click:close="removeLabels(selectedTodofullLabels, item)"
+        color="primary"
+      >
+        <strong>{{ getLabelTitle(data.selection.value) }}</strong>
+      </v-chip>
+    </template>
+  </v-combobox>
 </template>
 
 <script>

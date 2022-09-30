@@ -19,4 +19,11 @@ export default {
   delete(id) {
     return axios.delete(config.DASHBOARD_BASE_URL + `/api/chats/${id}`);
   },
+  undoPendingMessagesCount(id, count) {
+    return axios.post(
+      config.DASHBOARD_BASE_URL +
+        `/api/chats/${id}/undo_pending_messages_count`,
+      { count }
+    );
+  },
 };

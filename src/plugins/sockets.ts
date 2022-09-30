@@ -78,4 +78,14 @@ socket.on("DELETED_MESSAGE", (data) => {
   store.commit("chatsModule/deletedMessage", data);
 });
 
+socket.on("UNDO_PENDING_MESSAGES_COUNT", (data) => {
+  const { chatId, count } = data;
+  let chatsModule = store.state.chatsModule;
+  let chats = chatsModule.chats;
+  let chatToUpdateIndex = chats.findIndex((chat) => chat._id == chatId);
+  if (chatToUpdateIndex > -1) {
+    chats[chatToUpdateIndex].pending_messages_count = count;
+  }
+});
+
 export default socket;

@@ -1,5 +1,5 @@
 <template>
-  <v-row>
+  <v-row style="height: 100%">
     <v-col cols="12" sm="9">
       <v-card>
         <!---/Main Box chat list -->
@@ -154,6 +154,18 @@
                   </h4>
                 </div>
                 <v-spacer></v-spacer>
+                <v-btn
+                  @click="undoPendingMessagesCount"
+                  fab
+                  large
+                  color="bot"
+                  class="undo-pending-message mr-2"
+                >
+                  <v-icon class="wechat-color">mdi-wechat</v-icon>
+                  <v-tooltip activator="parent" anchor="bottom"
+                    >Marcar como no leído</v-tooltip
+                  >
+                </v-btn>
                 <v-tooltip top>
                   <template v-slot:activator="{ on, attrs }">
                     <v-btn
@@ -380,6 +392,7 @@
               </div>
             </template>
           </template>
+          <template v-slot:detailpart></template>
         </BaseLeftRightPartVue>
       </v-card>
     </v-col>
@@ -397,7 +410,7 @@
       </v-sheet>
       <v-window v-model="tabForm">
         <v-window-item :value="0">
-          <div style="background-color: #ffffff" class="mb-7">
+          <div style="background-color: #ffffff" class="mb-7 detail-part">
             <v-card-text class="pa-5 border-bottom">
               <h3 class="title text-h6">Usuario</h3>
               <h4>
@@ -416,47 +429,59 @@
             <v-divider></v-divider>
             <v-card-text class="pa-5 border-bottom">
               <v-text-field
-                dense
-                outlined
+                density="compact"
+                hide-details
+                variant="outlined"
                 label="Nombres"
-                placeholder="Username"
+                placeholder="Nombres"
                 append-icon="mdi-account"
                 v-model="userForm.name"
+                class="mb-2"
               ></v-text-field>
               <v-text-field
-                dense
-                outlined
+                density="compact"
+                hide-details
+                variant="outlined"
                 label="Teléfonos"
-                placeholder="Username"
+                placeholder="Teléfonos"
                 append-icon="mdi-cellphone"
                 v-model="userForm.phone"
+                class="mb-2"
               ></v-text-field>
               <v-text-field
-                dense
-                outlined
+                density="compact"
+                hide-details
+                variant="outlined"
                 label="Correo"
-                placeholder="Email"
+                placeholder="Correo"
                 append-icon="mdi-email"
                 v-model="userForm.email"
+                class="mb-2"
               ></v-text-field>
               <v-text-field
-                dense
-                outlined
+                density="compact"
+                hide-details
+                variant="outlined"
                 label="Ciudad"
-                placeholder="Email"
+                placeholder="Ciudad"
                 append-icon="mdi-email"
                 v-model="userForm.city"
+                class="mb-2"
               ></v-text-field>
               <v-textarea
+                density="compact"
+                hide-details
+                variant="outlined"
                 clearable
                 clear-icon="mdi-close-circle"
                 label="Notas"
                 v-model="userForm.notes"
+                class="mb-2"
               ></v-textarea>
               <bold>Etiquetas</bold>
               <TodofullLabelsSelector
                 :initialData="userForm.todofullLabels"
-                class="ma-3"
+                class="my-3"
                 @onSelectTodofullLabels="onSelectTodofullLabels"
                 :key="updateLabels"
               ></TodofullLabelsSelector>
@@ -464,7 +489,7 @@
                 <v-btn
                   color="success"
                   @click="saveUserForm"
-                  outlined
+                  variant="outlined"
                   class="text-capitalize mr-2"
                   >Guardar</v-btn
                 >
@@ -522,6 +547,7 @@ export default {
       chats: [],
       messages: [],
       selectedChat: {},
+      selectedPendingMessagesCount: 0,
       text: "",
       isAgentConnected: false,
       dialog: null,
@@ -579,6 +605,8 @@ export default {
     },
     async selectChat(chat) {
       this.clearForm();
+      // salvar cantidad de mensajes pendientes, por si se quiere marcar no leido
+      this.selectedPendingMessagesCount = chat.pending_messages_count;
       // socket para resetear contador de mensajes no leidos a todos los conectados
       socket.emit("RESTART_PENDING_MESSAGES", {
         chatId: chat._id,
@@ -861,6 +889,19 @@ export default {
         }
       }
     },
+    undoPendingMessagesCount() {
+      let count =
+        this.selectedPendingMessagesCount === 0
+          ? 1
+          : this.selectedPendingMessagesCount;
+      socket.emit("UNDO_PENDING_MESSAGES_COUNT", {
+        count,
+        chatId: this.selectedChat._id,
+      });
+      // actualizar bd
+      chatsService.undoPendingMessagesCount(this.selectedChat._id, count);
+      buildSuccess("Conversación marcada como no leída");
+    },
   },
   computed: {
     filteredChats() {
@@ -901,6 +942,9 @@ export default {
   flex-direction: row-reverse;
 }
 .chat-room-box-height {
-  height: calc(100vh - 440px);
+  height: calc(100vh - 340px);
+}
+.detail-part {
+  max-height: calc(100vh - 100px);
 }
 </style>
