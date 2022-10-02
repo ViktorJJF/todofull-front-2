@@ -1,5 +1,5 @@
 <template>
-  <v-row style="height: 100%">
+  <v-row>
     <v-col cols="12" sm="9">
       <v-card>
         <!---/Main Box chat list -->
@@ -62,6 +62,18 @@
                 hide-details
                 v-model="searchContact"
               ></v-text-field>
+            </div>
+            <div class="px-5">
+              <v-chip-group v-model="filterChats" active-class="primary--text"
+                ><v-chip
+                  v-for="filter in filters"
+                  :key="filter"
+                  color="success"
+                  :multiple="false"
+                >
+                  <strong>{{ filter }}</strong>
+                </v-chip></v-chip-group
+              >
             </div>
 
             <v-list>
@@ -134,8 +146,8 @@
           <template v-slot:rightpart>
             <template v-if="Object.keys(selectedChat).length > 0">
               <!---chat header-->
-              <div class="d-flex pa-4 align-center">
-                <v-avatar size="45" class="mr-3"
+              <div class="d-flex pa-1 align-center">
+                <v-avatar size="35" class="mr-3"
                   ><img
                     :src="
                       getProfilePic(selectedChat) ||
@@ -211,6 +223,8 @@
                     :key="formattedMessage._id"
                     :class="{
                       'chat-msg': true,
+                      'ma-0': true,
+                      'pa-0': true,
                       owner: formattedMessage.from != 'Cliente',
                     }"
                   >
@@ -233,14 +247,66 @@
                     </div>
                     <div class="chat-msg-content">
                       <div
-                        class="mb-2"
+                        class="mb-0 hover-text"
                         v-for="message in formattedMessage.messages"
                         :key="message._id"
+                        @mouseover="selectedMessage = message"
                       >
+                        <v-card
+                          class="tooltip-text"
+                          :style="`${
+                            showMessageOptions &&
+                            this.selectedMessage &&
+                            this.selectedMessage._id == message._id
+                              ? 'visibility:visible'
+                              : ''
+                          }`"
+                          id="top"
+                        >
+                          <v-btn-toggle divided>
+                            <v-btn
+                              v-show="getFieldTextSelection == 'text'"
+                              @click="
+                                userForm.name = selectedText;
+                                saveUserForm();
+                                showMessageOptions = false;
+                              "
+                              icon="mdi-account"
+                            ></v-btn>
+                            <v-btn
+                              v-show="getFieldTextSelection == 'phone'"
+                              @click="
+                                userForm.phone = selectedText;
+                                saveUserForm();
+                                showMessageOptions = false;
+                              "
+                              icon="mdi-cellphone"
+                            ></v-btn>
+                            <v-btn
+                              v-show="getFieldTextSelection == 'email'"
+                              @click="
+                                userForm.email = selectedText;
+                                saveUserForm();
+                                showMessageOptions = false;
+                              "
+                              icon="mdi-email"
+                            ></v-btn>
+                            <v-btn
+                              v-show="getFieldTextSelection == 'text'"
+                              @click="
+                                userForm.city = selectedText;
+                                saveUserForm();
+                                showMessageOptions = false;
+                              "
+                              icon="mdi-city"
+                            ></v-btn>
+                          </v-btn-toggle>
+                        </v-card>
                         <div
                           v-if="message.type === 'text' || !message.type"
                           class="chat-msg-text"
                           v-html="parseMarkdown(message.text)"
+                          ref="target"
                         ></div>
                         <div
                           v-if="message.type === 'image'"
@@ -397,109 +463,93 @@
       </v-card>
     </v-col>
     <v-col cols="12" sm="3" v-if="selectedChat">
-      <v-sheet elevation="6">
-        <v-tabs
-          v-model="tabForm"
-          background-color="primary"
-          class="d-flex align-center"
-        >
-          <v-tab :value="0">
-            <v-icon class="mb-1" start> mdi-account </v-icon>
-          </v-tab>
-        </v-tabs>
-      </v-sheet>
-      <v-window v-model="tabForm">
-        <v-window-item :value="0">
-          <div style="background-color: #ffffff" class="mb-7 detail-part">
-            <v-card-text class="pa-5 border-bottom">
-              <h3 class="title text-h6">Usuario</h3>
-              <h4>
-                Fuente:
-                {{
-                  $store.state.botsModule.bots.find(
+      <v-card style="background-color: #ffffff" class="mb-7 detail-part">
+        <v-card-text class="pa-5 border-bottom">
+          <h3 class="title text-h6">Usuario</h3>
+          <h4>
+            Fuente:
+            {{
+              $store.state.botsModule.bots.find(
+                (el) => el.fanpageId == selectedChat.pageID
+              )
+                ? $store.state.botsModule.bots.find(
                     (el) => el.fanpageId == selectedChat.pageID
-                  )
-                    ? $store.state.botsModule.bots.find(
-                        (el) => el.fanpageId == selectedChat.pageID
-                      ).name
-                    : "Sin fuente"
-                }}
-              </h4>
-            </v-card-text>
-            <v-divider></v-divider>
-            <v-card-text class="pa-5 border-bottom">
-              <v-text-field
-                density="compact"
-                hide-details
-                variant="outlined"
-                label="Nombres"
-                placeholder="Nombres"
-                append-icon="mdi-account"
-                v-model="userForm.name"
-                class="mb-2"
-              ></v-text-field>
-              <v-text-field
-                density="compact"
-                hide-details
-                variant="outlined"
-                label="Teléfonos"
-                placeholder="Teléfonos"
-                append-icon="mdi-cellphone"
-                v-model="userForm.phone"
-                class="mb-2"
-              ></v-text-field>
-              <v-text-field
-                density="compact"
-                hide-details
-                variant="outlined"
-                label="Correo"
-                placeholder="Correo"
-                append-icon="mdi-email"
-                v-model="userForm.email"
-                class="mb-2"
-              ></v-text-field>
-              <v-text-field
-                density="compact"
-                hide-details
-                variant="outlined"
-                label="Ciudad"
-                placeholder="Ciudad"
-                append-icon="mdi-email"
-                v-model="userForm.city"
-                class="mb-2"
-              ></v-text-field>
-              <v-textarea
-                density="compact"
-                hide-details
-                variant="outlined"
-                clearable
-                clear-icon="mdi-close-circle"
-                label="Notas"
-                v-model="userForm.notes"
-                class="mb-2"
-              ></v-textarea>
-              <bold>Etiquetas</bold>
-              <TodofullLabelsSelector
-                :initialData="userForm.todofullLabels"
-                class="my-3"
-                @onSelectTodofullLabels="onSelectTodofullLabels"
-                :key="updateLabels"
-              ></TodofullLabelsSelector>
-              <div class="mt-4">
-                <v-btn
-                  color="success"
-                  @click="saveUserForm"
-                  variant="outlined"
-                  class="text-capitalize mr-2"
-                  >Guardar</v-btn
-                >
-              </div>
-            </v-card-text>
+                  ).name
+                : "Sin fuente"
+            }}
+          </h4>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-text class="pa-5 border-bottom">
+          <v-text-field
+            density="compact"
+            hide-details
+            variant="outlined"
+            label="Nombres"
+            placeholder="Nombres"
+            append-icon="mdi-account"
+            v-model="userForm.name"
+            class="mb-2"
+          ></v-text-field>
+          <v-text-field
+            density="compact"
+            hide-details
+            variant="outlined"
+            label="Teléfonos"
+            placeholder="Teléfonos"
+            append-icon="mdi-cellphone"
+            v-model="userForm.phone"
+            class="mb-2"
+          ></v-text-field>
+          <v-text-field
+            density="compact"
+            hide-details
+            variant="outlined"
+            label="Correo"
+            placeholder="Correo"
+            append-icon="mdi-email"
+            v-model="userForm.email"
+            class="mb-2"
+          ></v-text-field>
+          <v-text-field
+            density="compact"
+            hide-details
+            variant="outlined"
+            label="Ciudad"
+            placeholder="Ciudad"
+            append-icon="mdi-city"
+            v-model="userForm.city"
+            class="mb-2"
+          ></v-text-field>
+          <bold>Etiquetas</bold>
+          <TodofullLabelsSelector
+            :initialData="userForm.todofullLabels"
+            class="my-3"
+            @onSelectTodofullLabels="onSelectTodofullLabels"
+            :key="updateLabels"
+          ></TodofullLabelsSelector>
+          <v-textarea
+            density="compact"
+            hide-details
+            variant="outlined"
+            clearable
+            clear-icon="mdi-close-circle"
+            label="Notas"
+            v-model="userForm.notes"
+            class="mb-2"
+          ></v-textarea>
+
+          <div class="mt-4">
+            <v-btn
+              color="success"
+              @click="saveUserForm"
+              variant="outlined"
+              class="text-capitalize mr-2"
+              >Guardar</v-btn
+            >
           </div>
-        </v-window-item>
-        <v-window-item :value="1"> </v-window-item>
-        <v-window-item :value="2"> </v-window-item>
-      </v-window>
+        </v-card-text>
+      </v-card>
     </v-col>
   </v-row>
 </template>
@@ -575,10 +625,27 @@ export default {
         todofullLabels: [],
       },
       updateScroll: 0,
+      selectedText: "",
+      showMessageOptions: false,
+      selectedMessage: null,
+      filterChats: 0,
+      filters: ["Todos", "Pendientes", "Resueltos"],
     };
   },
   mounted() {
     this.initialize();
+    document.addEventListener("mouseup", (event) => {
+      if (
+        (event.target.tagName.toLowerCase() === "p" ||
+          event.target.tagName.toLowerCase() === "a" ||
+          event.target.tagName.toLowerCase() === "div") &&
+        (event.target.parentElement.classList.contains("chat-msg-text") ||
+          event.target.parentElement.classList.contains("hover-text") ||
+          event.target.parentElement.classList.length === 0)
+      ) {
+        this.onSelectedText();
+      }
+    });
   },
   methods: {
     async initialize(page = 1) {
@@ -878,12 +945,16 @@ export default {
     async loadMore() {
       if (this.searchContact.trim().length === 0) {
         this.page += 1;
-        const response = await chatsService.list({
+        let payload = {
           page: this.page,
           limit: 50,
           sort: "updatedAt",
           order: "desc",
-        });
+        };
+        if (this.activePlatforms.length > 0) {
+          payload.platforms = this.activePlatforms;
+        }
+        const response = await chatsService.list(payload);
         for (const chat of response.data.payload) {
           this.$store.commit("chatsModule/addChatToEnd", chat);
         }
@@ -902,10 +973,29 @@ export default {
       chatsService.undoPendingMessagesCount(this.selectedChat._id, count);
       buildSuccess("Conversación marcada como no leída");
     },
+    onSelectedText() {
+      this.showMessageOptions = true;
+      this.selectedText = window.getSelection().toString();
+    },
+
+    mouseOver() {
+      console.log("mouse encima");
+    },
+    getSelectedText() {
+      return window.getSelection().toString();
+    },
   },
   computed: {
     filteredChats() {
-      return this.$store.getters["chatsModule/getSortedChats"];
+      return this.filterChats == 0
+        ? this.$store.getters["chatsModule/getSortedChats"]
+        : this.filterChats == 1
+        ? this.$store.getters["chatsModule/getSortedChats"].filter(
+            (el) => el.pending_messages_count > 0
+          )
+        : this.$store.getters["chatsModule/getSortedChats"].filter(
+            (el) => el.pending_messages_count == 0
+          );
     },
     formattedMessages() {
       return this.messages.reduce((acc, el) => {
@@ -921,6 +1011,13 @@ export default {
         }
         return acc;
       }, []);
+    },
+    getFieldTextSelection() {
+      return this.selectedText.includes("@")
+        ? "email"
+        : !isNaN(this.selectedText)
+        ? "phone"
+        : "text";
     },
   },
   watch: {
@@ -945,6 +1042,42 @@ export default {
   height: calc(100vh - 340px);
 }
 .detail-part {
-  max-height: calc(100vh - 100px);
+  height: calc(100vh - 90px);
+  overflow: scroll;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  position: absolute;
+  z-index: 1;
+  width: 100px !important;
+}
+
+// .hover-text:hover .tooltip-text {
+//   visibility: visible;
+// }
+
+#top {
+  top: -40px;
+  left: -5%;
+}
+
+#bottom {
+  top: 25px;
+  left: -50%;
+}
+
+#left {
+  top: -8px;
+  right: 120%;
+}
+
+#right {
+  top: -8px;
+  left: 120%;
+}
+
+.hover-text {
+  position: relative;
 }
 </style>
