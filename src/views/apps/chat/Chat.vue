@@ -54,7 +54,7 @@
             </v-btn>
           </template>
           <template v-slot:leftpart>
-            <div class="pa-5 border-bottom">
+            <div class="pa-3 border-bottom">
               <v-text-field
                 label="Buscar contacto"
                 variant="outlined"
@@ -62,6 +62,19 @@
                 hide-details
                 v-model="searchContact"
               ></v-text-field>
+            </div>
+            <div class="pa-3 border-bottom">
+              <v-select
+                v-model="selectedCountry"
+                :items="['Peru', 'Chile', 'Colombia']"
+                menu-props="auto"
+                hide-details
+                density="compact"
+                single-line
+                label="Selecciona un país"
+                variant="outlined"
+                clearable
+              ></v-select>
             </div>
             <div class="px-5">
               <v-chip-group v-model="filterChats" active-class="primary--text"
@@ -181,6 +194,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on, attrs }">
                     <v-btn
+                      size="small"
                       v-bind="attrs"
                       v-on="on"
                       @click="
@@ -247,7 +261,7 @@
                     </div>
                     <div class="chat-msg-content">
                       <div
-                        class="mb-0 hover-text"
+                        class="mb-1 hover-text"
                         v-for="message in formattedMessage.messages"
                         :key="message._id"
                         @mouseover="selectedMessage = message"
@@ -630,6 +644,7 @@ export default {
       selectedMessage: null,
       filterChats: 0,
       filters: ["Todos", "Pendientes", "Resueltos"],
+      selectedCountry: null,
     };
   },
   mounted() {
@@ -661,6 +676,9 @@ export default {
       };
       if (this.activePlatforms.length > 0) {
         payload.platforms = this.activePlatforms;
+      }
+      if (this.selectedCountry) {
+        payload.selectedCountry = this.selectedCountry;
       }
       await Promise.all([
         this.$store.dispatch("botsModule/list"),
@@ -954,6 +972,9 @@ export default {
         if (this.activePlatforms.length > 0) {
           payload.platforms = this.activePlatforms;
         }
+        if (this.selectedCountry) {
+          payload.selectedCountry = this.selectedCountry;
+        }
         const response = await chatsService.list(payload);
         for (const chat of response.data.payload) {
           this.$store.commit("chatsModule/addChatToEnd", chat);
@@ -983,6 +1004,9 @@ export default {
     },
     getSelectedText() {
       return window.getSelection().toString();
+    },
+    onSelectedCountry(event) {
+      console.log("seleccionado: ", event);
     },
   },
   computed: {
@@ -1024,6 +1048,10 @@ export default {
     messages() {
       scrollBottom();
     },
+    selectedCountry() {
+      this.page = 1;
+      this.initialize();
+    },
     async searchContact() {
       this.page = 1;
       clearTimeout(this.delayTimer);
@@ -1041,6 +1069,9 @@ export default {
 .chat-room-box-height {
   height: calc(100vh - 340px);
 }
+.chat-room {
+  overflow: visible;
+}
 .detail-part {
   height: calc(100vh - 90px);
   overflow: scroll;
@@ -1049,7 +1080,7 @@ export default {
 .tooltip-text {
   visibility: hidden;
   position: absolute;
-  z-index: 1;
+  z-index: 9999999999 !important;
   width: 100px !important;
 }
 
