@@ -5,6 +5,7 @@
         <span class="fa fa-spinner fa-spin"></span> Cargando
       </div>
     </transition>
+    <slot name="loading" />
     <ul class="list-group" id="infinite-list">
       <div><slot /></div>
     </ul>
@@ -90,7 +91,7 @@ body {
 }
 .list-group {
   overflow: auto;
-  height: 80vh;
+  height: calc(73vh - 100px);
 }
 
 .loading {

@@ -9,7 +9,7 @@ function toggleLpart() {
 
 <template>
   <!---/Left chat list -->
-  <div class="d-flex mainbox">
+  <div class="mainbox">
     <div class="left-part" :class="Lpart ? 'showLeftPart' : 'HideLeftPart'">
       <slot name="channels"></slot>
       <slot name="leftpart"></slot>
@@ -33,14 +33,14 @@ function toggleLpart() {
 
 <style lang="scss">
 .mainbox {
-  overflow: hidden;
+  display: flex;
 }
 .left-part {
   width: 360px;
   border-right: 1px solid rgba(0, 0, 0, 0.05);
-  height: calc(100vh - 100px);
   transition: 0.1s ease-in;
   flex-shrink: 0;
+  height: 100%;
 }
 .v-theme--light {
   .left-part {
@@ -55,32 +55,10 @@ function toggleLpart() {
 .right-part {
   width: 100%;
   position: relative;
-  height: calc(100vh - 100px);
 }
 .toggleLeft {
   position: absolute;
   right: 15px;
   top: 15px;
-}
-.h-100 {
-  height: calc(100vh - 200px);
-}
-@media (max-width: 960px) {
-  .left-part {
-    position: absolute;
-    left: -260px;
-    &.showLeftPart {
-      left: 0;
-      z-index: 2;
-      box-shadow: 2px 1px 20px rgba(0, 0, 0, 0.1);
-    }
-  }
-  .boxoverlay {
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    z-index: 1;
-    background: rgba(0, 0, 0, 0.2);
-  }
 }
 </style>

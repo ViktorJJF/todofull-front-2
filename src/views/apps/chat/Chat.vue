@@ -88,6 +88,10 @@
                 </v-chip></v-chip-group
               >
             </div>
+            <div class="px-5">
+              <h6>Total: {{ $store.state.chatsModule.total }}</h6>
+              <h6>Mostrando: {{ $store.state.chatsModule.chats.length }}</h6>
+            </div>
 
             <v-list>
               <!---/chat list -->
@@ -151,6 +155,7 @@
                       </div>
                     </div>
                   </div>
+                  <template v-slot:loading></template>
                 </InfiniteScroll>
               </div>
             </v-list>
@@ -621,8 +626,6 @@ export default {
       fieldsToSearch: ["foreign_telefono", "foreign_name"],
       page: 1,
       pageCount: 0,
-      chatCategories: ["Pendientes", "Resueltos", "Todos"],
-      formCategories: ["Pendientes", "Resueltos", "Todos"],
       tabCategory: 2,
       tabForm: 0,
       searchContact: "",
@@ -645,6 +648,7 @@ export default {
       filterChats: 0,
       filters: ["Todos", "Pendientes", "Resueltos"],
       selectedCountry: null,
+      isLoadingMore: false,
     };
   },
   mounted() {
@@ -672,13 +676,16 @@ export default {
         fieldsToSearch: this.fieldsToSearch,
         sort: "updatedAt",
         order: "desc",
-        limit: 50,
+        limit: 100,
       };
       if (this.activePlatforms.length > 0) {
         payload.platforms = this.activePlatforms;
       }
       if (this.selectedCountry) {
         payload.selectedCountry = this.selectedCountry;
+      }
+      if (this.filterChats) {
+        payload.filterChats = this.filters[this.filterChats];
       }
       await Promise.all([
         this.$store.dispatch("botsModule/list"),
@@ -850,6 +857,7 @@ export default {
       }
     },
     addPlatform(platform: String): void {
+      this.page = 1;
       if (this.activePlatforms.includes(platform)) {
         this.activePlatforms = this.activePlatforms.filter(
           (p) => p !== platform
@@ -961,11 +969,12 @@ export default {
       return formatDistance(new Date(), date, { addSuffix: true, locale: es });
     },
     async loadMore() {
+      this.isLoadingMore = true;
       if (this.searchContact.trim().length === 0) {
         this.page += 1;
         let payload = {
           page: this.page,
-          limit: 50,
+          limit: 100,
           sort: "updatedAt",
           order: "desc",
         };
@@ -975,10 +984,14 @@ export default {
         if (this.selectedCountry) {
           payload.selectedCountry = this.selectedCountry;
         }
+        if (this.filterChats) {
+          payload.filterChats = this.filters[this.filterChats];
+        }
         const response = await chatsService.list(payload);
         for (const chat of response.data.payload) {
           this.$store.commit("chatsModule/addChatToEnd", chat);
         }
+        this.isLoadingMore = false;
       }
     },
     undoPendingMessagesCount() {
@@ -1058,6 +1071,10 @@ export default {
       this.delayTimer = setTimeout(() => {
         this.initialize();
       }, 600);
+    },
+    filterChats() {
+      this.page = 1;
+      this.initialize();
     },
   },
 };
