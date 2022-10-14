@@ -365,7 +365,10 @@ export const getDataFromLeadDetail = (leadDetail) => {
 
 // extract file name from url between symbols / and ?
 export const getFileNameFromUrl = (url) => {
-  return url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("?"));
+  // get string after .com and before -
+  return url.includes(".amazonaws.com")
+    ? decodeURIComponent(url.split(".com/")[1].split("-")[0])
+    : url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("?"));
 };
 
 export const parseMarkdown = (text: String): String => {
