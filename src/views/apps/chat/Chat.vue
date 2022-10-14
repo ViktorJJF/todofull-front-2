@@ -600,7 +600,7 @@ text/plain, application/pdf"
   </v-row>
 </template>
 
-<script  lang="ts">
+<script lang="js">
 import UploadImages from "vue-upload-drop-images";
 import { formatDistance } from "date-fns";
 import chatsService from "@/services/api/chats";
@@ -617,28 +617,20 @@ import {
 } from "@/utils/utils";
 import socket from "@/plugins/sockets";
 import { es } from "date-fns/locale";
-// import InfiniteScroll from "@/components/InfiniteScroll.vue";
+import InfiniteScroll from "@/components/InfiniteScroll.vue";
 import BaseLeftRightPartVue from "@/components/BaseLeftRightPart.vue";
 import { buildSuccess } from "@/utils/utils.ts";
 import AgentsSelector from "@/components/AgentsSelector.vue";
 import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
-import InfiniteScroll from "@/components/InfiniteScroll.vue";
 
 export default {
   components: {
-    // InfiniteScroll,
     BaseLeftRightPartVue,
     AgentsSelector,
     TodofullLabelsSelector,
     InfiniteScroll,
     UploadImages,
   },
-  // filters: {
-  //   formatDate: function (value) {
-  //     let date = new Date(value);
-  //     return formatDistance(new Date(), date, { addSuffix: true, locale: es });
-  //   },
-  // },
   data() {
     return {
       uploadingImage: false,
@@ -676,7 +668,6 @@ export default {
       updateScroll: 0,
       selectedText: "",
       showMessageOptions: false,
-      selectedMessage: null,
       filterChats: 0,
       filters: ["Todos", "Pendientes", "Resueltos"],
       selectedCountry: null,
@@ -867,11 +858,11 @@ export default {
     loadStory() {
       this.isErrorStory = false;
     },
-    getChatUserData(chat: Object): Object {
+    getChatUserData(chat) {
       let userData = getDataFromLeadDetail(chat.cleanLeadId.details);
       return userData;
     },
-    getChatUserName(chat: Object): String {
+    getChatUserName(chat) {
       let userData = chat.cleanLeadId
         ? this.getChatUserData(chat)
         : chat.leadId
@@ -885,10 +876,10 @@ export default {
       }
       return "Usuario";
     },
-    getUserDataByPlatform(chat: Object): Object {
+    getUserDataByPlatform(chat) {
       let details = chat.cleanLeadId.details;
     },
-    getPlatformIconStyle(platform: String): String {
+    getPlatformIconStyle(platform) {
       const platforms = {
         whatsapp: "mdi-whatsapp whatsapp-color",
         facebook: "mdi-facebook-messenger messenger-color",
@@ -896,12 +887,12 @@ export default {
       };
       return platforms[platform];
     },
-    getProfilePic(chat: Object): String {
+    getProfilePic(chat) {
       if (chat.leadId) {
         return chat.leadId.profile_pic;
       }
     },
-    addPlatform(platform: String): void {
+    addPlatform(platform) {
       this.page = 1;
       if (this.activePlatforms.includes(platform)) {
         this.activePlatforms = this.activePlatforms.filter(
@@ -912,7 +903,7 @@ export default {
       }
       this.initialize();
     },
-    onSelectedAgent(agent: String): void {
+    onSelectedAgent(agent) {
       if (this.selectedChat.cleanLeadId) {
         // es lead (dejó datos)
         this.selectedChat.cleanLeadId.telefonoId = agent;
@@ -1000,16 +991,16 @@ export default {
         });
       }
     },
-    getFileNameFromUrl(url: String): String {
+    getFileNameFromUrl(url) {
       return getFileNameFromUrl(url);
     },
-    parseMarkdown(text: String): String {
+    parseMarkdown(text) {
       return parseMarkdown(text);
     },
-    formatDate(date: String, format = "dd/MM/yyyy HH:mm"): String {
+    formatDate(date, format = "dd/MM/yyyy HH:mm") {
       return getFormat(date, format);
     },
-    formatDateAgo(value: String): String {
+    formatDateAgo(value) {
       let date = new Date(value);
       return formatDistance(new Date(), date, { addSuffix: true, locale: es });
     },

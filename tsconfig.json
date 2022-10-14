@@ -5,7 +5,7 @@
     "baseUrl": ".",
     "strict": false, // ir migrando de a poquito y pasar a true
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["*", "./src/*"]
     },
     "allowJs": true,
   },
