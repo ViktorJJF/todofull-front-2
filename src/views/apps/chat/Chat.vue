@@ -390,6 +390,7 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   class="feather feather-image"
+                  @click="uploadDialog = true"
                 >
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                   <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -403,25 +404,23 @@
                   stroke-width="1.5"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  class="feather feather-plus-circle"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M12 8v8M8 12h8"></path>
-                </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
                   class="feather feather-paperclip"
+                  @click="pickFile"
                 >
                   <path
                     d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"
                   ></path>
                 </svg>
+                <input
+                  type="file"
+                  id="file"
+                  ref="file"
+                  accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint,
+text/plain, application/pdf"
+                  capture
+                  @change="handleFileUpload"
+                  style="display: none"
+                />
                 <v-textarea
                   v-model="text"
                   class="mx-1"
@@ -430,7 +429,7 @@
                   variant="outlined"
                   hide-details
                   no-resize
-                  @keyup.enter="sendTextMessage(text)"
+                  @keyup.enter="sendMessage(text)"
                   :label="
                     selectedChat.isBotActive
                       ? 'Desactiva el chatbot para intervenir chat'
@@ -569,12 +568,42 @@
         </v-card-text>
       </v-card>
     </v-col>
+    <v-dialog v-model="uploadDialog">
+      <v-card>
+        <v-container class="pa-5">
+          <UploadImages
+            :key="resetImage"
+            value="/uploads/grodnobot.png"
+            ref="image"
+            @change="handleImages"
+            :max="1"
+            uploadMsg="Click para insertar o arrastrar una imagen"
+            fileError="Solo se aceptan archivos imágenes"
+            clearAll="Borrar todo"
+            class="mb-2"
+          />
+        </v-container>
+        <!-- <v-card-actions rd-actions>
+          <div class="flex-grow-1"></div>
+          <v-btn
+            :loading="uploadingImage"
+            color="success"
+            variant="outlined"
+            class="text-capitalize mr-2"
+            @click.self="sendImageMessage"
+            >Cargar</v-btn
+          >
+        </v-card-actions> -->
+      </v-card>
+    </v-dialog>
   </v-row>
 </template>
 
 <script lang="js">
+import UploadImages from "vue-upload-drop-images";
 import { formatDistance } from "date-fns";
 import chatsService from "@/services/api/chats";
+import filesService from "@/services/api/files";
 import cleanLeadsService from "@/services/api/cleanLeads";
 import leadsService from "@/services/api/leads";
 import messagesService from "@/services/api/messages";
@@ -599,9 +628,12 @@ export default {
     AgentsSelector,
     TodofullLabelsSelector,
     InfiniteScroll,
+    UploadImages,
   },
   data() {
     return {
+      uploadingImage: false,
+      uploadDialog: false,
       activePlatforms: [],
       chat: null,
       chats: [],
@@ -639,6 +671,12 @@ export default {
       filters: ["Todos", "Pendientes", "Resueltos"],
       selectedCountry: null,
       isLoadingMore: false,
+      resetImage: 0,
+      image: null,
+      file: null,
+      imageUploaded: false,
+      fileName: "",
+      fileUrl: "",
     };
   },
   mounted() {
@@ -657,6 +695,9 @@ export default {
     });
   },
   methods: {
+    pickFile() {
+      this.$refs.file.click();
+    },
     async initialize(page = 1) {
       this.isDataReady = false;
       // traer listado de chats
@@ -736,7 +777,7 @@ export default {
       }
       this.updateLabels += 1;
     },
-    sendTextMessage(text, from = "Agente") {
+    sendMessage(text, from = "Agente", type = "text", { url } = {}) {
       this.text = "";
       socket.emit("AGENT_MESSAGE", {
         senderId: this.selectedChat.leadId.contactId,
@@ -744,6 +785,10 @@ export default {
         text: text,
         pageID: this.selectedChat.pageID,
         platform: this.selectedChat.platform,
+        payload: {
+          url,
+        },
+        type,
       });
       scrollBottom();
     },
@@ -767,7 +812,7 @@ export default {
           " " +
           user.last_name;
         console.log("CONECTANDO AGENTE");
-        this.sendTextMessage(message, "Chatbot");
+        this.sendMessage(message, "Chatbot");
         this.isAgentConnected = true;
         // se cambia estado de atendiendo agente en bd
         chatsService.update(this.selectedChat._id, {
@@ -790,7 +835,7 @@ export default {
       buildSuccess("Chatbot reactivado");
       const user = JSON.parse(localStorage.getItem("user"));
       let message = `El agente ${user.first_name} ${user.last_name} se ha desconectado`;
-      this.sendTextMessage(message, "Chatbot");
+      this.sendMessage(message, "Chatbot");
       this.isAgentConnected = false;
       this.selectedChat.userId = null;
       chatsService.update(this.selectedChat._id, {
@@ -1010,6 +1055,69 @@ export default {
     },
     onSelectedCountry(event) {
       console.log("seleccionado: ", event);
+    },
+    handleImages() {
+      // this.editedItem.img = files;
+      [this.image] = this.$refs.image.files;
+      this.sendImageMessage();
+    },
+    clear() {
+      this.image = null;
+      this.resetImage += 1;
+      this.imageUploaded = false;
+    },
+    handleFileUpload() {
+      const files = this.$refs.file.files;
+      this.file = this.$refs.file.files[0];
+      if (files[0] !== undefined) {
+        this.fileName = files[0].name;
+        if (this.fileName.lastIndexOf(".") <= 0) {
+          return;
+        }
+        const fr = new FileReader();
+        fr.readAsDataURL(files[0]);
+        fr.addEventListener("load", () => {
+          this.fileUrl = fr.result;
+        });
+      } else {
+        this.fileName = "";
+        this.fileUrl = "";
+      }
+      console.log("🚀 Aqui *** -> this.fileName", this.fileName);
+      console.log("🚀 Aqui *** -> this.fileUrl", this.fileUrl);
+      this.sendFileMessage();
+    },
+    async sendImageMessage() {
+      if (this.image) {
+        console.log("cargando archivo: ", this.image);
+        this.uploadingImage = true;
+        let formData = new FormData();
+        formData.append("file", this.image);
+        let response = await filesService.create(formData);
+        const url = response.data.payload.url;
+        console.log("🚀 Aqui *** -> path", url);
+        this.sendMessage("", "Agente", "image", { url });
+        this.uploadDialog = false;
+        this.uploadingImage = false;
+        this.clear();
+        return url;
+      }
+    },
+    async sendFileMessage() {
+      if (this.file) {
+        console.log("cargando archivo: ", this.file);
+        this.uploadingImage = true;
+        let formData = new FormData();
+        formData.append("file", this.file);
+        let response = await filesService.create(formData);
+        const url = response.data.payload.url;
+        console.log("🚀 Aqui *** -> path", url);
+        this.sendMessage("", "Agente", "file", { url });
+        this.uploadDialog = false;
+        this.uploadingImage = false;
+        this.clear();
+        return url;
+      }
     },
   },
   computed: {
