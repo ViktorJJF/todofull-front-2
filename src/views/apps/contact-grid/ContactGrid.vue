@@ -107,7 +107,6 @@
                     color="success"
                     :disabled="address == ''"
                     @click="addContact"
-                    variant="contained"
                     >Save</v-btn
                   >
                 </v-card-actions>

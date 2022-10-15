@@ -177,7 +177,6 @@ const formTitle = computed(() => {
                   :disabled="
                     editedItem.userinfo == '' || editedItem.usermail == ''
                   "
-                  variant="contained"
                   @click="save"
                   >Save</v-btn
                 >

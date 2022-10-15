@@ -6,7 +6,6 @@ for (const key in files) {
   if (key === "./index.ts") continue;
   modules[camelCase(key.replace(/(\.\/|\.ts)/g, ""))] = files[key].default;
 }
-console.log(files, modules);
 
 // const requireModule = require.context(".", false, /\.js$/); // Get js files inside modules folder
 // const modules = {};

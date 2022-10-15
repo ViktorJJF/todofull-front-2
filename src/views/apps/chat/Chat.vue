@@ -67,7 +67,6 @@
               <v-select
                 v-model="selectedCountry"
                 :items="['Peru', 'Chile', 'Colombia']"
-                menu-props="auto"
                 hide-details
                 density="compact"
                 single-line
@@ -539,7 +538,7 @@ text/plain, application/pdf"
             v-model="userForm.city"
             class="mb-2"
           ></v-text-field>
-          <bold>Etiquetas</bold>
+          <span>Etiquetas</span>
           <TodofullLabelsSelector
             :initialData="userForm.todofullLabels"
             class="my-3"

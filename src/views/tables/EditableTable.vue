@@ -199,7 +199,6 @@ const breadcrumbs = ref([
                       :disabled="
                         editedItem.userinfo == '' || editedItem.usermail == ''
                       "
-                      variant="contained"
                       @click="save"
                       >Save</v-btn
                     >

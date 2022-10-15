@@ -81,7 +81,7 @@
     <v-navigation-drawer
       v-model="editTodo"
       temporary
-      position="right"
+      location="right"
       width="300"
     >
       <v-toolbar flat small>
