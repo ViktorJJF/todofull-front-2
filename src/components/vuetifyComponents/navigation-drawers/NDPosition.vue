@@ -18,7 +18,7 @@ const items = ref([
   </p>
   <v-card class="mt-6" max-height="300">
     <v-layout>
-      <v-navigation-drawer permanent position="right">
+      <v-navigation-drawer permanent location="right">
         <template v-slot:prepend>
           <v-list-item
             two-line

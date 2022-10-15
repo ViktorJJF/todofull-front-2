@@ -112,7 +112,7 @@ function logout() {
             ></v-list-item-avatar>
           </template>
         </v-list-item>
-        <v-btn flat color="primary" class="mt-4" variant="contained" block
+        <v-btn flat color="primary" class="mt-4" block
           >See all Messages</v-btn
         >
       </v-list>
@@ -150,7 +150,7 @@ function logout() {
               <v-btn
                 :color="item.color"
                 icon
-                variant="contained"
+                variant="contained-text"
                 elevation="0"
                 class="mr-3"
               >
@@ -159,7 +159,7 @@ function logout() {
             </v-list-item-avatar>
           </template>
         </v-list-item>
-        <v-btn block variant="contained" color="secondary" class="mt-4 py-4"
+        <v-btn block variant="contained-text" color="secondary" class="mt-4 py-4"
           >See all Notifications</v-btn
         >
       </v-list>
@@ -222,7 +222,7 @@ function logout() {
             <v-list-item-avatar start>
               <v-btn
                 :color="item.color"
-                variant="contained"
+                variant="contained-text"
                 icon
                 elevation="0"
                 size="small"
@@ -236,7 +236,7 @@ function logout() {
         <v-btn
           block
           color="secondary"
-          variant="contained"
+          variant="contained-text"
           class="mt-4 py-4"
           @click="logout"
           >Logout</v-btn

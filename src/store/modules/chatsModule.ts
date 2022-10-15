@@ -129,7 +129,6 @@ const module = {
     deletedMessage(state, data) {
       let message = state.messages.find((el) => el.mid === data.mid);
       if (message) {
-        console.log("BORRANDO MENSAJE");
         message.isActive = false;
       }
     },

@@ -3,7 +3,7 @@
     app
     temporary
     elevation="10"
-    position="right"
+    location="right"
     v-model="customizer.Customizer_drawer"
   >
     <div class="px-4 py-4">

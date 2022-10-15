@@ -3,10 +3,13 @@ import { RouterView } from "vue-router";
 import VerticalSidebarVue from "./vertical-sidebar/VerticalSidebar.vue";
 import VerticalHeaderVue from "./vertical-header/VerticalHeader.vue";
 import Customizer from "./customizer/Customizer.vue";
+import ChatSidebar from './chat-sidebar/ChatSidebar.vue'
 import { useCustomizerStore } from "@/stores/customizer";
+import { useChatSidebarStore } from '@/stores/chatSidebar'
 import HorizontalHeader from "./horizontal-header/HorizontalHeader.vue";
 import HorizontalSidebar from "./horizontal-sidebar/HorizontalSidebar.vue";
 const customizer = useCustomizerStore();
+const chatSidebar = useChatSidebarStore()
 </script>
 
 <template>
@@ -18,6 +21,7 @@ const customizer = useCustomizerStore();
     ]"
   >
     <Customizer />
+    <ChatSidebar />
     <VerticalSidebarVue v-if="!customizer.setHorizontalLayout" />
     <VerticalHeaderVue v-if="!customizer.setHorizontalLayout" />
     <v-main>
@@ -28,13 +32,10 @@ const customizer = useCustomizerStore();
 
         <v-btn
           class="customizer-btn"
-          variant="contained"
           icon="mdi-cog"
           size="large"
           flat
-          @click.stop="
-            customizer.SET_CUSTOMIZER_DRAWER(!customizer.Customizer_drawer)
-          "
+          @click.stop="chatSidebar.SET_SIDEBAR_DRAWER()"
         >
         </v-btn>
       </v-container>

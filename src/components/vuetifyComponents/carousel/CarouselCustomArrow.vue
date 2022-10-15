@@ -19,12 +19,12 @@ const slides = ref(["First", "Second", "Third", "Fourth", "Fifth"]);
   <v-card height="350">
     <v-carousel height="350" show-arrows hide-delimiter-background>
       <template v-slot:prev="{ props }">
-        <v-btn variant="contained" color="primary" @click="props.onClick"
+        <v-btn color="primary" @click="props.onClick"
           >Previous slide</v-btn
         >
       </template>
       <template v-slot:next="{ props }">
-        <v-btn variant="contained" color="secondary" @click="props.onClick"
+        <v-btn color="secondary" @click="props.onClick"
           >Next slide</v-btn
         >
       </template>

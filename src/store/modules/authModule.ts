@@ -80,7 +80,6 @@ const actions = {
     });
   },
   autoLogin({ commit }) {
-    console.log("vino autologin");
     const user = JSON.parse(localStorage.getItem("user"));
     commit("saveUser", user);
     commit("saveToken", localStorage.getItem("token"));

@@ -32,7 +32,7 @@ const sizes = ref(["04", "06", "08", "10", "12", "14"]);
     </v-card-text>
 
     <v-card-actions>
-      <v-btn block variant="contained" color="secondary">
+      <v-btn block color="secondary">
         Add to Cart
       </v-btn>
     </v-card-actions>
