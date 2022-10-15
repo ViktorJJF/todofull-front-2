@@ -38,41 +38,75 @@
 
       <v-expand-transition>
         <div v-if="selected" class="py-4">
-          <h4 class="mb-3">Tallas</h4>
+          <h4 class="mb-3" v-if="availableVariations.length">Tallas</h4>
           <v-row>
-            <v-col
-              v-for="variation of availableVariations"
-              :key="variation.id"
-            >
+            <v-col v-for="variation of availableVariations" :key="variation.id">
               <v-checkbox
-                :label="getVariationLabel(variation)"
+                :label="variation.label"
                 v-model="selectedVariations"
-                :value="variation.id"
+                :value="variation"
                 hide-details
               />
             </v-col>
           </v-row>
+          <v-row class="mb-3" v-if="availableVariations.length">
+            <v-col>
+              <v-btn variant="outlined" @click="handleSelectAllVariations"
+                >Seleccionar Todas</v-btn
+              >
+            </v-col>
+            <v-col>
+              <v-btn variant="outlined" @click="handleClearVariations"
+                >Limpiar Selección</v-btn
+              >
+            </v-col>
+          </v-row>
+          <h4 class="mb-3">Copiar respuestas</h4>
           <v-row class="mb-3">
             <v-col>
-              <v-btn @click="handleSelectAllVariations">Seleccionar Todas</v-btn>
+              <v-btn
+                v-if="availableVariations.length"
+                :disabled="!selectedVariations.length"
+                color="success"
+                block
+                @click="handleCopyAnswer('size')"
+              >
+                Tallas Seleccionadas
+              </v-btn>
+              <v-btn
+                v-else
+                color="error"
+                block
+                @click="handleCopyAnswer('size')"
+              >
+                No hay tallas disponibles
+              </v-btn>
             </v-col>
           </v-row>
-
-          <h4 class="mb-3">Copiar respuestas</h4>
-          <v-row>
+          <v-row class="mb-3">
             <v-col>
-              <v-btn rounded>Url</v-btn>
+              <v-btn @click="handleCopyAnswer('url')">Url</v-btn>
             </v-col>
             <v-col>
-              <v-btn rounded>Precio</v-btn>
+              <v-btn @click="handleCopyAnswer('price')">Precio</v-btn>
             </v-col>
             <v-col>
-              <v-btn rounded>Imagen</v-btn>
+              <v-btn
+                @click="handleCopyAnswer('image')"
+                :disabled="!selected.customImages[0]"
+                >Imagen</v-btn
+              >
             </v-col>
           </v-row>
           <v-row>
             <v-col>
-              <v-btn block>COPIAR TODO</v-btn>
+              <v-btn
+                block
+                @click="handleCopyAnswer('all')"
+                :disabled="!selectedVariations.length"
+              >
+                Copiar Todo
+              </v-btn>
             </v-col>
           </v-row>
         </div>
@@ -88,10 +122,10 @@ import { ref, watch, computed } from "vue";
 
 const chatSidebar = useChatSidebarStore();
 const isLoading = ref(false);
-const selected = ref(null);
 const search = ref("");
 const items = ref([]);
-const selectedVariations = ref([])
+const selected = ref(null);
+const selectedVariations = ref([]);
 
 const availableVariations = computed(() => {
   if (!selected.value) return [];
@@ -100,8 +134,103 @@ const availableVariations = computed(() => {
 });
 
 const handleSelectAllVariations = () => {
-  selectedVariations.value = availableVariations.value.map(variation => variation.id)
-}
+  selectedVariations.value = availableVariations.value;
+};
+
+const handleClearVariations = () => {
+  selectedVariations.value = [];
+};
+
+const handleCopyAnswer = (type: string = "all") => {
+  const message = getMessage(type);
+  navigator.clipboard.writeText(message);
+  alert(`Mensaje copiado al portapapeles: ${message}`);
+};
+
+const getMessage = (type) => {
+  const ref = selected.value.ref || selected.value.sku.split("-")[0];
+  const size = selectedVariations.value.map((variation) => variation.label);
+  const utmParams = `utm_content=roge&utm_medium=chattf&utm_source=IG-BOT`;
+  const baseUrl = `${selected.value.permalink}`;
+  const fullUrl = `${baseUrl}${baseUrl.endsWith("/") ? "" : "/"}?${utmParams}`;
+  const price = new Intl.NumberFormat().format(
+    selectedVariations.value[0].regular_price
+  );
+  if (type === "size") {
+    return messages["answers.size"](ref, size);
+  }
+
+  if (type === "url") {
+    return messages["answers.url"](ref, fullUrl);
+  }
+
+  if (type === "price") {
+    return messages["answers.price"](ref, price);
+  }
+
+  if (type === "image") {
+    return selected.value.customImages[0];
+  }
+
+  if (type === "all") {
+    return messages["answers.all"](ref, size, price, fullUrl);
+  }
+};
+
+const messages = {
+  "answers.size": (ref: string, size: string[]) => {
+    if (!size.length) {
+      return `Lamentablemente no tenemos esta talla en la ref: ${ref}`;
+    }
+
+    if (size.length === 1) {
+      return `Si tenemos disponible la ref: ${ref} en talla ${size[0]}`;
+    }
+
+    return `En la ref: ${ref}, tenemos disponibes las tallas: ${size.join(
+      ", "
+    )}`;
+  },
+  "answers.url": (ref, url) =>
+    `En el siguiente vinculo puedes tener toda la información y comprar la ref: ${ref} ${url}`,
+  "answers.price": (ref, price) => `El valor de la ref: ${ref} es de ${price}`,
+  "answers.all": (ref, size: string[], price, url) => {
+    if (size.length) {
+      return `En la ref: ${ref}, tenemos disponibles las tallas: ${size.join(
+        ", "
+      )},
+      su valor es de ${price} y puedes adquirirla en ${url}`;
+    }
+
+    return `Si tenemos disponible la ref ${ref} en tall ${size[0]}, su valor es de ${price} y puedes adquirirla en ${url}`;
+  },
+};
+
+const getAvailableVariations = (product) => {
+  const variations = [];
+
+  for (const variation of product.variations) {
+    const available =
+      variation.status === "publish" &&
+      variation.stock_status === "instock" &&
+      variation.attributes;
+
+    if (available) {
+      const variationFormatted = {
+        ...variation,
+        attributes: getFormatAttributes(variation.attributes),
+      };
+
+      Object.assign(variationFormatted, {
+        label: getVariationLabel(variationFormatted),
+      });
+
+      variations.push(variationFormatted);
+    }
+  }
+
+  return variations;
+};
 
 const getVariationLabel = (variation) => {
   const talla = variation.attributes.talla.option;
@@ -112,26 +241,6 @@ const getVariationLabel = (variation) => {
   }
 
   return talla;
-};
-
-const getAvailableVariations = (product) => {
-  let variations = [];
-
-  for (const variation of product.variations) {
-    const available =
-      variation.status === "publish" &&
-      variation.stock_status === "instock" &&
-      variation.attributes;
-
-    if (available) {
-      variations.push({
-        ...variation,
-        attributes: getFormatAttributes(variation.attributes),
-      });
-    }
-  }
-
-  return variations;
 };
 
 const getFormatAttributes = (attributes) => {
