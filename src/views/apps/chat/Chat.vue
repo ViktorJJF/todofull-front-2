@@ -808,9 +808,9 @@ export default {
         const user = JSON.parse(localStorage.getItem("user"));
         let message =
           "🤝👩🏻‍💼 Ahora estás conversando con el agente " +
-          user.first_name +
+          (user.alias || (user.first_name +
           " " +
-          user.last_name;
+          user.last_name));
         console.log("CONECTANDO AGENTE");
         this.sendMessage(message, "Chatbot");
         this.isAgentConnected = true;
@@ -834,7 +834,9 @@ export default {
       chat.isBotActive = true;
       buildSuccess("Chatbot reactivado");
       const user = JSON.parse(localStorage.getItem("user"));
-      let message = `El agente ${user.first_name} ${user.last_name} se ha desconectado`;
+      let message = `El agente ${(user.alias || (user.first_name +
+          " " +
+          user.last_name))} se ha desconectado`;
       this.sendMessage(message, "Chatbot");
       this.isAgentConnected = false;
       this.selectedChat.userId = null;
