@@ -40,7 +40,7 @@
         <div v-if="selected" class="py-4">
           <h4 class="mb-3" v-if="availableVariations.length">Tallas</h4>
           <v-row>
-            <v-col v-for="variation of availableVariations" :key="variation.id">
+            <v-col v-for="variation of availableVariations" :key="variation.id" cols="3">
               <v-checkbox
                 :label="variation.label"
                 v-model="selectedVariations"
@@ -68,17 +68,13 @@
                 v-if="availableVariations.length"
                 :disabled="!selectedVariations.length"
                 color="success"
+                class="mb-2"
                 block
                 @click="handleCopyAnswer('size')"
               >
                 Tallas Seleccionadas
               </v-btn>
-              <v-btn
-                v-else
-                color="error"
-                block
-                @click="handleCopyAnswer('size')"
-              >
+              <v-btn color="error" block @click="handleCopyAnswer('no-size')">
                 No hay tallas disponibles
               </v-btn>
             </v-col>
@@ -143,46 +139,38 @@ const handleClearVariations = () => {
 
 const handleCopyAnswer = (type: string = "all") => {
   const message = getMessage(type);
-  navigator.clipboard.writeText(message);
-  alert(`Mensaje copiado al portapapeles: ${message}`);
+  navigator.clipboard.writeText(message).then(() => {
+    alert(`Mensaje copiado al portapapeles: ${message}`);
+  });
 };
 
-const getMessage = (type) => {
+const getMessage = (type: string) => {
   const ref = selected.value.ref || selected.value.sku.split("-")[0];
-  const size = selectedVariations.value.map((variation) => variation.label);
+  const size = selectedVariations.value?.map((variation) => variation.label);
   const utmParams = `utm_content=roge&utm_medium=chattf&utm_source=IG-BOT`;
-  const baseUrl = `${selected.value.permalink}`;
+  const baseUrl = selected.value.permalink;
   const fullUrl = `${baseUrl}${baseUrl.endsWith("/") ? "" : "/"}?${utmParams}`;
   const price = new Intl.NumberFormat().format(
-    selectedVariations.value[0].regular_price
+    selected.value.variations[0].regular_price
   );
-  if (type === "size") {
-    return messages["answers.size"](ref, size);
-  }
 
-  if (type === "url") {
-    return messages["answers.url"](ref, fullUrl);
-  }
+  const args = [ref];
 
-  if (type === "price") {
-    return messages["answers.price"](ref, price);
-  }
-
+  if (type === "size") args.push(size);
+  if (type === "url") args.push(fullUrl);
+  if (type === "price") args.push(price);
+  if (type === "all") args.push(size, price, fullUrl);
   if (type === "image") {
     return selected.value.customImages[0];
   }
 
-  if (type === "all") {
-    return messages["answers.all"](ref, size, price, fullUrl);
-  }
+  return messages[`answers.${type}`](...args)
 };
 
 const messages = {
+  "answers.no-size": (ref) =>
+    `Lamentablemente no tenemos esta talla en la ref: ${ref}`,
   "answers.size": (ref: string, size: string[]) => {
-    if (!size.length) {
-      return `Lamentablemente no tenemos esta talla en la ref: ${ref}`;
-    }
-
     if (size.length === 1) {
       return `Si tenemos disponible la ref: ${ref} en talla ${size[0]}`;
     }
