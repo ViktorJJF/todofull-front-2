@@ -94,7 +94,7 @@
               >
             </v-col>
           </v-row>
-          <v-row>
+          <v-row class="mb-3">
             <v-col>
               <v-btn
                 block
@@ -103,6 +103,11 @@
               >
                 Copiar Todo
               </v-btn>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col>
+              <v-img :src="selected.customImages[0]" />
             </v-col>
           </v-row>
         </div>
