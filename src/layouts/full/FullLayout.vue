@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterView } from "vue-router";
+import { RouterView, useRoute } from "vue-router";
 import VerticalSidebarVue from "./vertical-sidebar/VerticalSidebar.vue";
 import VerticalHeaderVue from "./vertical-header/VerticalHeader.vue";
 import Customizer from "./customizer/Customizer.vue";
@@ -10,6 +10,7 @@ import HorizontalHeader from "./horizontal-header/HorizontalHeader.vue";
 import HorizontalSidebar from "./horizontal-sidebar/HorizontalSidebar.vue";
 const customizer = useCustomizerStore();
 const chatSidebar = useChatSidebarStore()
+const route = useRoute()
 </script>
 
 <template>
@@ -36,6 +37,7 @@ const chatSidebar = useChatSidebarStore()
           size="large"
           flat
           @click.stop="chatSidebar.SET_SIDEBAR_DRAWER()"
+          v-if="route.name==='Apps'"
         >
         </v-btn>
       </v-container>

@@ -621,6 +621,7 @@ import BaseLeftRightPartVue from "@/components/BaseLeftRightPart.vue";
 import { buildSuccess } from "@/utils/utils.ts";
 import AgentsSelector from "@/components/AgentsSelector.vue";
 import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
+import { useChatSidebarStore } from '@/stores/chatSidebar'
 
 export default {
   components: {
@@ -677,7 +678,11 @@ export default {
       imageUploaded: false,
       fileName: "",
       fileUrl: "",
+      chatSidebar: null,
     };
+  },
+  created() {
+    this.chatSidebar = useChatSidebarStore()
   },
   mounted() {
     this.initialize();
@@ -751,6 +756,8 @@ export default {
       this.chat = chat;
       this.selectedChat = chat;
       this.selectedChat.pending_messages_count = 0; // reiniciar contador mensajes sin leer
+      const bot = this.$store.state.botsModule.bots.find((el) => el.fanpageId == chat.pageID)
+      this.chatSidebar.SET_CURRENT_BOT(bot);
       scrollBottom();
       this.isChatMessageReady = true;
       if (chat.leadId) {

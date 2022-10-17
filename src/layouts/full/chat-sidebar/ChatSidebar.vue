@@ -19,6 +19,7 @@
           v-model="selected"
           v-model:search="search"
           :loading="isLoading"
+          autofocus
           cache-items
           item-title="name"
           item-value="_id"
@@ -117,9 +118,10 @@
 </template>
 
 <script setup lang="ts">
+import messages from './messages'
 import ecommercesApi from "@/services/api/ecommerces";
 import { useChatSidebarStore } from "@/stores/chatSidebar";
-import { ref, watch, computed } from "vue";
+import { ref, watch, watchEffect, computed } from "vue";
 
 const chatSidebar = useChatSidebarStore();
 const isLoading = ref(false);
@@ -152,7 +154,8 @@ const handleCopyAnswer = (type: string = "all") => {
 const getMessage = (type: string) => {
   const ref = selected.value.ref || selected.value.sku.split("-")[0];
   const size = selectedVariations.value?.map((variation) => variation.label);
-  const utmParams = `utm_content=roge&utm_medium=chattf&utm_source=IG-BOT`;
+  const utmSource = encodeURIComponent(chatSidebar.bot.nme);
+  const utmParams = `utm_content=roge&utm_medium=chattf&utm_source=${utmSource}`;
   const baseUrl = selected.value.permalink;
   const fullUrl = `${baseUrl}${baseUrl.endsWith("/") ? "" : "/"}?${utmParams}`;
   const price = new Intl.NumberFormat().format(
@@ -170,33 +173,6 @@ const getMessage = (type: string) => {
   }
 
   return messages[`answers.${type}`](...args)
-};
-
-const messages = {
-  "answers.no-size": (ref) =>
-    `Lamentablemente no tenemos esta talla en la ref: ${ref}`,
-  "answers.size": (ref: string, size: string[]) => {
-    if (size.length === 1) {
-      return `Si tenemos disponible la ref: ${ref} en talla ${size[0]}`;
-    }
-
-    return `En la ref: ${ref}, tenemos disponibes las tallas: ${size.join(
-      ", "
-    )}`;
-  },
-  "answers.url": (ref, url) =>
-    `En el siguiente vinculo puedes tener toda la información y comprar la ref: ${ref} ${url}`,
-  "answers.price": (ref, price) => `El valor de la ref: ${ref} es de ${price}`,
-  "answers.all": (ref, size: string[], price, url) => {
-    if (size.length) {
-      return `En la ref: ${ref}, tenemos disponibles las tallas: ${size.join(
-        ", "
-      )},
-      su valor es de ${price} y puedes adquirirla en ${url}`;
-    }
-
-    return `Si tenemos disponible la ref ${ref} en tall ${size[0]}, su valor es de ${price} y puedes adquirirla en ${url}`;
-  },
 };
 
 const getAvailableVariations = (product) => {
@@ -247,12 +223,17 @@ const getFormatAttributes = (attributes) => {
 };
 
 const fetchItems = async () => {
+  if(isLoading.value === true) {
+    return
+  }
+
   isLoading.value = true;
 
   const query = {
     limit: 10,
     filter: search.value,
-    fields: ["name", "ref"].join(","),
+    country: chatSidebar.bot ? chatSidebar.bot.country : undefined,
+    fields: ["name", "ref", "sku"].join(","),
   };
 
   const res = await ecommercesApi.list(query);
