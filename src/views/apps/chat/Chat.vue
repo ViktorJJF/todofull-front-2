@@ -376,6 +376,13 @@
                       </div>
                     </div>
                   </div>
+                  <div v-if="uploadingImage" class="chat-msg-text">
+                    <v-progress-circular
+                      class="v-progress-linear"
+                      indeterminate
+                      color="primary"
+                    ></v-progress-circular>
+                  </div>
                 </perfect-scrollbar>
               </div>
 
@@ -582,6 +589,9 @@ text/plain, application/pdf"
             clearAll="Borrar todo"
             class="mb-2"
           />
+          <div>
+            <v-btn color="success" @click="handleImages">Cargar</v-btn>
+          </div>
         </v-container>
         <!-- <v-card-actions rd-actions>
           <div class="flex-grow-1"></div>
@@ -955,7 +965,7 @@ export default {
               ? this.selectedChat.leadId.telefonoId._id
               : null,
 
-            todofullLabels: this.userForm.todofullLabels,
+            todofullLabels: this.getIdTodofullLabels(this.userForm.todofullLabels),
             details: [
               {
                 type: "CHATBOT",
@@ -994,13 +1004,17 @@ export default {
             email: this.userForm.email,
             ciudad: this.userForm.city,
             nota: this.userForm.notes,
-            todofullLabels: this.userForm.todofullLabels,
+            todofullLabels: this.getIdTodofullLabels(this.userForm.todofullLabels),
           },
         });
       }
     },
     getFileNameFromUrl(url) {
       return getFileNameFromUrl(url);
+    },
+    getIdTodofullLabels(todofullLabels){
+      // if is object, get id
+      return todofullLabels.filter(el=>el).map((label) => typeof label==='object'? label.value:label);
     },
     parseMarkdown(text) {
       return parseMarkdown(text);

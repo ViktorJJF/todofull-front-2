@@ -2,7 +2,7 @@ import axios from "axios";
 // import { checkIfTokenNeedsRefresh } from "@/utils/utils.js";
 // import { checkForUpdates } from "@/utils/updates.js";
 
-axios.defaults.timeout = 20000;
+axios.defaults.timeout = 120000;
 
 axios.defaults.baseURL = "";
 axios.defaults.headers.common["Accept-Language"] =
