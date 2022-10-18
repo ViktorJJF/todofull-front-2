@@ -11,7 +11,6 @@
     multiple
     no-data-text="No se encontraron etiquetas"
     outlined
-    hint="hola que hace"
   >
     <template v-slot:selection="data">
       <v-chip
@@ -19,7 +18,7 @@
         @click:close="removeLabels(selectedTodofullLabels, item)"
         color="primary"
       >
-        <strong>{{ getLabelTitle(data.selection.value) }}</strong>
+        <strong>{{ getLabelTitle(data.item.value) }}</strong>
       </v-chip>
     </template>
   </v-combobox>
