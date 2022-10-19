@@ -28,11 +28,12 @@
           hide-details
           outlined
           clearable
+          :menu-props="{ location: 'bottom end' }"
           label="Consultar producto"
           placeholder="Buscar por nombre o referencia"
           prepend-icon="mdi-database-search"
           return-object
-        ></v-autocomplete>
+        />
       </div>
 
       <v-divider></v-divider>
@@ -154,7 +155,7 @@ const handleCopyAnswer = (type: string = "all") => {
 const getMessage = (type: string) => {
   const ref = selected.value.ref || selected.value.sku.split("-")[0];
   const size = selectedVariations.value?.map((variation) => variation.label);
-  const utmSource = encodeURIComponent(chatSidebar.bot.nme);
+  const utmSource = encodeURIComponent(chatSidebar.bot.name);
   const utmParams = `utm_content=roge&utm_medium=chattf&utm_source=${utmSource}`;
   const baseUrl = selected.value.permalink;
   const fullUrl = `${baseUrl}${baseUrl.endsWith("/") ? "" : "/"}?${utmParams}`;
@@ -241,6 +242,12 @@ const fetchItems = async () => {
   items.value = res.data.payload;
   isLoading.value = false;
 };
+
+watch(selected, (selected) => {
+  if(!selected) {
+    selectedVariations.value = []
+  }
+})
 
 watch(search, (search) => {
   if (search && search !== selected.value?._id) {
