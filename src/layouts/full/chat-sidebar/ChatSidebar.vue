@@ -42,7 +42,12 @@
         <div v-if="selected" class="py-4">
           <h4 class="mb-3" v-if="availableVariations.length">Tallas</h4>
           <v-row>
-            <v-col v-for="variation of availableVariations" :key="variation.id" cols="3">
+            <v-col
+            v-for="variation of availableVariations"
+              :key="variation.id"
+              style="padding: 0"
+              cols="4"
+            >
               <v-checkbox
                 :label="variation.label"
                 v-model="selectedVariations"
@@ -119,10 +124,10 @@
 </template>
 
 <script setup lang="ts">
-import messages from './messages'
+import messages from "./messages";
 import ecommercesApi from "@/services/api/ecommerces";
 import { useChatSidebarStore } from "@/stores/chatSidebar";
-import { ref, watch, watchEffect, computed } from "vue";
+import { ref, watch, computed } from "vue";
 
 const chatSidebar = useChatSidebarStore();
 const isLoading = ref(false);
@@ -173,7 +178,7 @@ const getMessage = (type: string) => {
     return selected.value.customImages[0];
   }
 
-  return messages[`answers.${type}`](...args)
+  return messages[`answers.${type}`](...args);
 };
 
 const getAvailableVariations = (product) => {
@@ -224,8 +229,8 @@ const getFormatAttributes = (attributes) => {
 };
 
 const fetchItems = async () => {
-  if(isLoading.value === true) {
-    return
+  if (isLoading.value === true) {
+    return;
   }
 
   isLoading.value = true;
@@ -244,10 +249,10 @@ const fetchItems = async () => {
 };
 
 watch(selected, (selected) => {
-  if(!selected) {
-    selectedVariations.value = []
+  if (!selected) {
+    selectedVariations.value = [];
   }
-})
+});
 
 watch(search, (search) => {
   if (search && search !== selected.value?._id) {
