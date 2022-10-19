@@ -712,7 +712,7 @@ export default {
         fieldsToSearch: this.fieldsToSearch,
         sort: "updatedAt",
         order: "desc",
-        limit: 100,
+        limit: 50,
       };
       if (this.activePlatforms.length > 0) {
         payload.platforms = this.activePlatforms;
@@ -1013,12 +1013,16 @@ export default {
       return formatDistance(new Date(), date, { addSuffix: true, locale: es });
     },
     async loadMore() {
+      if(this.isloadingMore === true) {
+        return;
+      }
+
       this.isLoadingMore = true;
       if (this.searchContact.trim().length === 0) {
         this.page += 1;
         let payload = {
           page: this.page,
-          limit: 100,
+          limit: 50,
           sort: "updatedAt",
           order: "desc",
         };
@@ -1131,15 +1135,14 @@ export default {
   },
   computed: {
     filteredChats() {
-      return this.filterChats == 0
-        ? this.$store.getters["chatsModule/getSortedChats"]
-        : this.filterChats == 1
-        ? this.$store.getters["chatsModule/getSortedChats"].filter(
-            (el) => el.pending_messages_count > 0
-          )
-        : this.$store.getters["chatsModule/getSortedChats"].filter(
-            (el) => el.pending_messages_count == 0
-          );
+      const chats = this.$store.getters["chatsModule/getSortedChats"]
+      if(this.filterChats === 1) {
+        return chats.filter((el) => el.pending_messages_count > 0)
+      }
+      if(this.filterChats === 2) {
+        return chats.filter((el) => el.pending_messages_count === 0)
+      }
+      return chats;
     },
     formattedMessages() {
       return this.messages.reduce((acc, el) => {
@@ -1207,10 +1210,6 @@ export default {
   z-index: 9999999999 !important;
   width: 100px !important;
 }
-
-// .hover-text:hover .tooltip-text {
-//   visibility: visible;
-// }
 
 #top {
   top: -40px;

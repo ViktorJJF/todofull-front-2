@@ -145,15 +145,7 @@ const module = {
       return state.chats.filter((chat) => chat._id === chatId);
     },
     getSortedChats: (state) => {
-      return state.chats.sort((a, b) => {
-        if (a.updatedAt > b.updatedAt) {
-          return -1;
-        }
-        if (a.updatedAt < b.updatedAt) {
-          return 1;
-        }
-        return 0;
-      });
+      return state.chats.sort((a, b) => b.updatedAt - a.updatedAt);
     },
   },
 };
