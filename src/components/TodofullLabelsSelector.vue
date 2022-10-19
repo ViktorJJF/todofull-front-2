@@ -67,7 +67,9 @@ export default {
     },
   },
   async mounted() {
-    this.selectedTodofullLabels = this.initialData.map((el) => el._id);
+    this.selectedTodofullLabels = this.initialData.map((el) => {
+      return el._id;
+    });
     if (this.$store.state.todofullLabelsModule.todofullLabels.length === 0) {
       await this.$store.dispatch("todofullLabelsModule/list", {
         sort: "name",
