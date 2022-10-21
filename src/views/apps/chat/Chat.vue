@@ -689,6 +689,7 @@ export default {
       fileName: "",
       fileUrl: "",
       chatSidebar: null,
+      selectedAgent:null
     };
   },
   created() {
@@ -816,6 +817,7 @@ export default {
       this.userForm.todofullLabels = [];
       this.userForm.notes = "";
       this.userForm.phone = "";
+      this.selectedAgent=null
     },
     connectAgent(chat) {
       if (chat.isBotActive) {
@@ -922,6 +924,7 @@ export default {
       this.initialize();
     },
     onSelectedAgent(agent) {
+      this.selectedAgent=agent;
       if (this.selectedChat.cleanLeadId) {
         // es lead (dejó datos)
         this.selectedChat.cleanLeadId.telefonoId = agent;
@@ -1199,7 +1202,24 @@ export default {
     filterChats() {
       this.page = 1;
       this.initialize();
-    },
+    }, userForm: {
+     handler(form){
+       console.log("NUEVO VALOR: ",form) 
+      //  if(form.phone.length>0 && form.name.length>=0 && this.selectedChat.){
+      //   form.notes=`Hola ${
+      //           selectdeAgent.agenteId.nombre
+      //         } tu cliente: *${form.name}*\ncon telefono : *${
+      //           client.getFormattedPhone() || telefono
+      //         }*\nconsulta:' '.\nen la página: ${
+      //           ($store.state.botsModule.bots.find(
+      //               (el) => el.fanpageId == selectedChat.pageID
+      //             ).name)
+      //         } \n\nEn cuanto la contactes me informas para borrarla de los pendientes`
+            
+      //  }
+     },
+     deep: true
+  }
   },
 };
 </script>

@@ -31,13 +31,14 @@ export default {
       type: Array,
       default: () => [],
     },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
+    // disabled: {
+    //   type: Boolean,
+    //   default: false,
+    // },
   },
   data() {
     return {
+      disabled: false,
       todofullLabels: [],
       selectedTodofullLabels: [],
       searchLabel: "",
@@ -62,6 +63,10 @@ export default {
           "onSelectTodofullLabels",
           JSON.parse(JSON.stringify(this.selectedTodofullLabels))
         );
+        this.disabled = true;
+        setTimeout(() => {
+          this.disabled = false;
+        }, 0);
       },
       deep: true,
     },
