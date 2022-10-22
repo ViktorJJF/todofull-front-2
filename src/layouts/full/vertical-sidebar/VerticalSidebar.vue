@@ -36,7 +36,7 @@ const sidebarMenu = ref(sidebarItems);
     <!---Navigation -->
     <!-- ---------------------------------------------- -->
     <perfect-scrollbar class="scrollnavbar">
-      <v-list class="pa-4" color="transparent">
+      <v-list class="pa-4">
         <!-- ---------------------------------------------- -->
         <!---Menu Loop -->
         <!-- ---------------------------------------------- -->
@@ -110,7 +110,7 @@ const sidebarMenu = ref(sidebarItems);
                 class="feather-sm v-icon v-icon--size-default"
               ></vue-feather>
             </v-list-item-avatar>
-            <v-list-item-title v-text="item.title"></v-list-item-title>
+            <v-list-item-title dark v-text="item.title"></v-list-item-title>
           </v-list-item>
           <!-- ---------------------------------------------- -->
           <!---End Single Item-->

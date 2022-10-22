@@ -24,6 +24,11 @@ export default [
     to: "/apps/chat",
   },
   {
+    title: "Categorias",
+    icon: "message-square",
+    to: { name: 'Categories' }
+  },
+  {
     title: "Calendar",
     icon: "calendar",
     to: "/apps/fullcalendar",
