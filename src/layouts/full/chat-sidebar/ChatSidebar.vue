@@ -110,6 +110,9 @@
               >
                 Copiar Todo
               </v-btn>
+                <v-snackbar v-model="clipboardNotification" color="success">
+                  Se ha copiado mensaje al portapapeles!
+                </v-snackbar>
             </v-col>
           </v-row>
           <v-row>
@@ -135,6 +138,7 @@ const search = ref("");
 const items = ref([]);
 const selected = ref(null);
 const selectedVariations = ref([]);
+const clipboardNotification = ref(false)
 
 const availableVariations = computed(() => {
   if (!selected.value) return [];
@@ -153,14 +157,14 @@ const handleClearVariations = () => {
 const handleCopyAnswer = (type: string = "all") => {
   const message = getMessage(type);
   navigator.clipboard.writeText(message).then(() => {
-    alert(`Mensaje copiado al portapapeles: ${message}`);
+    clipboardNotification.value = true;
   });
 };
 
 const getMessage = (type: string) => {
   const ref = selected.value.ref || selected.value.sku.split("-")[0];
   const size = selectedVariations.value?.map((variation) => variation.label);
-  const utmSource = encodeURIComponent(chatSidebar.bot.name);
+  const utmSource = chatSidebar.bot?.name.split(' ')[0] || '';
   const utmParams = `utm_content=roge&utm_medium=chattf&utm_source=${utmSource}`;
   const baseUrl = selected.value.permalink;
   const fullUrl = `${baseUrl}${baseUrl.endsWith("/") ? "" : "/"}?${utmParams}`;
