@@ -9,7 +9,7 @@ export default defineConfig({
     port: 3030,
   },
   build: {
-    outDir: "../todofull3/public",
+    outDir: "./dist",
     emptyOutDir: false,
   },
   plugins: [
