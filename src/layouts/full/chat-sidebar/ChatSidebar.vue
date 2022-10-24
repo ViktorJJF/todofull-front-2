@@ -128,6 +128,7 @@
 
 <script setup lang="ts">
 import messages from "./messages";
+import chatsApi from '@/services/api/chats'
 import ecommercesApi from "@/services/api/ecommerces";
 import { useChatSidebarStore } from "@/stores/chatSidebar";
 import { ref, watch, computed } from "vue";
@@ -155,29 +156,36 @@ const handleClearVariations = () => {
 };
 
 const handleCopyAnswer = (type: string = "all") => {
-  const message = getMessage(type);
-  navigator.clipboard.writeText(message).then(() => {
-    clipboardNotification.value = true;
+  getMessage(type).then((message) => {
+    navigator.clipboard.writeText(message).then(() => {
+      clipboardNotification.value = true;
+    })
   });
 };
 
-const getMessage = (type: string) => {
+const getMessage = async (type: string) => {
   const ref = selected.value.ref || selected.value.sku.split("-")[0];
   const size = selectedVariations.value?.map((variation) => variation.label);
-  const utmSource = chatSidebar.bot?.name.split(' ')[0] || '';
-  const utmParams = `utm_content=roge&utm_medium=chattf&utm_source=${utmSource}`;
-  const baseUrl = selected.value.permalink;
-  const fullUrl = `${baseUrl}${baseUrl.endsWith("/") ? "" : "/"}?${utmParams}`;
   const price = new Intl.NumberFormat().format(
     selected.value.variations[0].regular_price
   );
+  
+  let url = ''
+  if(['url', 'all'].includes(type)) {
+    const utmSource = chatSidebar.bot?.name.split(' ')[0] || '';
+    const utmParams = `utm_content=roge&utm_medium=chattf&utm_source=${utmSource}`;
+    const baseUrl = selected.value.permalink;
+    const fullUrl = `${baseUrl}${baseUrl.endsWith("/") ? "" : "/"}?${utmParams}`;
+    const res = await chatsApi.shortenLink(fullUrl);
+    url = res.data.payload.shorturl
+  }
 
   const args = [ref];
 
   if (type === "size") args.push(size);
-  if (type === "url") args.push(fullUrl);
+  if (type === "url") args.push(url);
   if (type === "price") args.push(price);
-  if (type === "all") args.push(size, price, fullUrl);
+  if (type === "all") args.push(size, price, url);
   if (type === "image") {
     return selected.value.customImages[0];
   }

@@ -19,6 +19,9 @@ export default {
   delete(id) {
     return axios.delete(config.DASHBOARD_BASE_URL + `/api/chats/${id}`);
   },
+  shortenLink(url) {
+    return axios.post(`${config.DASHBOARD_BASE_URL}/api/chats/shorten-link`, { url })
+  },
   undoPendingMessagesCount(id, count) {
     return axios.post(
       config.DASHBOARD_BASE_URL +
