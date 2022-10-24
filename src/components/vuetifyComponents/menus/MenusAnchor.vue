@@ -20,7 +20,7 @@ const anchor = ref("end");
     Menu can be offset relative to the activator by using the anchor prop.
   </p>
   <div class="text-center mt-4">
-    <v-select v-model="anchor" :items="anchors" label="Anchor"></v-select>
+    <v-select v-model="(anchor as any)" :items="anchors" label="Anchor"></v-select>
     <v-menu :anchor="anchor">
       <template v-slot:activator="{ props }">
         <v-btn color="primary" dark v-bind="props"> Dropdown </v-btn>

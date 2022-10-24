@@ -43,11 +43,3 @@
     </div>
   </div>
 </template>
-
-<script>
-export default {
-  name: "AlertProminent",
-
-  data: () => ({}),
-};
-</script>

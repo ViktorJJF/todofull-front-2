@@ -10,8 +10,7 @@ const rules = ref([
   <div>
     <v-alert
       icon="mdi-alert-outline"
-      outlined
-      variant="contained-text"
+      variant="outlined"
       type="info"
       class="my-2 mb-3 caption pa-3"
       >Form Action at center align of the form</v-alert

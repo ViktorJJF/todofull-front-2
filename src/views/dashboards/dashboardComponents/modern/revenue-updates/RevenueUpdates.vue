@@ -23,7 +23,7 @@ onMounted(() => {
         <v-spacer></v-spacer>
         <div class="ml-auto">
           <v-select
-            v-model="select"
+            v-model="(select as any)"
             :items="items"
             variant="outlined"
             dense

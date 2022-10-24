@@ -18,7 +18,6 @@ const alert = ref(true);
       <v-alert
         v-model="alert"
         border="start"
-        variant="contained-text"
         closable
         close-label="Close Alert"
         color="deep-purple accent-4"

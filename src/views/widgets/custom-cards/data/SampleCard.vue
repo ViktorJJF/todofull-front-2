@@ -57,7 +57,7 @@ const cards = ref([
             >With supporting text below as a natural lead-in to additional
             content.
           </p>
-          <v-btn variant="contained-text" class="mt-4" :color="item.color">Go Somewhere</v-btn>
+          <v-btn class="mt-4" :color="item.color">Go Somewhere</v-btn>
         </v-card-text>
       </v-card>
     </v-col>

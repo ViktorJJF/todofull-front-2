@@ -17,7 +17,7 @@ const items = ref(["March", "April", "May", "June"]);
 
         <div class="ml-auto">
           <v-select
-            v-model="select"
+            v-model="(select as any)"
             :items="items"
             hide-details="true"
             variant="outlined"

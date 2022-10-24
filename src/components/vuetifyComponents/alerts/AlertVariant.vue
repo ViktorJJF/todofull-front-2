@@ -15,7 +15,6 @@
         color="primary"
         icon="mdi-flash"
         title="Contained Flat (Default)"
-        variant="contained-flat"
       >
         Nullam tincidunt adipiscing enim. In consectetuer turpis ut velit.
         Maecenas egestas arcu quis ligula mattis placerat. Praesent metus
@@ -24,7 +23,7 @@
 
       <br />
 
-      <v-alert color="info" title="Contained Text" variant="contained-text">
+      <v-alert color="info" title="Contained Text">
         <div>
           Maecenas nec odio et ante tincidunt tempus. Sed mollis, eros et
           ultrices tempus, mauris ipsum aliquam libero, non adipiscing dolor
@@ -66,7 +65,6 @@
         density="compact"
         icon="mdi-clock-fast"
         title="Contained"
-        variant="contained"
       >
         Vestibulum ullamcorper mauris at ligula. Nulla porta dolor. Vestibulum
         facilisis, purus nec pulvinar iaculis, ligula mi congue nunc, vitae

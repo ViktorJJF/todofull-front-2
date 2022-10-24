@@ -1,7 +1,18 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-const messages = ref([
+interface Message {
+  avatar: string
+  name: string,
+  title: string,
+  excerpt: string,
+  color?: string,
+  icon?: string,
+  new?: boolean,
+  total?: number,
+}
+
+const messages = ref<any>([
   {
     avatar: "https://avatars0.githubusercontent.com/u/9064066?v=4&s=460",
     name: "John Leider",
@@ -57,8 +68,7 @@ const lorem = ref(
                     alt="Avatar"
                     src="https://avatars0.githubusercontent.com/u/9064066?v=4&s=460"
                   ></v-img>
-                  <v-icon
-                    v-else
+                  <v-icon v-else
                     :color="message.color"
                     :icon="message.icon"
                   ></v-icon>

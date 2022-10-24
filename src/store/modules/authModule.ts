@@ -5,7 +5,7 @@ import router from "@/router";
 
 const state = () => ({
   user: null,
-  token: JSON.parse(!!localStorage.getItem("token")) || null,
+  token: !!localStorage.getItem("token") || null,
   isTokenSet: !!localStorage.getItem("token"),
 });
 
@@ -17,6 +17,7 @@ const getters = {
 };
 const actions = {
   initialLoad({ commit }) {
+    // @ts-ignore
     if (process.browser) {
       commit("initialLoad");
     }
@@ -42,8 +43,8 @@ const actions = {
             commit("saveUser", response.data.user);
             commit("saveToken", response.data.token);
             // commit(types.EMAIL_VERIFIED, response.data.user.verified);
-            buildSuccess("Bienvenido", commit);
-            resolve();
+            buildSuccess("Bienvenido");
+            resolve(null);
           }
         })
         .catch((error) => {
@@ -71,7 +72,7 @@ const actions = {
             //   )
             // );
             commit("saveToken", response.data.token);
-            resolve();
+            resolve(null);
           }
         })
         .catch((error) => {
@@ -101,7 +102,7 @@ const actions = {
   //         let data = res.data.payload;
   //         buildSuccess("Registro guardado con éxito", commit, resolve);
   //         commit("editUser", data);
-  //         resolve();
+  //         resolve(null);
   //       })
   //       .catch((error) => {
   //         handleError(error, commit, reject);

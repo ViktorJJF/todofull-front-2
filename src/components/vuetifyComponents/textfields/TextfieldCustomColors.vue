@@ -43,7 +43,7 @@
             </v-col>
             <v-col cols="12" sm="6">
               <v-select
-                v-model="form.favoriteAnimal"
+                v-model="(form.favoriteAnimal as any)"
                 :items="animals"
                 :rules="rules.animal"
                 color="pink"

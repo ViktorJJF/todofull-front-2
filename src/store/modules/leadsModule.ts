@@ -45,7 +45,7 @@ const module = {
           .create(data)
           .then((res) => {
             commit("loadingModule/showLoading", true, { root: true });
-            buildSuccess("Registro guardado con éxito", commit);
+            buildSuccess("Registro guardado con éxito");
             commit("create", res.data.payload);
             resolve(res.data.payload);
           })
@@ -54,14 +54,14 @@ const module = {
           });
       });
     },
-    update({ commit }, { id, data, notifyUser = true } = {}) {
+    update({ commit }, { id, data, notifyUser = true }: any = {}) {
       return new Promise((resolve, reject) => {
         api
           .update(id, data)
           .then((res) => {
             commit("loadingModule/showLoading", true, { root: true });
             if (notifyUser) {
-              buildSuccess("Lead actualizado con éxito", commit);
+              buildSuccess("Lead actualizado con éxito");
             }
             commit("update", {
               id,
@@ -80,9 +80,9 @@ const module = {
           .delete(id)
           .then(() => {
             commit("loadingModule/showLoading", true, { root: true });
-            buildSuccess("Registro eliminado con éxito", commit);
+            buildSuccess("Registro eliminado con éxito");
             commit("delete", id);
-            resolve();
+            resolve(null);
           })
           .catch((error) => {
             handleError(error, commit, reject);

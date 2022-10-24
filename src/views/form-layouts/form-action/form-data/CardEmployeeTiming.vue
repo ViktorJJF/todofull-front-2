@@ -10,7 +10,6 @@ const rules = ref([
     <v-alert
       icon="mdi-alert-outline"
       outlined
-      variant="contained-text"
       type="info"
       class="mb-4 caption pa-3"
       >Form Action at left ending of the form.</v-alert

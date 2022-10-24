@@ -67,7 +67,7 @@ export function getRandomInt(min, max) {
 //     es: require('date-fns/locale/es')
 // }
 
-export const getFormat = (date: String, formatStr: String): String => {
+export const getFormat = (date: string, formatStr: any): string => {
   // return format(date, formatStr, {
   //     locale: localesDateFns[window.__localeId__]
   // })
@@ -95,7 +95,7 @@ export const formatErrorMessages = (translationParent, msg) => {
 };
 
 export const buildPayloadPagination = (
-  pagination = { page: 1, itemsPerPage: 20 },
+  pagination = { page: 1, itemsPerPage: 20 } as any,
   search
 ) => {
   const { page, itemsPerPage } = pagination;

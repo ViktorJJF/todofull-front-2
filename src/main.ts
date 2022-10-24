@@ -11,7 +11,7 @@ import VueApexCharts from "vue3-apexcharts";
 // @ts-ignore:next-line
 import InstantSearch from "vue-instantsearch/vue3/es";
 import VCalendar from "v-calendar";
-import moshaToasTify from "@/plugins/moshaToasTify";
+import moshaToasTify from "@/plugins/moshaToastify";
 import VueFeather from "vue-feather";
 import axios from "@/plugins/axios";
 

@@ -1,4 +1,18 @@
-export default [
+interface sideberItemTo {
+  name: string;
+}
+
+interface SidebarItem {
+  header?: string,
+  group?: string,
+  title?: string,
+  icon?: string,
+  model?: boolean,
+  children?: SidebarItem[],
+  to?: string | sideberItemTo,
+}
+
+const items: SidebarItem[] = [
   { header: "Home" },
   {
     title: "Analytical",
@@ -393,3 +407,5 @@ export default [
     to: "/icons/feather",
   },
 ];
+
+export default items

@@ -15,7 +15,7 @@ const menu = ref(false);
         bottom
         right
         transition="scale-transition"
-        origin="top left"
+        location="top start"
       >
         <template v-slot:activator="{ props }">
           <v-chip pill v-bind="props">

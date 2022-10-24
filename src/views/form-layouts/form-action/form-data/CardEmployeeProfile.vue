@@ -11,8 +11,7 @@ const rules = ref([
   <div>
     <v-alert
       icon="mdi-alert-outline"
-      outlined
-      variant="contained-text"
+      variant="outlined"
       type="info"
       class="mb-4 caption pa-3"
       >Form Action at Right ending of the form.</v-alert

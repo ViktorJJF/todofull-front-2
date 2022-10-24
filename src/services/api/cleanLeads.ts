@@ -3,7 +3,7 @@ import store from "@/store";
 import config from "@/config";
 
 export default {
-  list(query = { sort: "createdAt", order: "1" }) {
+  list(query: any = { sort: "createdAt", order: "1" }) {
     if (query.telefonoId === null) query.telefonoId = "";
     if (query.todofullLabels) {
       query.todofullLabels = JSON.stringify(query.todofullLabels);
@@ -15,7 +15,7 @@ export default {
       params: query,
     });
   },
-  listAll(query = { sort: "createdAt", order: "1" }) {
+  listAll(query: any = { sort: "createdAt", order: "1" }) {
     if (query.telefonoId === null) query.telefonoId = "";
     if (query.pais) {
       //filtro pais

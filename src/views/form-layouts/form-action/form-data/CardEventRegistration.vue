@@ -8,7 +8,6 @@ const ex7 = ref("red");
     <v-alert
       icon="mdi-alert-outline"
       outlined
-      variant="contained-text"
       type="info"
       class="mb-4 caption pa-3"
       >Form Action at mulitple space top,bottom and left,right.</v-alert

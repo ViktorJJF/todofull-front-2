@@ -13,7 +13,6 @@
         </v-col>
         <v-col cols="6" lg="8">
           <v-select
-            v-model="e1"
             :items="states"
             menu-props="auto"
             label="Select"
@@ -30,7 +29,6 @@
         </v-col>
         <v-col cols="6" lg="8">
           <v-select
-            v-model="e2"
             :items="states"
             menu-props="auto"
             hide-details

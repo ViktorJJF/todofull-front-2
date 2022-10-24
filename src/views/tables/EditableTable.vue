@@ -182,7 +182,7 @@ const breadcrumbs = ref([
                               variant="outlined"
                               hide-details
                               :items="rolesbg"
-                              v-model="editedItem.rolestatus"
+                              v-model="(editedItem.rolestatus as any)"
                               label="Role Background"
                             ></v-select>
                           </v-col>

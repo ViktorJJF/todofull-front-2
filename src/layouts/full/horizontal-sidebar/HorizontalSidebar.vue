@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import { useCustomizerStore } from "@/stores/customizer";
-import HorizontalItems from "./horizontalItems";
 import VerticalSidebar from "../vertical-sidebar/VerticalSidebar.vue";
+import horizontalItems from "./horizontalItems";
 
 const customizer = useCustomizerStore();
-const sidebarMenu = ref(HorizontalItems);
+const sidebarMenu = ref<any>(horizontalItems);
 function subIsActive(input: any) {
   const paths = Array.isArray(input) ? input : [input];
   return paths.some((path) => {

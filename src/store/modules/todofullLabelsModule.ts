@@ -29,7 +29,7 @@ const module = {
           .create(data)
           .then((res) => {
             commit("loadingModule/showLoading", true, { root: true });
-            buildSuccess("Registro guardado con éxito", commit);
+            buildSuccess("Registro guardado con éxito");
             commit("create", res.data.payload);
             resolve(res.data.payload);
           })
@@ -44,7 +44,7 @@ const module = {
           .update(id, data)
           .then((res) => {
             commit("loadingModule/showLoading", true, { root: true });
-            buildSuccess("Registro actualizado con éxito", commit);
+            buildSuccess("Registro actualizado con éxito");
             commit("update", {
               id,
               data: res.data.payload,
@@ -62,9 +62,9 @@ const module = {
           .delete(id)
           .then(() => {
             commit("loadingModule/showLoading", true, { root: true });
-            buildSuccess("Registro eliminado con éxito", commit);
+            buildSuccess("Registro eliminado con éxito");
             commit("delete", id);
-            resolve();
+            resolve(undefined);
           })
           .catch((error) => {
             handleError(error, commit, reject);
