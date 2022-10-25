@@ -28,9 +28,9 @@ const menu = ref(false);
         <v-card width="300">
           <v-list dark>
             <v-list-item>
-              <v-list-item-avatar>
+              <span>
                 <v-img src="https://cdn.vuetifyjs.com/images/john.png"></v-img>
-              </v-list-item-avatar>
+              </span>
               <v-list-item-content>
                 <v-list-item-title>John Leider</v-list-item-title>
                 <v-list-item-subtitle>john@vuetifyjs.com</v-list-item-subtitle>

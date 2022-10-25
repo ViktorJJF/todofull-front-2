@@ -13,9 +13,9 @@
           <v-system-bar></v-system-bar>
           <v-list>
             <v-list-item>
-              <v-list-item-avatar>
+              <span>
                 <v-img src="https://cdn.vuetifyjs.com/images/john.png"></v-img>
-              </v-list-item-avatar>
+              </span>
             </v-list-item>
 
             <v-list-item link>

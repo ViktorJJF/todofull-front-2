@@ -62,24 +62,24 @@ const sidebarMenu = ref(sidebarItems);
                 class="mb-1"
               >
                 <!---Icon  -->
-                <v-list-item-avatar start class="v-list-item-avatar--start">
+                <span start class="span--start">
                   <vue-feather
                     :type="item.icon"
                     class="feather-sm"
                   ></vue-feather>
-                </v-list-item-avatar>
+                </span>
                 <!---Title  -->
                 <v-list-item-title
                   v-text="item.title"
                   class="mr-auto"
                 ></v-list-item-title>
                 <template v-slot:append>
-                  <v-list-item-avatar end class="v-list-item-avatar--end">
+                  <span end class="span--end">
                     <vue-feather
                       type="chevron-down"
                       class="feather-sm"
                     ></vue-feather>
-                  </v-list-item-avatar>
+                  </span>
                 </template>
               </v-list-item>
             </template>
@@ -94,9 +94,9 @@ const sidebarMenu = ref(sidebarItems);
               rounded="lg"
               class="first-level-item mb-1"
             >
-              <v-list-item-avatar start class="v-list-item-avatar--start">
+              <span start class="span--start">
                 <vue-feather type="disc" class="feather-sm"></vue-feather>
-              </v-list-item-avatar>
+              </span>
               <v-list-item-title v-text="subitem.title"></v-list-item-title>
             </v-list-item>
           </v-list-group>
@@ -104,12 +104,12 @@ const sidebarMenu = ref(sidebarItems);
           <!---Single Item-->
           <!-- ---------------------------------------------- -->
           <v-list-item v-else :key="i" :to="item.to" rounded="lg" class="mb-1">
-            <v-list-item-avatar start class="v-list-item-avatar--start">
+            <span start class="span--start">
               <vue-feather
                 :type="item.icon"
                 class="feather-sm v-icon v-icon--size-default"
               ></vue-feather>
-            </v-list-item-avatar>
+            </span>
             <v-list-item-title dark v-text="item.title"></v-list-item-title>
           </v-list-item>
           <!-- ---------------------------------------------- -->

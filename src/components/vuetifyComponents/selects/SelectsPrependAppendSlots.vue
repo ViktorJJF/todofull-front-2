@@ -32,9 +32,9 @@
         <template v-slot:append-item>
           <v-divider class="mb-2"></v-divider>
           <v-list-item disabled>
-            <v-list-item-avatar color="grey lighten-3">
+            <span color="grey lighten-3">
               <v-icon>mdi-food-apple</v-icon>
-            </v-list-item-avatar>
+            </span>
 
             <v-list-item-content v-if="likesAllFruit">
               <v-list-item-title

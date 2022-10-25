@@ -4,7 +4,7 @@
   <!-- ----------------------------------------------------------------------------- -->
   <div>
     <v-list-item-subtitle class="text-wrap">
-      Here we combine v-list-item-avatar and v-list-item-icon in a single-line
+      Here we combine span and v-list-item-icon in a single-line
       list.
     </v-list-item-subtitle>
     <div class="mt-4">
@@ -24,9 +24,9 @@
         <v-subheader>Recent chat</v-subheader>
 
         <v-list-item v-for="item in items" :key="item.title" @click.stop>
-          <v-list-item-avatar>
+          <span>
             <v-img :src="item.avatar"></v-img>
-          </v-list-item-avatar>
+          </span>
 
           <v-list-item-content>
             <v-list-item-title v-text="item.title"></v-list-item-title>
@@ -46,9 +46,9 @@
         <v-subheader>Previous chats</v-subheader>
 
         <v-list-item v-for="item in items2" :key="item.title" @click.stop>
-          <v-list-item-avatar>
+          <span>
             <v-img :src="item.avatar"></v-img>
-          </v-list-item-avatar>
+          </span>
 
           <v-list-item-content>
             <v-list-item-title v-text="item.title"></v-list-item-title>

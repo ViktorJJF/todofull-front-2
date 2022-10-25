@@ -28,9 +28,9 @@
         <v-subheader inset>Folders</v-subheader>
 
         <v-list-item v-for="item in items" :key="item.title" @click.stop>
-          <v-list-item-avatar>
+          <span>
             <v-icon :class="[item.iconClass]" v-text="item.icon"></v-icon>
-          </v-list-item-avatar>
+          </span>
 
           <v-list-item-content>
             <v-list-item-title v-text="item.title"></v-list-item-title>
@@ -49,9 +49,9 @@
         <v-subheader inset>Files</v-subheader>
 
         <v-list-item v-for="item in items2" :key="item.title" @click.stop>
-          <v-list-item-avatar>
+          <span>
             <v-icon :class="[item.iconClass]" v-text="item.icon"></v-icon>
-          </v-list-item-avatar>
+          </span>
 
           <v-list-item-content>
             <v-list-item-title v-text="item.title"></v-list-item-title>

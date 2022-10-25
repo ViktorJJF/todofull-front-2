@@ -102,14 +102,14 @@ function logout() {
           :subtitle="item.desc"
         >
           <template v-slot:prepend>
-            <v-list-item-avatar start class="v-list-item-avatar--start">
+            <span start class="span--start">
               <v-avatar size="50">
                 <v-img
                   :src="`/assets/images/users/${item.image}`"
                   :alt="item.image"
                   width="50"
                 ></v-img></v-avatar
-            ></v-list-item-avatar>
+            ></span>
           </template>
         </v-list-item>
         <v-btn flat color="primary" class="mt-4" block
@@ -146,7 +146,7 @@ function logout() {
           :subtitle="item.desc"
         >
           <template v-slot:prepend>
-            <v-list-item-avatar start>
+            <span start>
               <v-btn
                 :color="item.color"
                 icon
@@ -155,7 +155,7 @@ function logout() {
               >
                 <vue-feather :type="item.icon" size="18"></vue-feather>
               </v-btn>
-            </v-list-item-avatar>
+            </span>
           </template>
         </v-list-item>
         <v-btn block color="secondary" class="mt-4 py-4"
@@ -218,7 +218,7 @@ function logout() {
           rounded="lg"
         >
           <template v-slot:prepend>
-            <v-list-item-avatar start>
+            <span start>
               <v-btn
                 :color="item.color"
                 icon
@@ -228,7 +228,7 @@ function logout() {
               >
                 <vue-feather :type="item.icon" size="18"></vue-feather>
               </v-btn>
-            </v-list-item-avatar>
+            </span>
           </template>
         </v-list-item>
         <v-btn

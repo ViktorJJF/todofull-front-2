@@ -36,9 +36,9 @@
                 ></v-divider>
 
                 <v-list-item v-else :key="item.title" ripple>
-                  <v-list-item-avatar>
+                  <span>
                     <img :src="item.avatar" />
-                  </v-list-item-avatar>
+                  </span>
                   <v-list-item-content>
                     <v-list-item-title v-html="item.title"></v-list-item-title>
                     <v-list-item-subtitle

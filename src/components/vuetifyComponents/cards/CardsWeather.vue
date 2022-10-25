@@ -54,17 +54,17 @@ const forecast = ref([
     </v-card-text>
 
     <v-list-item density="compact">
-      <v-list-item-avatar left>
+      <span left>
         <v-icon icon="mdi-weather-windy"></v-icon>
-      </v-list-item-avatar>
+      </span>
 
       <v-list-item-subtitle>123 km/h</v-list-item-subtitle>
     </v-list-item>
 
     <v-list-item density="compact">
-      <v-list-item-avatar left>
+      <span left>
         <v-icon icon="mdi-weather-pouring"></v-icon>
-      </v-list-item-avatar>
+      </span>
 
       <v-list-item-subtitle>48%</v-list-item-subtitle>
     </v-list-item>

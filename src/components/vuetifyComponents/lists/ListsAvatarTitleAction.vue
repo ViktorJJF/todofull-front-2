@@ -35,9 +35,9 @@
             <v-list-item-title v-text="item.title"></v-list-item-title>
           </v-list-item-content>
 
-          <v-list-item-avatar>
+          <span>
             <v-img :src="item.avatar"></v-img>
-          </v-list-item-avatar>
+          </span>
         </v-list-item>
       </v-list>
     </div>

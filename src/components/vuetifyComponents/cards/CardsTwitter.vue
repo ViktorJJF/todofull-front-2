@@ -17,12 +17,12 @@
 
     <v-card-actions>
       <v-list-item class="w-100">
-        <v-list-item-avatar left>
+        <span left>
           <v-avatar
             color="grey-darken-3"
             image="https://avataaars.io/?avatarStyle=Transparent&topType=ShortHairShortCurly&accessoriesType=Prescription02&hairColor=Black&facialHairType=Blank&clotheType=Hoodie&clotheColor=White&eyeType=Default&eyebrowType=DefaultNatural&mouthType=Default&skinColor=Light"
           ></v-avatar>
-        </v-list-item-avatar>
+        </span>
 
         <v-list-item-header>
           <v-list-item-title>Evan You</v-list-item-title>
