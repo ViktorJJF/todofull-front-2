@@ -3,9 +3,11 @@ import { ref } from "vue";
 import { useCustomizerStore } from "@/stores/customizer";
 import VerticalSidebar from "../vertical-sidebar/VerticalSidebar.vue";
 import horizontalItems from "./horizontalItems";
+import { useDisplay } from 'vuetify'
 
 const customizer = useCustomizerStore();
 const sidebarMenu = ref<any>(horizontalItems);
+const { mdAndUp } = useDisplay()
 function subIsActive(input: any) {
   const paths = Array.isArray(input) ? input : [input];
   return paths.some((path) => {
@@ -15,7 +17,7 @@ function subIsActive(input: any) {
 </script>
 
 <template>
-  <template v-if="$vuetify.display.mdAndUp">
+  <template v-if="mdAndUp">
     <div
       class="horizontalMenu"
       :style="

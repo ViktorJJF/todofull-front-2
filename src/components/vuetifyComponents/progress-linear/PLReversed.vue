@@ -1,4 +1,6 @@
 <script setup lang="ts">
+  import { useRtl } from 'vuetify'
+  const { isRtl } = useRtl()
 </script>
 
 <template>
@@ -40,7 +42,7 @@
 
     <v-progress-linear
       model-value="15"
-      :reverse="!!$vuetify?.rtl?.isRtl"
+      :reverse="isRtl"
     ></v-progress-linear>
   </div>
 </template>

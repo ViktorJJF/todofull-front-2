@@ -4,15 +4,17 @@ import { useCustomizerStore } from "@/stores/customizer";
 import sidebarItems from "./sidebarItem";
 import LogoLight from "../logo/LogoLight.vue";
 import LogoDark from "../logo/LogoDark.vue";
+import { useDisplay } from 'vuetify'
 
 const customizer = useCustomizerStore();
 const sidebarMenu = ref(sidebarItems);
+const { mdAndUp } = useDisplay();
 </script>
 
 <template>
   <v-navigation-drawer
     left
-    :permanent="$vuetify.display.mdAndUp"
+    :permanent="mdAndUp"
     v-model="customizer.Sidebar_drawer"
     elevation="10"
     :class="customizer.SidebarColor == 'white' ? '' : 'text-white'"
