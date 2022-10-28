@@ -1,148 +1,119 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import CategoriesTree from "./CategoriesTree/index.vue";
+import type { CategoryItem } from "./CategoriesTree/types/categoryItem";
+import type { Category } from "./types/category";
+import categoriesApi from "@/services/api/categories";
+import { v4 as uuidv4 } from "uuid";
+
 const headers = ref([
   { label: "Departamento" },
   { label: "Categorias" },
   { label: "Categoria Hija" },
   { label: "Categoria Hija 2" },
+  { label: "Categoria Hija 3" },
 ]);
+const categoriesToUpload = ref<CategoryItem[]>([]);
+const categories = ref<Category[]>([]);
+const saveLoading = ref(false);
 
-interface Category {
-  _id: string;
-  name: string;
-  position?: number;
-  parent?: string;
-  children: Category[];
-}
+categoriesApi.list().then((res) => {
+  categories.value = res.data.payload;
+});
 
-const categoriesTree = ref([
-  {
-    _id: "1",
-    name: "Jeans",
-    parent: null,
-    children: [
-      {
-        _id: "2",
-        name: "Skinny",
-        parent: "1",
-        children: [],
-      },
-      {
-        _id: "3",
-        name: "Push Up",
-        parent: "1",
-        children: [],
-      },
-    ],
-  },
-]);
+const categoriesTree = computed(() => {
+  // using slice to pass array as value
+  return buildCategoriesTree(categories.value);
+});
 
-const handleAddChildren = (category?: Category) => {
-  if (category) {
-    category.children.push({
-      _id: "123",
-      name: "",
-      parent: category._id,
-      children: [],
-    });
+const getChildren = (category: Category, list: Category[]) => {
+  const childrens = [];
+  for (const [index, item] of list.entries()) {
+    if (category._id === item.parent) {
+      // mutating the object to avoid creating a new space in memory
+      Object.assign(item, { children: getChildren(item, list) });
+      childrens.push(item);
+    }
+  }
+  return childrens;
+};
+
+const buildCategoriesTree = (categories): CategoryItem[] => {
+  const items = [];
+  // find roots categories and remove them from base array
+  for (const [index, category] of categories.entries()) {
+    if (category.parent === null) {
+      // mutating the object to avoid creating a new space in memory
+      Object.assign(category, { children: getChildren(category, categories) });
+      items.push(category);
+    }
+  }
+  return items;
+};
+
+const handleAddItem = (parentId?: string) => {
+  const newItem = {
+    _id: uuidv4(),
+    name: "Categoria",
+    parent: parentId,
+    children: [],
+    isNew: true,
+  };
+  categories.value.push(newItem);
+  categoriesToUpload.value.push(newItem);
+};
+
+const handleAddHeader = () => {
+  headers.value.push({ label: `Categoria Hija ${headers.value.length - 1}` });
+};
+
+const handleUpdateItem = (item: CategoryItem) => {
+  const index = categoriesToUpload.value.findIndex(
+    (cat) => cat._id === item._id
+  );
+  if (index !== -1) {
+    categoriesToUpload.value.splice(index, 1, item);
     return;
   }
+  categoriesToUpload.value.push(item);
+};
 
-  categoriesTree.value.push({
-    _id: "123",
-    name: "Departamento X",
-    parent: null,
-    children: [],
+const handleSave = async () => {
+  saveLoading.value = true;
+  const promises = categoriesToUpload.value.map(async (item) => {
+    if (item.isNew) {
+      await categoriesApi.create(item);
+      return;
+    }
+    await categoriesApi.update(item._id, item);
   });
+
+  await Promise.allSettled(promises);
+
+  categoriesToUpload.value = [];
+  saveLoading.value = false;
 };
 </script>
 
 <template>
   <v-card class="overflow-x-auto">
     <v-card-title>Categorias</v-card-title>
-    <v-card-text>
-      <div class="row mb-6">
-        <div class="col" v-for="header in headers" :key="header.label">
-          <div class="box">
-            <span>{{ header.label }}</span>
-          </div>
-        </div>
-      </div>
-
-      <template v-for="(category, index) of categoriesTree">
-        <div class="row">
-          <div class="col d-flex align-center flex-column">
-            <div class="box">
-              {{ category.name }}
-            </div>
-            <div class="mt-5" v-if="index === categoriesTree.length - 1">
-              <v-btn icon="mdi-plus" @click="handleAddChildren()" />
-            </div>
-          </div>
-          <div class="col col-wrapper">
-            <div
-              class="row"
-              v-for="(childCategory, index) of category.children"
-            >
-              <div class="col d-flex align-center flex-column">
-                <div class="box mb-3">
-                  {{ childCategory.name }}
-                </div>
-                <div class="mt-5" v-if="index === category.children.length - 1">
-                  <v-btn icon="mdi-plus" @click="handleAddChildren(category)" />
-                </div>
-              </div>
-              <div class="col">
-                <div
-                  class="row"
-                  v-for="innerCategory in childCategory.children"
-                >
-                  <div class="col d-flex justify-center">
-                    <div class="box mb-3">
-                      {{ innerCategory.name }}
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <div class="col d-flex justify-center">
-                    <v-btn
-                      icon="mdi-plus"
-                      @click="handleAddChildren(childCategory)"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <v-divider class="my-6" />
-      </template>
+    <v-card-text :style="{ display: 'inline-block' }">
+      <v-btn
+        class="ml-3 mb-2"
+        :disabled="!categoriesToUpload.length"
+        :loading="saveLoading"
+        @click="handleSave"
+      >
+        Guardar
+      </v-btn>
+      <CategoriesTree
+        :headers="headers"
+        :items="categoriesTree"
+        @add-item="handleAddItem"
+        @add-header="handleAddHeader"
+        @update-item="handleUpdateItem"
+      />
     </v-card-text>
   </v-card>
 </template>
-
-<style lang="scss">
-.row {
-  display: flex;
-}
-.col {
-  flex: 0 0 auto;
-  width: 250px;
-  padding: 10px;
-}
-
-.col-wrapper {
-  width: auto;
-  padding: 0;
-}
-
-.box {
-  width: 100%;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-}
-</style>
