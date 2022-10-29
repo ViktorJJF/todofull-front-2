@@ -4,7 +4,7 @@ import { buildSuccess, handleError } from "@/utils/utils.js";
 import router from "@/router";
 
 const state = () => ({
-  user: null,
+  user: JSON.parse(localStorage.getItem('user')),
   token: !!localStorage.getItem("token") || null,
   isTokenSet: !!localStorage.getItem("token"),
 });
@@ -31,18 +31,8 @@ const actions = {
           if (response.status === 200) {
             localStorage.setItem("user", JSON.stringify(response.data.user));
             localStorage.setItem("token", response.data.token);
-            // window.localStorage.setItem(
-            //   "tokenExpiration",
-            //   JSON.stringify(
-            //     format(
-            //       addMinutes(new Date(), MINUTES_TO_CHECK_FOR_TOKEN_REFRESH),
-            //       "X"
-            //     )
-            //   )
-            // );
             commit("saveUser", response.data.user);
             commit("saveToken", response.data.token);
-            // commit(types.EMAIL_VERIFIED, response.data.user.verified);
             buildSuccess("Bienvenido");
             resolve(null);
           }
@@ -62,15 +52,6 @@ const actions = {
               "token",
               JSON.stringify(response.data.token)
             );
-            // window.localStorage.setItem(
-            //   "tokenExpiration",
-            //   JSON.stringify(
-            //     format(
-            //       addMinutes(new Date(), MINUTES_TO_CHECK_FOR_TOKEN_REFRESH),
-            //       "X"
-            //     )
-            //   )
-            // );
             commit("saveToken", response.data.token);
             resolve(null);
           }
@@ -84,7 +65,6 @@ const actions = {
     const user = JSON.parse(localStorage.getItem("user"));
     commit("saveUser", user);
     commit("saveToken", localStorage.getItem("token"));
-    // commit(types.EMAIL_VERIFIED, user.verified);
   },
   logout({ commit }) {
     window.localStorage.removeItem("token");
@@ -93,22 +73,6 @@ const actions = {
     router.push({ name: "login" });
     commit("logout");
   },
-  // editUser({ commit }, { id, data }) {
-  //   return new Promise((resolve, reject) => {
-  //     commit("loadingModule/showLoading", true, { root: true });
-  //     apiUsers
-  //       .editMember(id, data)
-  //       .then((res) => {
-  //         let data = res.data.payload;
-  //         buildSuccess("Registro guardado con éxito", commit, resolve);
-  //         commit("editUser", data);
-  //         resolve(null);
-  //       })
-  //       .catch((error) => {
-  //         handleError(error, commit, reject);
-  //       });
-  //   });
-  // },
 };
 const mutations = {
   saveToken(state, token) {

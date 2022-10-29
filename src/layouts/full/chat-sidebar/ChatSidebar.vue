@@ -43,7 +43,7 @@
           <h4 class="mb-3" v-if="availableVariations.length">Tallas</h4>
           <v-row>
             <v-col
-            v-for="variation of availableVariations"
+              v-for="variation of availableVariations"
               :key="variation.id"
               style="padding: 0"
               cols="4"
@@ -110,9 +110,9 @@
               >
                 Copiar Todo
               </v-btn>
-                <v-snackbar v-model="clipboardNotification" color="success">
-                  Se ha copiado mensaje al portapapeles!
-                </v-snackbar>
+              <v-snackbar v-model="clipboardNotification" color="success">
+                Se ha copiado mensaje al portapapeles!
+              </v-snackbar>
             </v-col>
           </v-row>
           <v-row>
@@ -128,22 +128,26 @@
 
 <script setup lang="ts">
 import messages from "./messages";
-import chatsApi from '@/services/api/chats'
+import chatsApi from "@/services/api/chats";
 import ecommercesApi from "@/services/api/ecommerces";
 import { useChatSidebarStore } from "@/stores/chatSidebar";
 import { ref, watch, computed } from "vue";
+import { useStore } from "vuex";
 
-const chatSidebar = useChatSidebarStore();
 const isLoading = ref(false);
 const search = ref("");
 const items = ref([]);
 const selected = ref(null);
 const selectedVariations = ref([]);
-const clipboardNotification = ref(false)
+const clipboardNotification = ref(false);
+
+const chatSidebar = useChatSidebarStore();
+const store = useStore();
+
+const user = computed(() => store.state.authModule.user);
 
 const availableVariations = computed(() => {
   if (!selected.value) return [];
-
   return getAvailableVariations(selected.value);
 });
 
@@ -159,8 +163,18 @@ const handleCopyAnswer = (type: string = "all") => {
   getMessage(type).then((message) => {
     navigator.clipboard.writeText(message).then(() => {
       clipboardNotification.value = true;
-    })
+    });
   });
+};
+
+const buildUrl = async () => {
+  const utmSource = chatSidebar.bot?.name.split(" ")[0] || "";
+  const utmContent = user.value.alias || user.value.first_name;
+  const utmParams = `utm_content=${utmContent}&utm_medium=chattf&utm_source=${utmSource}`;
+  const baseUrl = selected.value.permalink;
+  const fullUrl = `${baseUrl}${baseUrl.endsWith("/") ? "" : "/"}?${utmParams}`;
+  const res = await chatsApi.shortenLink(fullUrl);
+  return res.data.payload.shorturl;
 };
 
 const getMessage = async (type: string) => {
@@ -169,16 +183,8 @@ const getMessage = async (type: string) => {
   const price = new Intl.NumberFormat().format(
     selected.value.variations[0].regular_price
   );
-  
-  let url = ''
-  if(['url', 'all'].includes(type)) {
-    const utmSource = chatSidebar.bot?.name.split(' ')[0] || '';
-    const utmParams = `utm_content=roge&utm_medium=chattf&utm_source=${utmSource}`;
-    const baseUrl = selected.value.permalink;
-    const fullUrl = `${baseUrl}${baseUrl.endsWith("/") ? "" : "/"}?${utmParams}`;
-    const res = await chatsApi.shortenLink(fullUrl);
-    url = res.data.payload.shorturl
-  }
+
+  const url = ["url", "all"].includes(type) ? await buildUrl() : "";
 
   const args = [ref];
 
