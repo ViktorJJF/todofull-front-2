@@ -679,7 +679,7 @@ export default {
       selectedText: "",
       showMessageOptions: false,
       filterChats: 0,
-      filters: ["Todos", "Pendientes", "Resueltos"],
+      filters: ["Todos", "Pendientes", "Resueltos","Sin bot"],
       selectedCountry: null,
       isLoadingMore: false,
       resetImage: 0,
