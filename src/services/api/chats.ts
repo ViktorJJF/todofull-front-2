@@ -10,6 +10,9 @@ export default {
   listOne(id) {
     return axios.get(config.DASHBOARD_BASE_URL + `/api/chats/${id}`);
   },
+  listPermissions() {
+    return axios.get(config.DASHBOARD_BASE_URL + `/api/chats/permissions`);
+  },
   update(id, payload) {
     return axios.put(config.DASHBOARD_BASE_URL + `/api/chats/${id}`, payload);
   },

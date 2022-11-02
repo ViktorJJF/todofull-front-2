@@ -7,50 +7,20 @@
           <!---/Left chat list -->
           <template v-slot:channels>
             <v-btn
+              v-for="platform of platformsSource"
               small
-              @click="addPlatform('whatsapp')"
-              :class="{
-                'ma-2': true,
-                selected: activePlatforms.includes('whatsapp'),
-              }"
               text
               icon
               color="white"
-            >
-              <v-icon class="whatsapp-color">mdi-whatsapp</v-icon>
-              <v-tooltip activator="parent" anchor="bottom">Whatsapp</v-tooltip>
-            </v-btn>
-            <v-btn
-              small
-              @click="addPlatform('instagram')"
+              @click="addPlatform(platform.value)"
               :class="{
                 'ma-2': true,
-                selected: activePlatforms.includes('instagram'),
+                selected: activePlatforms.includes(platform.value),
               }"
-              text
-              icon
-              color="white"
+              :key="platform.value"
             >
-              <v-icon class="instagram-color">mdi-instagram</v-icon>
-              <v-tooltip activator="parent" anchor="bottom"
-                >Instagram</v-tooltip
-              >
-            </v-btn>
-            <v-btn
-              small
-              @click="addPlatform('facebook')"
-              :class="{
-                'ma-2': true,
-                selected: activePlatforms.includes('facebook'),
-              }"
-              text
-              icon
-              color="white"
-            >
-              <v-icon class="messenger-color">mdi-facebook-messenger</v-icon>
-              <v-tooltip activator="parent" anchor="bottom"
-                >Messenger</v-tooltip
-              >
+              <v-icon :class="platform.iconClass">{{platform.icon}}</v-icon>
+              <v-tooltip activator="parent" anchor="bottom">{{platform.text}}</v-tooltip>
             </v-btn>
           </template>
           <template v-slot:leftpart>
@@ -66,7 +36,7 @@
             <div class="pa-3 border-bottom">
               <v-select
                 v-model="selectedCountry"
-                :items="['Peru', 'Chile', 'Colombia']"
+                :items="countries"
                 hide-details
                 density="compact"
                 single-line
@@ -76,16 +46,17 @@
               ></v-select>
             </div>
             <div class="px-5">
-              <v-chip-group v-model="filterChats" active-class="primary--text"
-                ><v-chip
-                  v-for="filter in filters"
-                  :key="filter"
+              <v-chip-group v-model="filterChats" active-class="primary--text">
+                <v-chip
+                  v-for="filter in filtersSource"
                   color="success"
                   :multiple="false"
+                  size="small"
+                  :key="filter"
                 >
-                  <strong>{{ filter }}</strong>
-                </v-chip></v-chip-group
-              >
+                  <strong>{{ filter.text }}</strong>
+                </v-chip>
+              </v-chip-group>
             </div>
             <div class="px-5">
               <h6>Total: {{ $store.state.chatsModule.total }}</h6>
@@ -99,7 +70,7 @@
                 class="v-progress-linear"
                 indeterminate
                 color="primary"
-              ></v-progress-circular>
+              />
 
               <div v-else class="">
                 <!---/Icon -->
@@ -593,17 +564,6 @@ text/plain, application/pdf"
             <v-btn color="success" @click="handleImages">Cargar</v-btn>
           </div>
         </v-container>
-        <!-- <v-card-actions rd-actions>
-          <div class="flex-grow-1"></div>
-          <v-btn
-            :loading="uploadingImage"
-            color="success"
-            variant="outlined"
-            class="text-capitalize mr-2"
-            @click.self="sendImageMessage"
-            >Cargar</v-btn
-          >
-        </v-card-actions> -->
       </v-card>
     </v-dialog>
   </v-row>
@@ -645,7 +605,6 @@ export default {
     return {
       uploadingImage: false,
       uploadDialog: false,
-      activePlatforms: [],
       chat: null,
       chats: [],
       messages: [],
@@ -665,6 +624,12 @@ export default {
       searchContact: "",
       isDataReady: false,
       isChatMessageReady: false,
+      activePlatforms: [],
+      platforms: [
+        { text: 'Whatsapp', value: 'whatsapp', icon: 'mdi-whatsapp', iconClass: 'whatsapp-color' },
+        { text: 'Instagram', value: 'instagram', icon: 'mdi-instagram', iconClass: 'instagram-color' },
+        { text: 'Facebook', value: 'facebook', icon: 'mdi-facebook-messenger', iconClass: 'messenger-color' },
+      ],
       updateLabels: 0,
       // userData
       userForm: {
@@ -678,8 +643,14 @@ export default {
       updateScroll: 0,
       selectedText: "",
       showMessageOptions: false,
-      filterChats: 0,
-      filters: ["Todos", "Pendientes", "Resueltos","Sin bot"],
+      filterChats: null,
+      filters: [
+        { text: 'Pendientes', value: 'pending' },
+        { text: 'Resueltos', value: 'solved' },
+        { text: 'Sin Bot', value: 'no-bot' },
+        { text: 'Recientes', value: 'recents' },
+        { text: 'Equipo', value: 'team' },
+      ],
       selectedCountry: null,
       isLoadingMore: false,
       resetImage: 0,
@@ -689,14 +660,17 @@ export default {
       fileName: "",
       fileUrl: "",
       chatSidebar: null,
-      selectedAgent:null
+      selectedAgent: null,
+      permissions: null
     };
   },
   created() {
     this.chatSidebar = useChatSidebarStore()
+    this.initialize();
+    
+    chatsService.listPermissions().then(res => this.permissions = res.data.payload);
   },
   mounted() {
-    this.initialize();
     document.addEventListener("mouseup", (event) => {
       if (
         (event.target.tagName.toLowerCase() === "p" ||
@@ -716,7 +690,6 @@ export default {
     },
     async initialize(page = 1) {
       this.isDataReady = false;
-      // traer listado de chats
       let payload = {
         page: this.page || page,
         search: this.searchContact,
@@ -732,13 +705,12 @@ export default {
         payload.selectedCountry = this.selectedCountry;
       }
       if (this.filterChats) {
-        payload.filterChats = this.filters[this.filterChats];
+        payload.filterChats = this.filtersSource[this.filterChats].value;
       }
       await Promise.all([
         this.$store.dispatch("botsModule/list"),
         this.$store.dispatch("chatsModule/list", payload),
       ]);
-      // this.$store.commit("chatsModule/setChats", this.chats);
       this.chats = this.$store.state.chatsModule.chats;
       this.isDataReady = true;
     },
@@ -896,9 +868,6 @@ export default {
       }
       return "Usuario";
     },
-    getUserDataByPlatform(chat) {
-      let details = chat.cleanLeadId.details;
-    },
     getPlatformIconStyle(platform) {
       const platforms = {
         whatsapp: "mdi-whatsapp whatsapp-color",
@@ -1050,7 +1019,7 @@ export default {
           payload.selectedCountry = this.selectedCountry;
         }
         if (this.filterChats) {
-          payload.filterChats = this.filters[this.filterChats];
+          payload.filterChats = this.filtersSource[this.filterChats].value;
         }
         const response = await chatsService.list(payload);
         for (const chat of response.data.payload) {
@@ -1151,15 +1120,23 @@ export default {
     },
   },
   computed: {
+    countries() {
+      return this.permissions
+      ? this.permissions.countries
+      : []
+    },
+    platformsSource() {
+      if(!this.permissions) return [];
+
+      return this.platforms.filter(o => this.permissions.platforms.includes(o.value))
+    },
+    filtersSource() {
+      if(!this.permissions) return [];
+
+      return this.filters.filter(o => this.permissions.status.includes(o.value))
+    },
     filteredChats() {
-      const chats = this.$store.getters["chatsModule/getSortedChats"]
-      if(this.filterChats === 1) {
-        return chats.filter((el) => el.pending_messages_count > 0)
-      }
-      if(this.filterChats === 2) {
-        return chats.filter((el) => el.pending_messages_count === 0)
-      }
-      return chats;
+      return this.$store.getters["chatsModule/getSortedChats"]
     },
     formattedMessages() {
       return this.messages.reduce((acc, el) => {
@@ -1202,7 +1179,8 @@ export default {
     filterChats() {
       this.page = 1;
       this.initialize();
-    }, userForm: {
+    },
+    userForm: {
      handler(form){
        console.log("NUEVO VALOR: ",form) 
       //  if(form.phone.length>0 && form.name.length>=0 && this.selectedChat.){

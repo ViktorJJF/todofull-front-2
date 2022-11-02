@@ -7,8 +7,8 @@
     >
       <option value="Sin valor">Sin agente</option>
       <option
-        :value="telefono._id"
         v-for="telefono in telefonos"
+        :value="telefono._id"
         :key="telefono._id"
       >
         {{ telefono.agenteId.nombre }} ({{ telefono.numero }})
@@ -38,10 +38,7 @@ export default {
     async initialize() {
       await Promise.all([this.$store.dispatch("telefonosModule/list")]);
       this.telefonos = this.$store.state.telefonosModule.telefonos.filter(
-        (telefono) => telefono.active == true
-      );
-      this.telefonos = this.telefonos.filter(
-        (telefono) => telefono.agenteId != null
+        (telefono) => telefono.active == true && telefono.agenteId != null
       );
     },
     onSelectedAgent(event) {
