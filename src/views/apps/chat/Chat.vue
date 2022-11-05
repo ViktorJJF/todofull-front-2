@@ -999,34 +999,34 @@ export default {
       return formatDistance(new Date(), date, { addSuffix: true, locale: es });
     },
     async loadMore() {
-      if(this.isloadingMore === true) {
-        return;
-      }
+      if(this.isloadingMore === true) { return; }
+
+      if (this.searchContact.trim().length !== 0) { return; }
 
       this.isLoadingMore = true;
-      if (this.searchContact.trim().length === 0) {
-        this.page += 1;
-        let payload = {
-          page: this.page,
-          limit: 50,
-          sort: "updatedAt",
-          order: "desc",
-        };
-        if (this.activePlatforms.length > 0) {
-          payload.platforms = this.activePlatforms;
-        }
-        if (this.selectedCountry) {
-          payload.selectedCountry = this.selectedCountry;
-        }
-        if (this.filterChats) {
-          payload.filterChats = this.filtersSource[this.filterChats].value;
-        }
-        const response = await chatsService.list(payload);
-        for (const chat of response.data.payload) {
-          this.$store.commit("chatsModule/addChatToEnd", chat);
-        }
-        this.isLoadingMore = false;
+      
+      this.page += 1;
+      let payload = {
+        page: this.page,
+        limit: 50,
+        sort: "updatedAt",
+        order: "desc",
+      };
+      if (this.activePlatforms.length > 0) {
+        payload.platforms = this.activePlatforms;
       }
+      if (this.selectedCountry) {
+        payload.selectedCountry = this.selectedCountry;
+      }
+      if (this.filterChats) {
+        payload.filterChats = this.filtersSource[this.filterChats].value;
+      }
+      const response = await chatsService.list(payload);
+      for (const chat of response.data.payload) {
+        this.$store.commit("chatsModule/addChatToEnd", chat);
+      }
+      
+      this.isLoadingMore = false;
     },
     undoPendingMessagesCount() {
       let count =
