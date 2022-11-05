@@ -23,7 +23,9 @@ export default {
     return axios.delete(config.DASHBOARD_BASE_URL + `/api/chats/${id}`);
   },
   shortenLink(url) {
-    return axios.post(`${config.DASHBOARD_BASE_URL}/api/chats/shorten-link`, { url })
+    return axios.post(`${config.DASHBOARD_BASE_URL}/api/chats/shorten-link`, {
+      url,
+    });
   },
   undoPendingMessagesCount(id, count) {
     return axios.post(
@@ -31,5 +33,10 @@ export default {
         `/api/chats/${id}/undo_pending_messages_count`,
       { count }
     );
+  },
+  addUser(id, userId) {
+    return axios.put(config.DASHBOARD_BASE_URL + `/api/chats/${id}/add_user`, {
+      userId,
+    });
   },
 };

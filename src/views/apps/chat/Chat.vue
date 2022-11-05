@@ -19,8 +19,10 @@
               }"
               :key="platform.value"
             >
-              <v-icon :class="platform.iconClass">{{platform.icon}}</v-icon>
-              <v-tooltip activator="parent" anchor="bottom">{{platform.text}}</v-tooltip>
+              <v-icon :class="platform.iconClass">{{ platform.icon }}</v-icon>
+              <v-tooltip activator="parent" anchor="bottom">{{
+                platform.text
+              }}</v-tooltip>
             </v-btn>
           </template>
           <template v-slot:leftpart>
@@ -768,6 +770,7 @@ export default {
       this.updateLabels += 1;
     },
     sendMessage(text, from = "Agente", type = "text", { url } = {}) {
+      const user = JSON.parse(localStorage.getItem("user"));
       this.text = "";
       socket.emit("AGENT_MESSAGE", {
         senderId: this.selectedChat.leadId.contactId,
@@ -779,6 +782,7 @@ export default {
           url,
         },
         type,
+        userId:user._id
       });
       scrollBottom();
     },
@@ -805,11 +809,12 @@ export default {
         console.log("CONECTANDO AGENTE");
         this.sendMessage(message, "Chatbot");
         this.isAgentConnected = true;
-        // se cambia estado de atendiendo agente en bd
+        // se desactiva bot
         chatsService.update(this.selectedChat._id, {
-          // userId: user._id,
           isBotActive: false,
         });
+        // se agrega el agente usuario al chat
+        chatsService.addUser(this.selectedChat._id,user._id)
         scrollBottom();
         socket.emit("CONNECT_AGENT", {
           senderId: this.selectedChat.leadId.contactId,
@@ -832,7 +837,6 @@ export default {
       this.isAgentConnected = false;
       this.selectedChat.userId = null;
       chatsService.update(this.selectedChat._id, {
-        userId: null,
         isBotActive: true,
       });
       socket.emit("DISCONNECT_AGENT", {
