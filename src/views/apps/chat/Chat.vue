@@ -645,7 +645,7 @@ export default {
       updateScroll: 0,
       selectedText: "",
       showMessageOptions: false,
-      filterChats: null,
+      filterChats: undefined,
       filters: [
         { text: 'Pendientes', value: 'pending' },
         { text: 'Sin Bot', value: 'no-bot' },
@@ -705,7 +705,7 @@ export default {
       if (this.selectedCountry) {
         payload.selectedCountry = this.selectedCountry;
       }
-      if (this.filterChats) {
+      if (this.filterChats !== undefined) {
         payload.filterChats = this.filtersSource[this.filterChats].value;
       }
       await Promise.all([
@@ -1002,7 +1002,7 @@ export default {
       return formatDistance(new Date(), date, { addSuffix: true, locale: es });
     },
     async loadMore() {
-      if(this.isloadingMore === true) { return; }
+      if(this.isLoadingMore === true) { return; }
 
       if (this.searchContact.trim().length !== 0) { return; }
 
@@ -1021,7 +1021,7 @@ export default {
       if (this.selectedCountry) {
         payload.selectedCountry = this.selectedCountry;
       }
-      if (this.filterChats) {
+      if (this.filterChats !== undefined) {
         payload.filterChats = this.filtersSource[this.filterChats].value;
       }
       const response = await chatsService.list(payload);
