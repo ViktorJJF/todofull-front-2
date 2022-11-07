@@ -648,7 +648,6 @@ export default {
       filterChats: null,
       filters: [
         { text: 'Pendientes', value: 'pending' },
-        { text: 'Resueltos', value: 'solved' },
         { text: 'Sin Bot', value: 'no-bot' },
         { text: 'Recientes', value: 'recents' },
         { text: 'Equipo', value: 'team' },
