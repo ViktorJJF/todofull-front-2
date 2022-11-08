@@ -905,9 +905,11 @@ export default {
       this.initialize();
     },
     toggleCountry(country) {
-      this.selectedCountry = this.selectedCountry
-        ? null
-        : country.value
+      if(this.selectedCountry === country.value) {
+        return this.selectedCountry = null;
+      }
+
+      this.selectedCountry = country.value
     },
     onSelectedAgent(agent) {
       this.selectedAgent=agent;
