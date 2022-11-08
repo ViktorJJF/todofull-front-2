@@ -3,7 +3,7 @@ import environment from "@/environment";
 
 let socketUrl =
   environment === "development"
-    ? "http://localhost:5000"
+    ? "http://localhost:3000"
     : "https://chatbotmujeron.herokuapp.com";
 const socket = io(socketUrl);
 import store from "@/store/index";

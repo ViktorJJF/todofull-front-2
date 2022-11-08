@@ -6,24 +6,38 @@
         <BaseLeftRightPartVue>
           <!---/Left chat list -->
           <template v-slot:channels>
-            <v-btn
-              v-for="platform of platformsSource"
-              small
-              text
-              icon
-              color="white"
-              @click="addPlatform(platform.value)"
-              :class="{
-                'ma-2': true,
-                selected: activePlatforms.includes(platform.value),
-              }"
-              :key="platform.value"
-            >
-              <v-icon :class="platform.iconClass">{{ platform.icon }}</v-icon>
-              <v-tooltip activator="parent" anchor="bottom">{{
-                platform.text
-              }}</v-tooltip>
-            </v-btn>
+            <div class="d-flex justify-space-evenly">
+              <v-btn
+                v-for="platform of platformsSource"
+                small
+                icon
+                color="white"
+                @click="addPlatform(platform.value)"
+                :class="{
+                  selected: activePlatforms.includes(platform.value),
+                }"
+                :key="platform.value"
+              >
+                <v-icon :class="platform.iconClass">{{ platform.icon }}</v-icon>
+                <v-tooltip activator="parent" anchor="bottom">{{
+                  platform.text
+                }}</v-tooltip>
+              </v-btn>
+              <v-divider class="mt-1" vertical/>
+              <v-btn
+                v-for="country of countries"
+                small
+                icon
+                color="white"
+                @click="toggleCountry(country)"
+                :class="{selected: selectedCountry === country.value}"
+              >
+                <img style="width: 25px;" :src="country.icon" />
+                <v-tooltip activator="parent" anchor="bottom">
+                  {{country.value}}
+                </v-tooltip>
+              </v-btn>
+            </div>
           </template>
           <template v-slot:leftpart>
             <div class="pa-3 border-bottom">
@@ -34,18 +48,6 @@
                 hide-details
                 v-model="searchContact"
               ></v-text-field>
-            </div>
-            <div class="pa-3 border-bottom">
-              <v-select
-                v-model="selectedCountry"
-                :items="countries"
-                hide-details
-                density="compact"
-                single-line
-                label="Selecciona un país"
-                variant="outlined"
-                clearable
-              ></v-select>
             </div>
             <div class="px-5">
               <v-chip-group v-model="filterChats" active-class="primary--text">
@@ -594,6 +596,9 @@ import { buildSuccess } from "@/utils/utils.ts";
 import AgentsSelector from "@/components/AgentsSelector.vue";
 import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
 import { useChatSidebarStore } from '@/stores/chatSidebar'
+import PeruFlagR from '@/assets/images/flags/peru.png'
+import ChileFlagR from '@/assets/images/flags/chile.png'
+import ColombiaFlagR from '@/assets/images/flags/colombia.png'
 
 export default {
   components: {
@@ -632,6 +637,12 @@ export default {
         { text: 'Instagram', value: 'instagram', icon: 'mdi-instagram', iconClass: 'instagram-color' },
         { text: 'Facebook', value: 'facebook', icon: 'mdi-facebook-messenger', iconClass: 'messenger-color' },
       ],
+      selectedCountry: null,
+      countries: [
+        { value: 'Peru', icon: PeruFlagR },
+        { value: 'Chile', icon: ChileFlagR },
+        { value: 'Colombia', icon: ColombiaFlagR },
+      ],
       updateLabels: 0,
       // userData
       userForm: {
@@ -652,7 +663,6 @@ export default {
         { text: 'Recientes', value: 'recents' },
         { text: 'Equipo', value: 'team' },
       ],
-      selectedCountry: null,
       isLoadingMore: false,
       resetImage: 0,
       image: null,
@@ -668,7 +678,6 @@ export default {
   created() {
     this.chatSidebar = useChatSidebarStore()
     this.initialize();
-    
     chatsService.listPermissions().then(res => this.permissions = res.data.payload);
   },
   mounted() {
@@ -895,6 +904,11 @@ export default {
       }
       this.initialize();
     },
+    toggleCountry(country) {
+      this.selectedCountry = this.selectedCountry
+        ? null
+        : country.value
+    },
     onSelectedAgent(agent) {
       this.selectedAgent=agent;
       if (this.selectedChat.cleanLeadId) {
@@ -921,8 +935,6 @@ export default {
     },
     async saveUserForm() {
       if (this.userForm.phone) {
-        console.log("EL PAIS: ", this.selectedChat.leadId.pais);
-        console.log("las etiquetas: ", this.userForm.todofullLabels);
         let createdItem = await this.$store.dispatch(
           "cleanLeadsModule/create",
           {
@@ -1048,15 +1060,8 @@ export default {
       this.showMessageOptions = true;
       this.selectedText = window.getSelection().toString();
     },
-
-    mouseOver() {
-      console.log("mouse encima");
-    },
     getSelectedText() {
       return window.getSelection().toString();
-    },
-    onSelectedCountry(event) {
-      console.log("seleccionado: ", event);
     },
     handleImages() {
       // this.editedItem.img = files;
@@ -1085,8 +1090,7 @@ export default {
         this.fileName = "";
         this.fileUrl = "";
       }
-      console.log("🚀 Aqui *** -> this.fileName", this.fileName);
-      console.log("🚀 Aqui *** -> this.fileUrl", this.fileUrl);
+      
       this.sendFileMessage();
     },
     async sendImageMessage() {
@@ -1123,10 +1127,10 @@ export default {
     },
   },
   computed: {
-    countries() {
-      return this.permissions
-      ? this.permissions.countries
-      : []
+    countriesSource() {
+      if(!this.permissions) return [];
+
+      return this.countries.filter(o => this.permissions.countries.includes(o.value))
     },
     platformsSource() {
       if(!this.permissions) return [];
@@ -1183,24 +1187,6 @@ export default {
       this.page = 1;
       this.initialize();
     },
-    userForm: {
-     handler(form){
-       console.log("NUEVO VALOR: ",form) 
-      //  if(form.phone.length>0 && form.name.length>=0 && this.selectedChat.){
-      //   form.notes=`Hola ${
-      //           selectdeAgent.agenteId.nombre
-      //         } tu cliente: *${form.name}*\ncon telefono : *${
-      //           client.getFormattedPhone() || telefono
-      //         }*\nconsulta:' '.\nen la página: ${
-      //           ($store.state.botsModule.bots.find(
-      //               (el) => el.fanpageId == selectedChat.pageID
-      //             ).name)
-      //         } \n\nEn cuanto la contactes me informas para borrarla de los pendientes`
-            
-      //  }
-     },
-     deep: true
-  }
   },
 };
 </script>
