@@ -25,7 +25,7 @@
               </v-btn>
               <v-divider class="mt-1" vertical/>
               <v-btn
-                v-for="country of countries"
+                v-for="country of countriesSource"
                 small
                 icon
                 color="white"
@@ -678,7 +678,10 @@ export default {
   created() {
     this.chatSidebar = useChatSidebarStore()
     this.initialize();
-    chatsService.listPermissions().then(res => this.permissions = res.data.payload);
+    chatsService.listPermissions().then(res => {
+      this.permissions = res.data.payload
+      this.selectedCountry = this.permissions.countries[0]
+    });
   },
   mounted() {
     document.addEventListener("mouseup", (event) => {
