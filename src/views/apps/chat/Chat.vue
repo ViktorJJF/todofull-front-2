@@ -1198,7 +1198,16 @@ export default {
       return this.filters.filter(o => this.permissions.status.includes(o.value))
     },
     filteredChats() {
-      return this.$store.getters["chatsModule/getSortedChats"]
+      return this.$store.getters["chatsModule/getSortedChats"].filter(chat => {
+        if (this.activePlatforms.length > 0) {
+          if(!this.activePlatforms.includes(chat.platform)) return false;
+        }
+        if (this.selectedCountry) {
+          if(chat.leadId.pais !== this.selectedCountry) return false;
+        }
+
+        return true;
+      })
     },
     formattedMessages() {
       return this.messages.reduce((acc, el) => {
@@ -1237,7 +1246,7 @@ export default {
       if(val) {
         chatsService.listPermissionsByTeams(val).then(res => this.teamPermissions = res.data.payload)
       }else {
-        this.teamPermissions = [] 
+        this.teamPermissions = []
       }
     },
     async searchContact() {
