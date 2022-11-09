@@ -581,6 +581,7 @@ import filesService from "@/services/api/files";
 import cleanLeadsService from "@/services/api/cleanLeads";
 import leadsService from "@/services/api/leads";
 import messagesService from "@/services/api/messages";
+import sellTeamsService from "@/services/api/sellTeams";
 import {
   scrollBottom,
   getDataFromLeadDetail,
@@ -682,6 +683,7 @@ export default {
       this.permissions = res.data.payload
       this.selectedCountry = this.permissions.countries[0]
     });
+    sellTeamsService.list({ byAgent: true }).then(res => console.log(res.data.payload))
   },
   mounted() {
     document.addEventListener("mouseup", (event) => {
