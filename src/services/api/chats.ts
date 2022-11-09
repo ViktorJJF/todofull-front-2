@@ -13,6 +13,9 @@ export default {
   listPermissions() {
     return axios.get(config.DASHBOARD_BASE_URL + `/api/chats/permissions`);
   },
+  listPermissionsByTeams(id) {
+    return axios.get(config.DASHBOARD_BASE_URL + `/api/chats/permissions/teams/${id}`);
+  },
   update(id, payload) {
     return axios.put(config.DASHBOARD_BASE_URL + `/api/chats/${id}`, payload);
   },

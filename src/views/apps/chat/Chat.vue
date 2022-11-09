@@ -49,6 +49,19 @@
                 v-model="searchContact"
               ></v-text-field>
             </div>
+            <div class="pa-3 pt-1" v-if="sellTeams.length">
+              <v-select
+                v-model="selectedSellTeam"
+                :items="sellTeams"
+                item-title="nombre"
+                item-value="_id"
+                variant="outlined"
+                density="compact"
+                hide-details
+                clearable
+                placeholder="Filtrar por equipo"
+              />
+            </div>
             <div class="px-5">
               <v-chip-group v-model="filterChats" active-class="primary--text">
                 <v-chip
@@ -662,8 +675,10 @@ export default {
         { text: 'Pendientes', value: 'pending' },
         { text: 'Sin Bot', value: 'no-bot' },
         { text: 'Recientes', value: 'recents' },
-        { text: 'Equipo', value: 'team' },
       ],
+      sellTeams: [],
+      selectedSellTeam: null,
+      teamPermissions: [],
       isLoadingMore: false,
       resetImage: 0,
       image: null,
@@ -673,17 +688,17 @@ export default {
       fileUrl: "",
       chatSidebar: null,
       selectedAgent: null,
-      permissions: null
+      userPermissions: null
     };
   },
   created() {
     this.chatSidebar = useChatSidebarStore()
     this.initialize();
     chatsService.listPermissions().then(res => {
-      this.permissions = res.data.payload
-      this.selectedCountry = this.permissions.countries[0]
+      this.userPermissions = res.data.payload
+      this.selectedCountry = this.userPermissions.countries[0]
     });
-    sellTeamsService.list({ byAgent: true }).then(res => console.log(res.data.payload))
+    sellTeamsService.list({ byAgent: true }).then(res => this.sellTeams = res.data.payload)
   },
   mounted() {
     document.addEventListener("mouseup", (event) => {
@@ -721,6 +736,9 @@ export default {
       }
       if (this.filterChats !== undefined) {
         payload.filterChats = this.filtersSource[this.filterChats].value;
+      }
+      if(this.selectedSellTeam) {
+        payload.teamId = this.selectedSellTeam;
       }
       await Promise.all([
         this.$store.dispatch("botsModule/list"),
@@ -915,6 +933,29 @@ export default {
       }
 
       this.selectedCountry = country.value
+    },
+    mergePermissions(teamPermissions, userPermissions) {
+      return teamPermissions.reduce((permissions, current) => {
+        const countries = [...permissions.countries]
+        for(const country of current.countries) {
+          if(!countries.includes(country)) countries.push(country)
+        }
+        const platforms = [...permissions.platforms]
+        for(const platform of current.platforms) {
+          if(!platforms.includes(platform)) platforms.push(platform)
+        }
+        const status = [...permissions.status]
+        for(const status of current.status) {
+          if(!status.includes(status)) status.push(status)
+        }
+        
+        return {
+          ...permissions,
+          countries,
+          platforms,
+          status,
+        };
+      }, userPermissions)
     },
     onSelectedAgent(agent) {
       this.selectedAgent=agent;
@@ -1134,6 +1175,13 @@ export default {
     },
   },
   computed: {
+    permissions() {
+      if(this.teamPermissions.length) {
+        return this.mergePermissions(this.teamPermissions, this.userPermissions)
+      }
+
+      return this.userPermissions;
+    },
     countriesSource() {
       if(!this.permissions) return [];
 
@@ -1182,6 +1230,15 @@ export default {
     selectedCountry() {
       this.page = 1;
       this.initialize();
+    },
+    selectedSellTeam(val) {
+      this.page = 1;
+      this.initialize()
+      if(val) {
+        chatsService.listPermissionsByTeams(val).then(res => this.teamPermissions = res.data.payload)
+      }else {
+        this.teamPermissions = [] 
+      }
     },
     async searchContact() {
       this.page = 1;
