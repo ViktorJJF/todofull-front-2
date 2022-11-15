@@ -1,4 +1,4 @@
-import api from "@/services/api/chats";
+import api from "@/services/api/negotiationStatusesLogs";
 import {
   buildSuccess,
   handleError,
@@ -8,12 +8,11 @@ import {
 const module = {
   namespaced: true,
   state: {
-    chats: [],
+    negotiationStatusesLogs: [],
     messages: [],
     selectedChat: null,
     total: 0,
     totalPages: 0,
-    hasPendingNegotiationStatus: false,
   },
   actions: {
     list({ commit }, query) {
@@ -87,7 +86,7 @@ const module = {
   },
   mutations: {
     list(state, data) {
-      state.chats = data;
+      state.negotiationStatusesLogs = data;
     },
     totalItems(state, data) {
       state.total = data;
@@ -96,35 +95,49 @@ const module = {
       state.totalPages = data;
     },
     create(state, data) {
-      state.chats.push(data);
+      state.negotiationStatusesLogs.push(data);
     },
     update(state, { id, data }) {
-      let indexToUpdate = state.chats.findIndex((member) => member._id == id);
-      state.chats.splice(indexToUpdate, 1, {
+      let indexToUpdate = state.negotiationStatusesLogs.findIndex(
+        (member) => member._id == id
+      );
+      state.negotiationStatusesLogs.splice(indexToUpdate, 1, {
         ...data,
       });
     },
     delete(state, id) {
-      let indexToDelete = state.chats.findIndex((member) => member._id == id);
-      state.chats.splice(indexToDelete, 1);
+      let indexToDelete = state.negotiationStatusesLogs.findIndex(
+        (member) => member._id == id
+      );
+      state.negotiationStatusesLogs.splice(indexToDelete, 1);
       state.total -= 1;
     },
-    setChats(state, data) {
-      state.chats = data;
+    setnegotiationStatusesLogs(state, data) {
+      state.negotiationStatusesLogs = data;
     },
     setSelectedChat(state, data) {
       state.selectedChat = data;
     },
     addChat(state, data) {
-      const index = state.chats.findIndex((chat) => chat._id == data._id);
+      const index = state.negotiationStatusesLogs.findIndex(
+        (chat) => chat._id == data._id
+      );
       if (index == -1) {
-        state.chats.unshift({ ...data, pending_messages_count: 0 });
+        state.negotiationStatusesLogs.unshift({
+          ...data,
+          pending_messages_count: 0,
+        });
       }
     },
     addChatToEnd(state, data) {
-      const index = state.chats.findIndex((chat) => chat._id == data._id);
+      const index = state.negotiationStatusesLogs.findIndex(
+        (chat) => chat._id == data._id
+      );
       if (index == -1) {
-        state.chats.push({ ...data, pending_messages_count: 0 });
+        state.negotiationStatusesLogs.push({
+          ...data,
+          pending_messages_count: 0,
+        });
       }
     },
     deletedMessage(state, data) {
@@ -143,10 +156,14 @@ const module = {
   },
   getters: {
     getChatById: (state) => (chatId) => {
-      return state.chats.filter((chat) => chat._id === chatId);
+      return state.negotiationStatusesLogs.filter(
+        (chat) => chat._id === chatId
+      );
     },
-    getSortedChats: (state) => {
-      return state.chats.sort((a, b) => b.updatedAt - a.updatedAt);
+    getSortednegotiationStatusesLogs: (state) => {
+      return state.negotiationStatusesLogs.sort(
+        (a, b) => b.updatedAt - a.updatedAt
+      );
     },
   },
 };

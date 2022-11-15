@@ -23,18 +23,18 @@
                   platform.text
                 }}</v-tooltip>
               </v-btn>
-              <v-divider class="mt-1" vertical/>
+              <v-divider class="mt-1" vertical />
               <v-btn
                 v-for="country of countriesSource"
                 small
                 icon
                 color="white"
                 @click="toggleCountry(country)"
-                :class="{selected: selectedCountry === country.value}"
+                :class="{ selected: selectedCountry === country.value }"
               >
-                <img style="width: 25px;" :src="country.icon" />
+                <img style="width: 25px" :src="country.icon" />
                 <v-tooltip activator="parent" anchor="bottom">
-                  {{country.value}}
+                  {{ country.value }}
                 </v-tooltip>
               </v-btn>
             </div>
@@ -815,6 +815,17 @@ export default {
         type,
         userId:user._id
       });
+      console.log("this.$store.state.chatsModule.hasPendingNegotiationStatus", this.$store.state.chatsModule.hasPendingNegotiationStatus)
+      // set negotiation status
+      if(this.$store.state.chatsModule.hasPendingNegotiationStatus){
+        this.$store.dispatch("negotiationStatusesModuleLogs/create",{
+    "negotiationStatusId": "636fc9aed31e5c701c0bb7c9",
+    "isCompleted": false,
+    "chatId": this.selectedChat._id,
+    "hasCronJob": true
+})
+this.$store.state.chatsModule.hasPendingNegotiationStatus=false
+      }
       scrollBottom();
     },
     clearForm() {
@@ -948,7 +959,7 @@ export default {
         for(const status of current.status) {
           if(!status.includes(status)) status.push(status)
         }
-        
+
         return {
           ...permissions,
           countries,
@@ -1067,7 +1078,7 @@ export default {
       if (this.searchContact.trim().length !== 0) { return; }
 
       this.isLoadingMore = true;
-      
+
       this.page += 1;
       let payload = {
         page: this.page,
@@ -1088,7 +1099,7 @@ export default {
       for (const chat of response.data.payload) {
         this.$store.commit("chatsModule/addChatToEnd", chat);
       }
-      
+
       this.isLoadingMore = false;
     },
     undoPendingMessagesCount() {
@@ -1138,7 +1149,7 @@ export default {
         this.fileName = "";
         this.fileUrl = "";
       }
-      
+
       this.sendFileMessage();
     },
     async sendImageMessage() {
