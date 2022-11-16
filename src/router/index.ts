@@ -46,6 +46,11 @@ const router = createRouter({
           component: () => import("@/views/categories/Categories.vue"),
         },
         {
+          name: "Attributes",
+          path: "apps/atributos",
+          component: () => import("@/views/attributes/Attributes.vue"),
+        },
+        {
           name: "ContactList",
           path: "apps/contact-list",
           component: () => import("@/views/apps/contact-list/ContactList.vue"),

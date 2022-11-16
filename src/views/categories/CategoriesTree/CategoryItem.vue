@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import type { PropType } from "vue";
 import type { CategoryItem } from "./types/categoryItem";
 import AddBtn from "./AddBtn.vue";
@@ -20,7 +20,13 @@ const props = defineProps({
   maxLevel: {
     type: Number,
   },
+  hideMappingBtn: {
+    type: Boolean,
+    default: false
+  }
 });
+
+const isMappingBtnVisible = ref(false);
 
 const showAddRight = computed(() => {
   return props.level < props.maxLevel;
@@ -29,13 +35,14 @@ const showAddRight = computed(() => {
 const emit = defineEmits<{
   (e: "addItem", parentId: string): void;
   (e: "updateItem", item: CategoryItem): void;
+  (e: "mappingClick", item: CategoryItem): void;
 }>();
 
 const handleAddItem = (parentId?: string) => {
   emit("addItem", parentId);
 };
 
-const handleUpdateItem = (item) => {
+const handleUpdateItem = (item: CategoryItem) => {
   emit("updateItem", item);
 };
 
@@ -44,6 +51,10 @@ const handleItemInput = (e: Event) => {
   const item = { ...props.item, name: value.trim() };
   handleUpdateItem(item);
 };
+
+const handleMappingClick = (item: CategoryItem) => {
+  emit('mappingClick', item)
+}
 </script>
 
 <template>
@@ -51,11 +62,25 @@ const handleItemInput = (e: Event) => {
     <div class="col d-flex align-center flex-column">
       <div
         class="box"
-        contenteditable
-        @input="handleItemInput"
         :style="{ backgroundColor: colors[level] }"
+        @mouseenter="isMappingBtnVisible = true"
+        @mouseleave="isMappingBtnVisible = false"
       >
-        {{ item.name }}
+        <div class="box-text" contenteditable @input="handleItemInput">
+          {{ item.name }}
+        </div>
+        <v-btn
+          v-if="!hideMappingBtn && isMappingBtnVisible"
+          class="box-action"
+          size="small"
+          icon
+          variant="text"
+          color="dark"
+          @click="handleMappingClick(item)"
+        >
+          <v-icon>mdi-sitemap-outline</v-icon>
+          <v-tooltip activator="parent" location="bottom">Mapeo</v-tooltip>
+        </v-btn>
       </div>
       <div v-if="showAddBottom" class="mt-3">
         <AddBtn @click="handleAddItem(item.parent)" :color="colors[level]" />
@@ -71,6 +96,7 @@ const handleItemInput = (e: Event) => {
         :key="innerItem._id"
         @add-item="handleAddItem"
         @update-item="handleUpdateItem"
+        @mapping-click="handleMappingClick"
       />
     </div>
     <div v-else-if="showAddRight" class="col d-flex justify-start">
@@ -106,5 +132,16 @@ const handleItemInput = (e: Event) => {
   justify-content: center;
   border: 1px solid #ccc;
   border-radius: 10px;
+  position: relative;
+}
+
+.box-text {
+  max-width: 75%;
+  text-align: center;
+}
+
+.box-action {
+  position: absolute;
+  right: 5px;
 }
 </style>

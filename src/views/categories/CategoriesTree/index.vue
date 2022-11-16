@@ -14,6 +14,7 @@ const emit = defineEmits<{
   (e: "addItem", parent?: string): void;
   (e: "addHeader"): void;
   (e: "updateItem", item: ICategoryItem): void;
+  (e: "mappingClick", item: ICategoryItem): void;
 }>();
 
 const handleAddItem = (parent?: string) => {
@@ -25,6 +26,9 @@ const handleAddHeader = () => {
 const handleUpdateItem = (item: ICategoryItem) => {
   emit("updateItem", item);
 };
+const handleMappingClick = (item: ICategoryItem) => {
+  emit("mappingClick", item);
+}
 </script>
 
 <template>
@@ -47,6 +51,7 @@ const handleUpdateItem = (item: ICategoryItem) => {
         :max-level="headers.length - 1"
         @add-item="handleAddItem"
         @update-item="handleUpdateItem"
+        @mapping-click="handleMappingClick"
       />
       <v-divider class="my-6" />
     </template>

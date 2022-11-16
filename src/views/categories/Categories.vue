@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import CategoriesTree from "./CategoriesTree/index.vue";
+import MapingDialog from "./MappingDialog.vue";
 import type { CategoryItem } from "./CategoriesTree/types/categoryItem";
 import type { Category } from "./types/category";
 import categoriesApi from "@/services/api/categories";
@@ -15,7 +16,9 @@ const headers = ref([
 ]);
 const categoriesToUpload = ref<CategoryItem[]>([]);
 const categories = ref<Category[]>([]);
-const saveLoading = ref(false);
+const isSaveLoading = ref(false);
+const selectedItem = ref<CategoryItem>(null);
+const isMappingDialogOpen = ref(false);
 
 categoriesApi.list().then((res) => {
   categories.value = res.data.payload;
@@ -25,6 +28,11 @@ const categoriesTree = computed(() => {
   // using slice to pass array as value
   return buildCategoriesTree(categories.value);
 });
+
+const handleMappingClick = (item: CategoryItem) => {
+  selectedItem.value = item;
+  isMappingDialogOpen.value = true;
+};
 
 const getChildren = (category: Category, list: Category[]) => {
   const childrens = [];
@@ -79,7 +87,7 @@ const handleUpdateItem = (item: CategoryItem) => {
 };
 
 const handleSave = async () => {
-  saveLoading.value = true;
+  isSaveLoading.value = true;
   const promises = categoriesToUpload.value.map(async (item) => {
     if (item.isNew) {
       await categoriesApi.create(item);
@@ -91,7 +99,7 @@ const handleSave = async () => {
   await Promise.allSettled(promises);
 
   categoriesToUpload.value = [];
-  saveLoading.value = false;
+  isSaveLoading.value = false;
 };
 </script>
 
@@ -102,7 +110,7 @@ const handleSave = async () => {
       <v-btn
         class="ml-3 mb-2"
         :disabled="!categoriesToUpload.length"
-        :loading="saveLoading"
+        :loading="isSaveLoading"
         @click="handleSave"
       >
         Guardar
@@ -113,7 +121,11 @@ const handleSave = async () => {
         @add-item="handleAddItem"
         @add-header="handleAddHeader"
         @update-item="handleUpdateItem"
+        @mapping-click="handleMappingClick"
       />
     </v-card-text>
+    <v-dialog v-model="isMappingDialogOpen" max-width="600px">
+      <MapingDialog :item="selectedItem" />
+    </v-dialog>
   </v-card>
 </template>
