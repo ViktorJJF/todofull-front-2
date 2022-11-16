@@ -23,18 +23,18 @@
                   platform.text
                 }}</v-tooltip>
               </v-btn>
-              <v-divider class="mt-1" vertical/>
+              <v-divider class="mt-1" vertical />
               <v-btn
                 v-for="country of countriesSource"
                 small
                 icon
                 color="white"
                 @click="toggleCountry(country)"
-                :class="{selected: selectedCountry === country.value}"
+                :class="{ selected: selectedCountry === country.value }"
               >
-                <img style="width: 25px;" :src="country.icon" />
+                <img style="width: 25px" :src="country.icon" />
                 <v-tooltip activator="parent" anchor="bottom">
-                  {{country.value}}
+                  {{ country.value }}
                 </v-tooltip>
               </v-btn>
             </div>
@@ -606,7 +606,7 @@ import socket from "@/plugins/sockets";
 import { es } from "date-fns/locale";
 import InfiniteScroll from "@/components/InfiniteScroll.vue";
 import BaseLeftRightPartVue from "@/components/BaseLeftRightPart.vue";
-import { buildSuccess } from "@/utils/utils.ts";
+import { buildSuccess,buildAlert } from "@/utils/utils.ts";
 import AgentsSelector from "@/components/AgentsSelector.vue";
 import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
 import { useChatSidebarStore } from '@/stores/chatSidebar'
@@ -748,6 +748,10 @@ export default {
       this.isDataReady = true;
     },
     async selectChat(chat) {
+      if(Object.keys(this.selectedChat).length>0 && this.userForm.todofullLabels.length === 0) {
+        // si existia chat antes y no habia etiquetas,mandar alerta
+        buildAlert(`No agregaste etiquetas a tu chat anterior, con : ${this.userForm.name}`, 'warning')
+      }
       this.clearForm();
       // salvar cantidad de mensajes pendientes, por si se quiere marcar no leido
       this.selectedPendingMessagesCount = chat.pending_messages_count;

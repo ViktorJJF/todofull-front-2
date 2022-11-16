@@ -104,6 +104,14 @@
           <v-row class="mb-3">
             <v-col>
               <v-btn
+                class="mb-2"
+                block
+                @click="copyAnswersAndSend('all')"
+                :disabled="!selectedVariations.length"
+              >
+                Copiar y Enviar
+              </v-btn>
+              <v-btn
                 block
                 @click="handleCopyAnswer('all')"
                 :disabled="!selectedVariations.length"
@@ -133,6 +141,7 @@ import ecommercesApi from "@/services/api/ecommerces";
 import { useChatSidebarStore } from "@/stores/chatSidebar";
 import { ref, watch, computed } from "vue";
 import { useStore } from "vuex";
+import { sendMessage } from "@/utils/utils";
 
 const isLoading = ref(false);
 const search = ref("");
@@ -164,6 +173,16 @@ const handleCopyAnswer = (type: string = "all") => {
     navigator.clipboard.writeText(message).then(() => {
       clipboardNotification.value = true;
     });
+  });
+};
+
+const copyAnswersAndSend = (type: string = "all") => {
+  getMessage(type).then((message) => {
+    console.log("🚀 Aqui *** -> message", message);
+    sendMessage(message, "Agente");
+    // navigator.clipboard.writeText(message).then(() => {
+    //   clipboardNotification.value = true;
+    // });
   });
 };
 

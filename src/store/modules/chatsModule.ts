@@ -147,6 +147,9 @@ const module = {
     getSortedChats: (state) => {
       return state.chats.sort((a, b) => b.updatedAt - a.updatedAt);
     },
+    getSelectedChat: (state) => {
+      return state.selectedChat;
+    },
   },
 };
 

@@ -1,3 +1,4 @@
+import socket from "@/plugins/sockets";
 import showdown from "showdown";
 import { isPast, format } from "date-fns";
 import { createToast } from "mosha-vue-toastify";
@@ -177,6 +178,10 @@ export const handleError = (error, commit, reject) => {
 
 export const buildSuccess = (msg: String) => {
   createToast(msg, { timeout: 3000, type: "success" });
+};
+
+export const buildAlert = (msg: String, type: any = "success") => {
+  createToast(msg, { timeout: 3000, type: type });
 };
 
 // Checks if tokenExpiration in localstorage date is past, if so then trigger an update
@@ -373,4 +378,29 @@ export const getFileNameFromUrl = (url) => {
 
 export const parseMarkdown = (text: String): String => {
   return converter.makeHtml(text);
+};
+
+export const sendMessage = (
+  text: String,
+  from: String = "Agente",
+  type: String = "text",
+  { url = "" } = {}
+) => {
+  console.log("mandando mensaje...");
+  const user = JSON.parse(localStorage.getItem("user"));
+  const selectedChat = store.getters["chatsModule/getSelectedChat"];
+  console.log("🚀 Aqui *** -> selectedChat", selectedChat);
+  socket.emit("AGENT_MESSAGE", {
+    senderId: selectedChat.leadId.contactId,
+    chatId: selectedChat._id,
+    text: text,
+    pageID: selectedChat.pageID,
+    platform: selectedChat.platform,
+    payload: {
+      url,
+    },
+    type,
+    userId: user._id,
+  });
+  scrollBottom();
 };
