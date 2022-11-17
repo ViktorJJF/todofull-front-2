@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import categoriesApi from "@/services/api/categories";
+import marketplacseApi from "@/services/api/marketplaces";
 import { ref, useAttrs, computed, watch } from 'vue';
 import type { PropType } from "vue";
 import type { Marketplace } from "../types/marketplace";
@@ -38,10 +38,10 @@ const selected = computed(() => categories.value.length ? props.modelValue[props
 const fetchCategories = async () => {
   loading.value = true
   if (props.parent) {
-    const res = await categoriesApi.listOneByMarketplace(props.marketplace._id, props.parent)
+    const res = await marketplacseApi.listCategory(props.marketplace._id, props.parent)
     categories.value = res.data.payload.children_categories;
   } else {
-    const res = await categoriesApi.listByMarketplaces(props.marketplace._id)
+    const res = await marketplacseApi.listCategories(props.marketplace._id)
     categories.value = res.data.payload;
   }
   loading.value = false

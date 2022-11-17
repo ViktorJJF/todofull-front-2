@@ -7,14 +7,6 @@ export default {
       params: query,
     });
   },
-  listByMarketplaces(id) {
-    return axios.get(config.DASHBOARD_BASE_URL + "/api/marketplace-categories/marketplaces/" + id);
-  },
-
-  listOneByMarketplace(id, categoryId) {
-    return axios.get(config.DASHBOARD_BASE_URL + `/api/marketplace-categories/marketplaces/${id}/categories/${categoryId}`);
-  },
-
   listOne(id: string) {
     return axios.get(config.DASHBOARD_BASE_URL + "/api/marketplace-categories/" + id);
   },
