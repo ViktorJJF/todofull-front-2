@@ -20,10 +20,6 @@ const props = defineProps({
   maxLevel: {
     type: Number,
   },
-  hideMappingBtn: {
-    type: Boolean,
-    default: false
-  }
 });
 
 const isMappingBtnVisible = ref(false);
@@ -34,7 +30,7 @@ const showAddRight = computed(() => {
 
 const emit = defineEmits<{
   (e: "addItem", parentId: string): void;
-  (e: "updateItem", item: CategoryItem): void;
+  (e: "update:item", item: CategoryItem): void;
   (e: "mappingClick", item: CategoryItem): void;
 }>();
 
@@ -43,7 +39,7 @@ const handleAddItem = (parentId?: string) => {
 };
 
 const handleUpdateItem = (item: CategoryItem) => {
-  emit("updateItem", item);
+  emit("update:item", item);
 };
 
 const handleItemInput = (e: Event) => {
@@ -70,7 +66,7 @@ const handleMappingClick = (item: CategoryItem) => {
           {{ item.name }}
         </div>
         <v-btn
-          v-if="!hideMappingBtn && isMappingBtnVisible"
+          v-if="isMappingBtnVisible"
           class="box-action"
           size="small"
           icon
@@ -89,14 +85,15 @@ const handleMappingClick = (item: CategoryItem) => {
     <div v-if="item.children.length" class="col col-wrapper">
       <CategoryItem
         v-for="(innerItem, i) of item.children"
+        :key="innerItem._id"
         :item="innerItem"
         :show-add-bottom="i === item.children.length - 1"
         :level="level + 1"
         :max-level="maxLevel"
-        :key="innerItem._id"
         @add-item="handleAddItem"
-        @update-item="handleUpdateItem"
+        @update:item="handleUpdateItem"
         @mapping-click="handleMappingClick"
+
       />
     </div>
     <div v-else-if="showAddRight" class="col d-flex justify-start">

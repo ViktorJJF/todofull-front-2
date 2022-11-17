@@ -1,29 +1,33 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import marketplacesApi from "@/services/api/marketplaces";
-import categoriesApi from "@/services/api/categories";
 import type { Marketplace } from "@/types/marketplace";
 import type { CategoryItem } from "./CategoriesTree/types/categoryItem";
-import _ from "lodash";
+import MercadolibreCategoriesSelect from '@/components/MercadolibreCategoriesSelect.vue'
+import SellercenterCategoriesSelect from '@/components/SellercenterCategoriesSelect.vue'
 
-defineProps<{
+const props = defineProps<{
   item: CategoryItem;
 }>();
 
+const emit = defineEmits<{
+  (e: 'update:item', item: CategoryItem): void
+}>()
+
 const marketplaces = ref<Marketplace[]>([]);
-const categories = ref(null);
+const localItem = ref({ ...props.item })
 
 marketplacesApi.list().then((res) => {
   marketplaces.value = res.data.payload;
 });
 
-categoriesApi.listByMarketplaces().then((res) => {
-  categories.value = _.groupBy(res.data.payload, "marketplaceId");
-});
+const handleSave = () => {
+  emit('update:item', localItem.value)
+}
 </script>
 
 <template>
-  <v-card v-if="categories">
+  <v-card>
     <v-card-title>{{ item.name }}</v-card-title>
     <v-card-text v-for="marketplace of marketplaces">
       {{ marketplace.name }}
@@ -33,25 +37,30 @@ categoriesApi.listByMarketplaces().then((res) => {
         density="compact"
         hide-details
       />
-      <v-select
+      <MercadolibreCategoriesSelect
         v-else-if="marketplace.type === 'mercadolibre'"
-        :items="categories[marketplace._id]"
-        item-value="id"
-        item-title="name"
+        :marketplace="marketplace"
         density="compact"
         variant="outlined"
         hide-details
+        clearable
+        placeholder="Seleccionar categoría"
+        v-model="localItem.mercadolibre"
       />
-      <v-text-field
-        v-else-if="marketplace.type === 'sellercenter'"
+      <SellercenterCategoriesSelect
+        v-if="marketplace.type === 'sellercenter'"
+        :marketplace="marketplace"
         variant="outlined"
         density="compact"
         hide-details
+        clearable
+        placeholder="Seleccionar categoría"
+        v-model="localItem.sellercenter"
       />
     </v-card-text>
     <v-card-actions>
       <v-spacer />
-      <v-btn>Guardar</v-btn>
+      <v-btn @click="handleSave">Guardar</v-btn>
     </v-card-actions>
   </v-card>
 </template>
