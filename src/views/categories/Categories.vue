@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import CategoriesTree from "./CategoriesTree/index.vue";
-import MapingDialog from "./MappingDialog.vue";
+import MapingForm from "./MappingForm.vue";
 import type { CategoryItem } from "./CategoriesTree/types/categoryItem";
-import type { Category } from "./types/category";
+import type { Category } from "@/types/category";
 import categoriesApi from "@/services/api/categories";
 import { v4 as uuidv4 } from "uuid";
 
@@ -140,7 +140,7 @@ const handleSave = async () => {
       />
     </v-card-text>
     <v-dialog v-model="isMappingDialogOpen" max-width="600px">
-      <MapingDialog :item="selectedItem" @update:item="handleMappingUpdateItem"/>
+      <MapingForm :item="selectedItem" @update:item="handleMappingUpdateItem"/>
     </v-dialog>
   </v-card>
 </template>
