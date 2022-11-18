@@ -13,6 +13,7 @@ const module = {
     selectedChat: null,
     total: 0,
     totalPages: 0,
+    hasToUpdateSelectedChat: false,
   },
   actions: {
     list({ commit }, query) {
@@ -131,6 +132,9 @@ const module = {
       if (message) {
         message.isActive = false;
       }
+    },
+    updateHasToUpdateSelectedChat(state, data) {
+      state.hasToUpdateSelectedChat = data;
     },
 
     setMessages(state, data) {

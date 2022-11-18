@@ -169,6 +169,14 @@
                     ></i>
                     {{ getChatUserName(selectedChat) }}
                   </h4>
+                  <span
+                    class="h6"
+                    v-if="
+                      selectedChat.leadId && selectedChat.leadId.follower_count
+                    "
+                    ><b>({{ selectedChat.leadId.follower_count }}</b>
+                    Seguidores)</span
+                  >
                 </div>
                 <v-spacer></v-spacer>
                 <v-btn
@@ -748,10 +756,10 @@ export default {
       this.isDataReady = true;
     },
     async selectChat(chat) {
-      if(Object.keys(this.selectedChat).length>0 && this.userForm.todofullLabels.length === 0) {
-        // si existia chat antes y no habia etiquetas,mandar alerta
-        buildAlert(`No agregaste etiquetas a tu chat anterior, con : ${this.userForm.name}`, 'warning')
-      }
+      // if(Object.keys(this.selectedChat).length>0 && this.userForm.todofullLabels.length === 0) {
+      //   // si existia chat antes y no habia etiquetas,mandar alerta
+      //   buildAlert(`No agregaste etiquetas a tu chat anterior, con : ${this.userForm.name}`, 'warning')
+      // }
       this.clearForm();
       // salvar cantidad de mensajes pendientes, por si se quiere marcar no leido
       this.selectedPendingMessagesCount = chat.pending_messages_count;
@@ -1263,7 +1271,22 @@ export default {
     filterChats() {
       this.page = 1;
       this.initialize();
-    },
+    },async '$store.state.chatsModule.hasToUpdateSelectedChat'() {
+    if(this.selectedChat){
+      try {
+        const updatedChat=(await chatsService.listOne(this.selectedChat._id)).data.payload;
+        if (updatedChat.leadId) {
+        this.userForm.todofullLabels = updatedChat.leadId.todofullLabels;
+      }
+      if (updatedChat.cleanLeadId) {
+        this.userForm.todofullLabels = updatedChat.cleanLeadId.todofullLabels;
+      }
+      this.updateLabels += 1;
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    }
   },
 };
 </script>

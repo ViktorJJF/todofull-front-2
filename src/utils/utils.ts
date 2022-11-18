@@ -4,6 +4,8 @@ import { isPast, format } from "date-fns";
 import { createToast } from "mosha-vue-toastify";
 import store from "@/store";
 import router from "@/router";
+import leadsApi from "@/services/api/leads";
+import cleanLeadsApi from "@/services/api/cleanLeads";
 
 // markdown
 const converter = new showdown.Converter({
@@ -180,8 +182,12 @@ export const buildSuccess = (msg: String) => {
   createToast(msg, { timeout: 3000, type: "success" });
 };
 
-export const buildAlert = (msg: String, type: any = "success") => {
-  createToast(msg, { timeout: 3000, type: type });
+export const buildAlert = (
+  msg: String,
+  type: any = "success",
+  timeout = 3000
+) => {
+  createToast(msg, { timeout, type: type });
 };
 
 // Checks if tokenExpiration in localstorage date is past, if so then trigger an update
@@ -389,18 +395,51 @@ export const sendMessage = (
   console.log("mandando mensaje...");
   const user = JSON.parse(localStorage.getItem("user"));
   const selectedChat = store.getters["chatsModule/getSelectedChat"];
-  console.log("🚀 Aqui *** -> selectedChat", selectedChat);
-  socket.emit("AGENT_MESSAGE", {
-    senderId: selectedChat.leadId.contactId,
-    chatId: selectedChat._id,
-    text: text,
-    pageID: selectedChat.pageID,
-    platform: selectedChat.platform,
-    payload: {
-      url,
-    },
-    type,
-    userId: user._id,
-  });
-  scrollBottom();
+  if (selectedChat) {
+    console.log("🚀 Aqui *** -> selectedChat", selectedChat);
+    socket.emit("AGENT_MESSAGE", {
+      senderId: selectedChat.leadId.contactId,
+      chatId: selectedChat._id,
+      text: text,
+      pageID: selectedChat.pageID,
+      platform: selectedChat.platform,
+      payload: {
+        url,
+      },
+      type,
+      userId: user._id,
+    });
+    scrollBottom();
+  }
+};
+
+export const addTodofullLabelsByChildren = async (
+  childrenIds: Array<string>
+) => {
+  const selectedChat = store.getters["chatsModule/getSelectedChat"];
+  let addedLabels = [];
+  try {
+    if (selectedChat) {
+      if (selectedChat.cleanLeadId) {
+        addedLabels = (
+          await cleanLeadsApi.addTodofullLabelsByChildren(
+            childrenIds,
+            selectedChat.cleanLeadId._id
+          )
+        ).data.payload;
+      } else if (selectedChat.leadId) {
+        addedLabels = (
+          await leadsApi.addTodofullLabelsByChildren(
+            childrenIds,
+            selectedChat.leadId._id
+          )
+        ).data.payload;
+      }
+    }
+    for (const addedLabel of addedLabels) {
+      buildAlert(`Etiqueta ${addedLabel.name} agregada`, "success", 6000);
+    }
+  } catch (error) {
+    console.log(error);
+  }
 };

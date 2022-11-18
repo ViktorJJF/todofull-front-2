@@ -80,4 +80,14 @@ export default {
   delete(id) {
     return axios.delete(config.DASHBOARD_BASE_URL + `/api/clean-leads/${id}`);
   },
+  addTodofullLabelsByChildren(childrenIds = [], cleanLeadId) {
+    return axios.post(
+      config.DASHBOARD_BASE_URL +
+        `/api/clean-leads/add-todofulllabels-by-children`,
+      {
+        childrenIds,
+        cleanLeadId,
+      }
+    );
+  },
 };

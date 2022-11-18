@@ -141,7 +141,7 @@ import ecommercesApi from "@/services/api/ecommerces";
 import { useChatSidebarStore } from "@/stores/chatSidebar";
 import { ref, watch, computed } from "vue";
 import { useStore } from "vuex";
-import { sendMessage } from "@/utils/utils";
+import { sendMessage, addTodofullLabelsByChildren } from "@/utils/utils";
 
 const isLoading = ref(false);
 const search = ref("");
@@ -177,9 +177,15 @@ const handleCopyAnswer = (type: string = "all") => {
 };
 
 const copyAnswersAndSend = (type: string = "all") => {
-  getMessage(type).then((message) => {
-    console.log("🚀 Aqui *** -> message", message);
+  getMessage(type).then(async (message) => {
+    const categoriesIds = selected.value.categories.map((el) => el._id);
+    await addTodofullLabelsByChildren(categoriesIds);
     sendMessage(message, "Agente");
+    chatSidebar.SET_SIDEBAR_DRAWER();
+    store.commit(
+      "chatsModule/updateHasToUpdateSelectedChat",
+      !store.state.chatsModule.hasToUpdateSelectedChat
+    );
     // navigator.clipboard.writeText(message).then(() => {
     //   clipboardNotification.value = true;
     // });
