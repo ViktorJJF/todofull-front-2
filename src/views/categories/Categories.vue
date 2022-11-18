@@ -78,12 +78,12 @@ const handleAddHeader = () => {
 };
 
 const handleUpdateItem = (item: CategoryItem) => {
-  let index = categories.value.findIndex(cat => cat._id === item._id)
-  
+  let index = categories.value.findIndex((cat) => cat._id === item._id);
+
   categories.value.splice(index, 1, item);
-  
-  index = categoriesToUpload.value.findIndex(cat => cat._id === item._id);
-  const isNew = index === -1
+
+  index = categoriesToUpload.value.findIndex((cat) => cat._id === item._id);
+  const isNew = index === -1;
   if (isNew) {
     return categoriesToUpload.value.push(item);
   }
@@ -92,9 +92,9 @@ const handleUpdateItem = (item: CategoryItem) => {
 };
 
 const handleMappingUpdateItem = async (item: CategoryItem) => {
-  handleUpdateItem(item)
-  isMappingDialogOpen.value = false
-}
+  handleUpdateItem(item);
+  isMappingDialogOpen.value = false;
+};
 
 const handleSave = async () => {
   isSaveLoading.value = true;
@@ -102,12 +102,12 @@ const handleSave = async () => {
     const res = item.isNew
       ? await categoriesApi.create(item)
       : await categoriesApi.update(item._id, item);
-    
+
     const itemRes = res.data.payload;
-    Object.assign(item, itemRes)
-    const index = categories.value.findIndex(o => o._id === itemRes._id)
-    if(index !== -1) {
-      categories.value.splice(index, 1, item)
+    Object.assign(item, itemRes);
+    const index = categories.value.findIndex((o) => o._id === itemRes._id);
+    if (index !== -1) {
+      categories.value.splice(index, 1, item);
     }
   });
 
@@ -140,7 +140,7 @@ const handleSave = async () => {
       />
     </v-card-text>
     <v-dialog v-model="isMappingDialogOpen" max-width="600px">
-      <MapingForm :item="selectedItem" @update:item="handleMappingUpdateItem"/>
+      <MapingForm :item="selectedItem" @update:item="handleMappingUpdateItem" />
     </v-dialog>
   </v-card>
 </template>

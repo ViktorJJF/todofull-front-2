@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import CategoriesSelect from "@/components/CategoriesSelect.vue";
+import MappingSection from "./MappingSection.vue";
 import type { SubmitEventPromise } from "vuetify";
 import type { Attribute } from "@/types/attribute";
 import type { AttributeTerm } from "@/types/attributeTerm";
@@ -43,6 +44,14 @@ const formTitle = computed(() => {
   return props.attribute ? "Modificar Atributo" : "Agregar Nuevo Atributo";
 });
 
+watch(categoriesSelected, (val) => {
+  if (val.length) {
+    Object.assign(editedItem.value, {
+      category: categoriesSelected.value.slice(-1)[0],
+    });
+  }
+});
+
 const handleAddTerm = () => {
   if (!term.value.name.trim().length) return;
   editedItem.value.terms.push(term.value);
@@ -53,14 +62,6 @@ const handleAddTerm = () => {
 };
 
 const handleSubmit = async (e: SubmitEventPromise) => {
-  e.preventDefault();
-
-  if (categoriesSelected.value.length) {
-    Object.assign(editedItem.value, {
-      category: categoriesSelected.value.slice(-1)[0],
-    });
-  }
-
   const isUpdate = editedItem.value._id;
   if (isUpdate) {
     const res = await attributesService.update(
@@ -78,7 +79,7 @@ const handleSubmit = async (e: SubmitEventPromise) => {
 
 <template>
   <v-card>
-    <v-form @submit="handleSubmit">
+    <v-form @submit.prevent="handleSubmit">
       <v-card-title>
         <v-icon color="primary" class="mr-1">mdi-update</v-icon>
         <span class="headline">{{ formTitle }}</span>
@@ -123,9 +124,19 @@ const handleSubmit = async (e: SubmitEventPromise) => {
               variant="outlined"
               density="compact"
               hide-details
+              clearable
+              placeholder="Selecciona una categoría"
             />
           </v-col>
         </v-row>
+        <v-row dense class="mb-2">
+          <v-col cols="12" sm="12" md="12">
+            <h3 class="mt-1">Mapeo de Atributos</h3>
+          </v-col>
+        </v-row>
+
+        <MappingSection :category="editedItem.category" />
+
         <v-row>
           <v-col cols="12">
             <div class="body-1 font-weight-bold">Términos</div>

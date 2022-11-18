@@ -2,7 +2,7 @@
 import marketplacseApi from "@/services/api/marketplaces";
 import { ref, useAttrs, computed, watch } from 'vue';
 import type { PropType } from "vue";
-import type { Marketplace } from "../types/marketplace";
+import type { Marketplace } from "@/types/marketplace";
 
 const attrs = useAttrs()
 
@@ -15,7 +15,7 @@ const props = defineProps({
     required: true
   },
   parent: {
-    type: Object
+    type: String,
   },
   level: {
     type: Number,
@@ -27,47 +27,38 @@ const emit = defineEmits<{
   (e: 'update:modelValue', payload: string[]): void
 }>()
 
-const rootCategories = ref([]);
+const categories = ref([]);
 const loading = ref(false);
 
-const categories = computed(() => {
-  if(props.parent) {
-    const categories = props.parent.Children.Category
-    return Array.isArray(categories)
-      ? categories
-      : [categories]
-  }
+// hide select when there is no more data
+const hidden = computed(() => categories.value.length === 0 && loading.value === false)
 
-  return rootCategories.value;
-})
-
-const selected = computed(() => {
-  if(!categories.value.length) return null;
-
-  const id = props.modelValue[props.level]
-  return categories.value.find(c => c.CategoryId === id)
-})
+const selected = computed(() => categories.value.length ? props.modelValue[props.level] : null)
 
 const fetchCategories = async () => {
-  loading.value = true;
-  const res = await marketplacseApi.listCategories(props.marketplace._id);
-  rootCategories.value = res.data.payload;
-  loading.value = false;
+  loading.value = true
+  if (props.parent) {
+    const res = await marketplacseApi.listCategory(props.marketplace._id, props.parent)
+    categories.value = res.data.payload.children_categories;
+  } else {
+    const res = await marketplacseApi.listCategories(props.marketplace._id)
+    categories.value = res.data.payload;
+  }
+  loading.value = false
 }
 
-if(!props.parent) {
-  fetchCategories()
-}
+fetchCategories()
 
 watch(() => props.parent, () => {
+  fetchCategories()
   const modelValue = props.modelValue.slice(0, props.level)
   emit('update:modelValue', modelValue)
 })
 
-const handleSelectChange = (val: any) => {
+const handleSelectChange = (val: string) => {
   let modelValue = [...props.modelValue];
   if(val) {
-    modelValue[props.level] = val.CategoryId;
+    modelValue[props.level] = val;
   }else {
     modelValue = modelValue.slice(0, props.level)
   }
@@ -82,17 +73,17 @@ const handleInnerChange = (modelValue) => {
 <template>
   <div :class="{ 'mt-2': parent }">
     <v-select
+      v-if="!hidden"
       :items="categories"
-      item-title="Name"
-      item-value="CategoryId"
-      return-object
+      item-title="name"
+      item-value="id"
       v-bind="attrs"
       :loading="loading"
       :modelValue="selected"
       @update:modelValue="handleSelectChange"
     />
-    <SellercenterCategoriesSelect
-      v-if="selected && selected.Children"
+    <MercadolibreCategoriesSelect
+      v-if="selected"
       :marketplace="marketplace"
       :parent="selected"
       v-bind="attrs"
