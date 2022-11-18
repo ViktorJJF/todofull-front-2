@@ -5,6 +5,13 @@ export default {
   list(query = { sort: "nombre", order: "1" }) {
     return axios.get(config.DASHBOARD_BASE_URL + "/api/marketplaces", { params: query });
   },
+  listCategories(id) {
+    return axios.get(config.DASHBOARD_BASE_URL + `/api/marketplaces/${id}/categories`);
+  },
+
+  listCategory(id, categoryId) {
+    return axios.get(config.DASHBOARD_BASE_URL + `/api/marketplaces/${id}/categories/${categoryId}`);
+  },
   update(id, payload) {
     return axios.put(config.DASHBOARD_BASE_URL + `/api/marketplaces/${id}`, payload);
   },

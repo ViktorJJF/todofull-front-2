@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import CategoriesTree from "./CategoriesTree/index.vue";
-import MapingDialog from "./MappingDialog.vue";
+import MapingForm from "./MappingForm.vue";
 import type { CategoryItem } from "./CategoriesTree/types/categoryItem";
-import type { Category } from "./types/category";
+import type { Category } from "@/types/category";
 import categoriesApi from "@/services/api/categories";
 import { v4 as uuidv4 } from "uuid";
 
@@ -36,7 +36,7 @@ const handleMappingClick = (item: CategoryItem) => {
 
 const getChildren = (category: Category, list: Category[]) => {
   const childrens = [];
-  for (const [index, item] of list.entries()) {
+  for (const item of list) {
     if (category._id === item.parent) {
       // mutating the object to avoid creating a new space in memory
       Object.assign(item, { children: getChildren(item, list) });
@@ -48,8 +48,8 @@ const getChildren = (category: Category, list: Category[]) => {
 
 const buildCategoriesTree = (categories): CategoryItem[] => {
   const items = [];
-  // find roots categories and remove them from base array
-  for (const [index, category] of categories.entries()) {
+
+  for (const category of categories) {
     if (category.parent === null) {
       // mutating the object to avoid creating a new space in memory
       Object.assign(category, { children: getChildren(category, categories) });
@@ -66,6 +66,8 @@ const handleAddItem = (parentId?: string) => {
     parent: parentId,
     children: [],
     isNew: true,
+    mercadolibre: [],
+    sellercenter: [],
   };
   categories.value.push(newItem);
   categoriesToUpload.value.push(newItem);
@@ -76,24 +78,37 @@ const handleAddHeader = () => {
 };
 
 const handleUpdateItem = (item: CategoryItem) => {
-  const index = categoriesToUpload.value.findIndex(
-    (cat) => cat._id === item._id
-  );
-  if (index !== -1) {
-    categoriesToUpload.value.splice(index, 1, item);
-    return;
+  let index = categories.value.findIndex(cat => cat._id === item._id)
+  
+  categories.value.splice(index, 1, item);
+  
+  index = categoriesToUpload.value.findIndex(cat => cat._id === item._id);
+  const isNew = index === -1
+  if (isNew) {
+    return categoriesToUpload.value.push(item);
   }
-  categoriesToUpload.value.push(item);
+
+  categoriesToUpload.value.splice(index, 1, item);
 };
+
+const handleMappingUpdateItem = async (item: CategoryItem) => {
+  handleUpdateItem(item)
+  isMappingDialogOpen.value = false
+}
 
 const handleSave = async () => {
   isSaveLoading.value = true;
   const promises = categoriesToUpload.value.map(async (item) => {
-    if (item.isNew) {
-      await categoriesApi.create(item);
-      return;
+    const res = item.isNew
+      ? await categoriesApi.create(item)
+      : await categoriesApi.update(item._id, item);
+    
+    const itemRes = res.data.payload;
+    Object.assign(item, itemRes)
+    const index = categories.value.findIndex(o => o._id === itemRes._id)
+    if(index !== -1) {
+      categories.value.splice(index, 1, item)
     }
-    await categoriesApi.update(item._id, item);
   });
 
   await Promise.allSettled(promises);
@@ -120,12 +135,12 @@ const handleSave = async () => {
         :items="categoriesTree"
         @add-item="handleAddItem"
         @add-header="handleAddHeader"
-        @update-item="handleUpdateItem"
+        @update:item="handleUpdateItem"
         @mapping-click="handleMappingClick"
       />
     </v-card-text>
     <v-dialog v-model="isMappingDialogOpen" max-width="600px">
-      <MapingDialog :item="selectedItem" />
+      <MapingForm :item="selectedItem" @update:item="handleMappingUpdateItem"/>
     </v-dialog>
   </v-card>
 </template>

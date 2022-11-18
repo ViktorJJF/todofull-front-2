@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import CategoriesSelect from "@/components/CategoriesSelect.vue";
 import type { SubmitEventPromise } from "vuetify";
-import type { Attribute } from "./types/attribute";
-import type { AttributeTerm } from "./types/attributeTerm";
-import { AttributeType } from "./types/attributeType";
+import type { Attribute } from "@/types/attribute";
+import type { AttributeTerm } from "@/types/attributeTerm";
+import { AttributeType } from "@/types/attributeType";
 import attributesService from "@/services/api/attributes";
+import categoriesService from "@/services/api/categories";
 
 const props = defineProps<{ attribute?: Attribute }>();
 
@@ -28,8 +30,14 @@ const typeOptions = ref([
   { title: "Text", value: AttributeType.Text },
   { title: "Color Picker", value: AttributeType.Color },
 ]);
-
 const loadingButton = ref(false);
+const categoriesSelected = ref([]);
+
+if (editedItem.value.category) {
+  categoriesService.listOne(editedItem.value.category).then((res) => {
+    categoriesSelected.value = res.data.payload.pathFromRoot.map((c) => c._id);
+  });
+}
 
 const formTitle = computed(() => {
   return props.attribute ? "Modificar Atributo" : "Agregar Nuevo Atributo";
@@ -47,9 +55,18 @@ const handleAddTerm = () => {
 const handleSubmit = async (e: SubmitEventPromise) => {
   e.preventDefault();
 
+  if (categoriesSelected.value.length) {
+    Object.assign(editedItem.value, {
+      category: categoriesSelected.value.slice(-1)[0],
+    });
+  }
+
   const isUpdate = editedItem.value._id;
   if (isUpdate) {
-    const res = await attributesService.update(editedItem.value._id, editedItem.value);
+    const res = await attributesService.update(
+      editedItem.value._id,
+      editedItem.value
+    );
     emit("save", res.data.payload);
     return;
   }
@@ -92,6 +109,17 @@ const handleSubmit = async (e: SubmitEventPromise) => {
               :items="typeOptions"
               v-model="editedItem.type"
               :rules="[(val) => !!val || 'El campo es requerido']"
+              variant="outlined"
+              density="compact"
+              hide-details
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <div class="body-1 font-weight-bold">Categoria</div>
+            <CategoriesSelect
+              v-model="categoriesSelected"
               variant="outlined"
               density="compact"
               hide-details

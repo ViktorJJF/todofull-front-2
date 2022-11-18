@@ -13,7 +13,7 @@ defineProps<{
 const emit = defineEmits<{
   (e: "addItem", parent?: string): void;
   (e: "addHeader"): void;
-  (e: "updateItem", item: ICategoryItem): void;
+  (e: "update:item", item: ICategoryItem): void;
   (e: "mappingClick", item: ICategoryItem): void;
 }>();
 
@@ -24,7 +24,7 @@ const handleAddHeader = () => {
   emit("addHeader");
 };
 const handleUpdateItem = (item: ICategoryItem) => {
-  emit("updateItem", item);
+  emit("update:item", item);
 };
 const handleMappingClick = (item: ICategoryItem) => {
   emit("mappingClick", item);
@@ -50,7 +50,7 @@ const handleMappingClick = (item: ICategoryItem) => {
         :show-add-bottom="i === items.length - 1"
         :max-level="headers.length - 1"
         @add-item="handleAddItem"
-        @update-item="handleUpdateItem"
+        @update:item="handleUpdateItem"
         @mapping-click="handleMappingClick"
       />
       <v-divider class="my-6" />

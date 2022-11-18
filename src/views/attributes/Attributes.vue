@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import CreateUpdate from "./CreateUpdate.vue";
-import type { Attribute } from "./types/attribute";
+import type { Attribute } from "@/types/attribute";
 import attributesService from "@/services/api/attributes";
 
 const attributes = ref<Attribute[]>([]);

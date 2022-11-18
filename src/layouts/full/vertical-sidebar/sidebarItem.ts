@@ -39,8 +39,13 @@ const items: SidebarItem[] = [
   },
   {
     title: "Categorias",
-    icon: "message-square",
+    icon: "disc",
     to: { name: 'Categories' }
+  },
+  {
+    title: "Atributos",
+    icon: "grid",
+    to: { name: 'Attributes' }
   },
   {
     title: "Calendar",
