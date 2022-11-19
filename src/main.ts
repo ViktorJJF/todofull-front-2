@@ -15,9 +15,14 @@ import moshaToasTify from "@/plugins/moshaToastify";
 import VueFeather from "vue-feather";
 import axios from "@/plugins/axios";
 
+//sweet alert
+import VueSweetalert2 from "vue-sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
+
 import "@/plugins/sockets";
 
 const app = createApp(App);
+app.use(VueSweetalert2);
 app.component(VueFeather.name, VueFeather);
 app.use(PerfectScrollbar);
 app.use(store);

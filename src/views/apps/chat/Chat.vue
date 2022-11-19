@@ -101,7 +101,7 @@
                     }"
                     v-for="(chat, i) in filteredChats"
                     :key="i"
-                    @click="() => selectChat(chat)"
+                    @click="selectChat(chat)"
                   >
                     <img
                       class="msg-profile"
@@ -591,6 +591,17 @@ text/plain, application/pdf"
         </v-container>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="alertDialog">
+      <v-card>
+        <v-container class="pa-5">
+          <h5>No colocaste etiquetas</h5>
+          <div>
+            <v-btn color="success">Continuar</v-btn>
+            <v-btn color="error">Cancelar</v-btn>
+          </div>
+        </v-container>
+      </v-card>
+    </v-dialog>
   </v-row>
 </template>
 
@@ -632,6 +643,7 @@ export default {
   },
   data() {
     return {
+      alertDialog:false,
       uploadingImage: false,
       uploadDialog: false,
       chat: null,
@@ -756,10 +768,20 @@ export default {
       this.isDataReady = true;
     },
     async selectChat(chat) {
-      // if(Object.keys(this.selectedChat).length>0 && this.userForm.todofullLabels.length === 0) {
-      //   // si existia chat antes y no habia etiquetas,mandar alerta
-      //   buildAlert(`No agregaste etiquetas a tu chat anterior, con : ${this.userForm.name}`, 'warning')
-      // }
+      if(Object.keys(this.selectedChat).length>0 && this.userForm.todofullLabels.length === 0) {
+        // si existia chat antes y no habia etiquetas,mandar alerta
+        let resp=await this
+        .$swal({
+          title:"No se agregaron etiquetas",
+          text:"No agregaste etiquetas a este chat ¿Seguro que quieres cambiar de chat?",
+          icon: "warning",
+          showCancelButton: true,
+          cancelButtonText: "Cancelar",
+        })
+      if(!resp.isConfirmed){
+        return;
+      }
+        }
       this.clearForm();
       // salvar cantidad de mensajes pendientes, por si se quiere marcar no leido
       this.selectedPendingMessagesCount = chat.pending_messages_count;
@@ -960,7 +982,7 @@ export default {
         for(const status of current.status) {
           if(!status.includes(status)) status.push(status)
         }
-        
+
         return {
           ...permissions,
           countries,
@@ -1079,7 +1101,7 @@ export default {
       if (this.searchContact.trim().length !== 0) { return; }
 
       this.isLoadingMore = true;
-      
+
       this.page += 1;
       let payload = {
         page: this.page,
@@ -1100,7 +1122,7 @@ export default {
       for (const chat of response.data.payload) {
         this.$store.commit("chatsModule/addChatToEnd", chat);
       }
-      
+
       this.isLoadingMore = false;
     },
     undoPendingMessagesCount() {
@@ -1150,7 +1172,7 @@ export default {
         this.fileName = "";
         this.fileUrl = "";
       }
-      
+
       this.sendFileMessage();
     },
     async sendImageMessage() {
