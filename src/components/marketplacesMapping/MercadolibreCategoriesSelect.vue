@@ -2,7 +2,7 @@
 import marketplacseApi from "@/services/api/marketplaces";
 import { ref, useAttrs, computed, watch } from 'vue';
 import type { PropType } from "vue";
-import type { Marketplace } from "../types/marketplace";
+import type { Marketplace } from "@/types/marketplace";
 
 const attrs = useAttrs()
 

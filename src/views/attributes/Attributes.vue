@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import CreateUpdate from "./CreateUpdate.vue";
+import CreateUpdate from "./CreateUpdate/index.vue";
 import type { Attribute } from "@/types/attribute";
 import attributesService from "@/services/api/attributes";
 
