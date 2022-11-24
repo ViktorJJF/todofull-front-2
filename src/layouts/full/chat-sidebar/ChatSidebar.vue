@@ -201,8 +201,8 @@ const buildUrl = async () => {
   const dto = {
     url: fullUrl,
     expiry: getExpiryDateTime(expiry),
-    metatitle: selected.value.categories[0] ? selected.value.categories[0].name : null,
-    metadescription: selected.value.name,
+    metatitle: selected.value.name,
+    metadescription: selected.value.categories[0] ? selected.value.categories[0].name : null,
   }
   const res = await chatsApi.shortenLink(dto);
   return res.data.payload.shorturl;
