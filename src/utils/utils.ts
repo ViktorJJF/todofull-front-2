@@ -443,3 +443,11 @@ export const addTodofullLabelsByChildren = async (
     console.log(error);
   }
 };
+
+export const getExpiryDateTime = (date: Date) => {
+  const dateISO = date.toISOString()
+
+  const datePart = dateISO.split('T')[0]
+
+  return `${datePart} 23:00:00`
+};
