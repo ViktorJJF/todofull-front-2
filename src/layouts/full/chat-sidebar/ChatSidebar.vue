@@ -141,7 +141,7 @@ import ecommercesApi from "@/services/api/ecommerces";
 import { useChatSidebarStore } from "@/stores/chatSidebar";
 import { ref, watch, computed } from "vue";
 import { useStore } from "vuex";
-import { sendMessage, addTodofullLabelsByChildren } from "@/utils/utils";
+import { sendMessage, addTodofullLabelsByChildren, getExpiryDateTime } from "@/utils/utils";
 
 const isLoading = ref(false);
 const search = ref("");
@@ -170,6 +170,7 @@ const handleClearVariations = () => {
 
 const handleCopyAnswer = (type: string = "all") => {
   getMessage(type).then((message) => {
+    console.log(message)
     navigator.clipboard.writeText(message).then(() => {
       clipboardNotification.value = true;
     });
@@ -186,9 +187,6 @@ const copyAnswersAndSend = (type: string = "all") => {
       "chatsModule/updateHasToUpdateSelectedChat",
       !store.state.chatsModule.hasToUpdateSelectedChat
     );
-    // navigator.clipboard.writeText(message).then(() => {
-    //   clipboardNotification.value = true;
-    // });
   });
 };
 
@@ -198,7 +196,15 @@ const buildUrl = async () => {
   const utmParams = `utm_content=${utmContent}&utm_medium=chattf&utm_source=${utmSource}`;
   const baseUrl = selected.value.permalink;
   const fullUrl = `${baseUrl}${baseUrl.endsWith("/") ? "" : "/"}?${utmParams}`;
-  const res = await chatsApi.shortenLink(fullUrl);
+  const expiry = new Date();
+  expiry.setMonth(expiry.getMonth() + 2) // expires in 2 months
+  const dto = {
+    url: fullUrl,
+    expiry: getExpiryDateTime(expiry),
+    metatitle: selected.value.name,
+    metadescription: selected.value.categories[0] ? selected.value.categories[0].name : null,
+  }
+  const res = await chatsApi.shortenLink(dto);
   return res.data.payload.shorturl;
 };
 
