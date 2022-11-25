@@ -330,10 +330,12 @@
                         </div>
                         <div
                           v-if="message.type === 'template'"
-                          class="chat-msg-text"
+                          class="chat-msg-text pa-3"
                         >
-                          <v-row justify="center">
-                            <div>
+                          <v-row justify="center ma-2">
+                            <div
+                              v-if="message.payload.hasOwnProperty('product')"
+                            >
                               <v-img
                                 class="rounded-corners"
                                 :src="
@@ -357,6 +359,71 @@
                                   }}
                                 </p>
                               </v-card>
+                            </div>
+                            <div v-else>
+                              <v-img
+                                class="rounded-corners ma-0 pa-0"
+                                :src="
+                                  message.payload.attachment.payload.elements[0]
+                                    .image_url
+                                "
+                                aspect-ratio="1"
+                                contain
+                                @click="openUrl(message.payload.post_url)"
+                              ></v-img>
+                              <v-card
+                                color="#F0F2F5"
+                                outlined
+                                class="pa-3 mb-1"
+                                width="200"
+                              >
+                                <strong>{{
+                                  message.payload.attachment.payload.elements[0]
+                                    .title
+                                }}</strong>
+                                <p class="mb-2">
+                                  {{
+                                    message.payload.attachment.payload
+                                      .elements[0].subtitle
+                                  }}
+                                </p>
+                                <v-btn
+                                  v-for="(button, btnIndex) in message.payload
+                                    .attachment.payload.elements[0].buttons"
+                                  :key="btnIndex"
+                                  small
+                                  class="wrapText mb-2"
+                                  block
+                                  outlined
+                                  color="primary"
+                                  @click="openLink"
+                                  ><a
+                                    v-if="button.type == 'web_url'"
+                                    :href="button.url"
+                                    target="_blank"
+                                    >{{ button.title }}</a
+                                  ><span v-else
+                                    >{{ button.title }}
+                                    <v-tooltip
+                                      activator="parent"
+                                      anchor="bottom"
+                                    >
+                                      {{ button.payload }}
+                                    </v-tooltip></span
+                                  >
+                                </v-btn>
+                              </v-card>
+                              <div v-if="message.payload.quick_replies">
+                                <v-chip
+                                  v-for="(reply, replyIdx) in message.payload
+                                    .quick_replies"
+                                  :multiple="false"
+                                  size="small"
+                                  :key="replyIdx"
+                                >
+                                  <strong>{{ reply.title }}</strong>
+                                </v-chip>
+                              </div>
                             </div>
                           </v-row>
                         </div>
@@ -1206,7 +1273,9 @@ export default {
         this.clear();
         return url;
       }
-    },
+    },openUrl(url){
+      window.open( url,'_blank')
+    }
   },
   computed: {
     permissions() {
@@ -1264,7 +1333,7 @@ export default {
         : !isNaN(this.selectedText)
         ? "phone"
         : "text";
-    },
+    }
   },
   watch: {
     messages() {
