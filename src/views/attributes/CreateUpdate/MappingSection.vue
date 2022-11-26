@@ -4,8 +4,13 @@ import type { Marketplace } from "@/types/marketplace";
 import marketplacseService from "@/services/api/marketplaces";
 import MercadolibreAttributesSelect from "@/components/marketplacesMapping/MercadolibreAttributesSelect.vue";
 
-const props = defineProps<{
+defineProps<{
+  mercadolibre: string;
   category: string;
+}>();
+
+const emits = defineEmits<{
+  (e: "update:mercadolibre", payload: any): void;
 }>();
 
 const marketplaces = ref<Marketplace[]>([]);
@@ -13,6 +18,10 @@ const marketplaces = ref<Marketplace[]>([]);
 marketplacseService
   .list()
   .then((res) => (marketplaces.value = res.data.payload));
+
+const handleChangeMercadolibre = (id: string) => {
+  emits("update:mercadolibre", id)
+}
 </script>
 
 <template>
@@ -28,6 +37,8 @@ marketplacseService
         hide-details
         clearable
         placeholder="Seleccion un atributo"
+        :model-value="mercadolibre"
+        @update:model-value="handleChangeMercadolibre"
       />
     </v-col>
   </v-row>

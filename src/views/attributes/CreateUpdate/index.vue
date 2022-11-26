@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import CategoriesSelect from "@/components/CategoriesSelect.vue";
 import MappingSection from "./MappingSection.vue";
+import CategoriesSection from "./CategoriesSection.vue";
 import type { SubmitEventPromise } from "vuetify";
 import type { Attribute } from "@/types/attribute";
 import type { AttributeTerm } from "@/types/attributeTerm";
 import { AttributeType } from "@/types/attributeType";
 import attributesService from "@/services/api/attributes";
-import categoriesService from "@/services/api/categories";
 
 const props = defineProps<{ attribute?: Attribute }>();
 
@@ -21,6 +20,8 @@ const editedItem = ref<Attribute>({
   type: props.attribute?.type || null,
   terms: props.attribute?.terms || [],
   category: props.attribute?.category || null,
+  categories: props.attribute?.categories || [],
+  mercadolibre: props.attribute?.mercadolibre || "",
 });
 const term = ref<AttributeTerm>({
   name: "",
@@ -33,12 +34,6 @@ const typeOptions = ref([
 ]);
 const loadingButton = ref(false);
 const categoriesSelected = ref([]);
-
-if (editedItem.value.category) {
-  categoriesService.listOne(editedItem.value.category).then((res) => {
-    categoriesSelected.value = res.data.payload.pathFromRoot.map((c) => c._id);
-  });
-}
 
 const formTitle = computed(() => {
   return props.attribute ? "Modificar Atributo" : "Agregar Nuevo Atributo";
@@ -116,26 +111,19 @@ const handleSubmit = async (e: SubmitEventPromise) => {
             />
           </v-col>
         </v-row>
-        <v-row>
-          <v-col>
-            <div class="body-1 font-weight-bold">Categoria</div>
-            <CategoriesSelect
-              v-model="categoriesSelected"
-              variant="outlined"
-              density="compact"
-              hide-details
-              clearable
-              placeholder="Selecciona una categoría"
-            />
-          </v-col>
-        </v-row>
+
+        <CategoriesSection v-model="editedItem.categories" />
+
         <v-row dense class="mb-2">
           <v-col cols="12" sm="12" md="12">
             <h3 class="mt-1">Mapeo de Atributos</h3>
           </v-col>
         </v-row>
 
-        <MappingSection :category="editedItem.category" />
+        <MappingSection
+          v-model:mercadolibre="editedItem.mercadolibre"
+          :category="editedItem.categories[0]"
+        />
 
         <v-row>
           <v-col cols="12">

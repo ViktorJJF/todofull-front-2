@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { ref, watch, useAttrs } from "vue";
-import type { Marketplace } from "@/src/types/marketplace";
+import type { Marketplace } from "@/types/marketplace";
 import marketplacesService from "@/services/api/marketplaces";
 
 const attrs = useAttrs();
 
 const props = defineProps<{
+  modelValue: String,
   marketplace: Marketplace;
   category: string;
+}>();
+
+const emits = defineEmits<{
+  (e: "update:model-value", payload: string): void
 }>();
 
 const attributes = ref([]);
@@ -20,6 +25,10 @@ const fetchAttributes = async () => {
 
   attributes.value = res.data.payload;
 };
+
+const handleChange = (id: string) => {
+  emits("update:model-value", id)
+}
 
 watch(
   () => props.category,
@@ -36,5 +45,7 @@ watch(
     item-title="name"
     item-value="id"
     v-bind="attrs"
+    :modelValue="modelValue"
+    @update:model-value="handleChange"
   />
 </template>
