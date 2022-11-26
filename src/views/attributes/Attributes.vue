@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import CreateUpdate from "./CreateUpdate/index.vue";
+import MappingForm from "./MappingForm.vue";
 import type { Attribute } from "@/types/attribute";
 import type { AttributeTerm } from "@/types/attributeTerm";
 import attributesService from "@/services/api/attributes";
@@ -89,6 +90,9 @@ const handleCreateUpdateChange = (value: boolean) => {
       @update:modelValue="handleCreateUpdateChange"
     >
       <CreateUpdate :attribute="selectedItem" @save="handleSave" />
+    </v-dialog>
+    <v-dialog v-model="isMappingFormVisible" max-width="600px">
+      <MappingForm :attribute="selectedItem" :term="selectedTerm" />
     </v-dialog>
   </v-container>
 </template>

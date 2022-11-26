@@ -36,7 +36,7 @@ const handleChangeMercadolibre = (id: string) => {
         density="compact"
         hide-details
         clearable
-        placeholder="Seleccion un atributo"
+        placeholder="Selecciona un atributo"
         :model-value="mercadolibre"
         @update:model-value="handleChangeMercadolibre"
       />

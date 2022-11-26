@@ -1,4 +1,5 @@
 export interface AttributeTerm {
   name: string,
-  description?: string
+  description?: string,
+  mercadolibre?: String
 }
