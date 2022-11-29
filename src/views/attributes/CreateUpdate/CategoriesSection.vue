@@ -21,7 +21,9 @@ const fetchInitialValues = async () => {
   }));
 };
 
-fetchInitialValues();
+if(props.modelValue.length) {
+  fetchInitialValues();
+}
 
 const handleAddItem = () => {
   items.value.push({

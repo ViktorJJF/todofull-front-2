@@ -114,13 +114,8 @@ const handleSubmit = async (e: SubmitEventPromise) => {
 
         <CategoriesSection v-model="editedItem.categories" />
 
-        <v-row dense class="mb-2">
-          <v-col cols="12" sm="12" md="12">
-            <h3 class="mt-1">Mapeo de Atributos</h3>
-          </v-col>
-        </v-row>
-
         <MappingSection
+          v-if="editedItem.categories.length"
           v-model:mercadolibre="editedItem.mercadolibre"
           :category="editedItem.categories[0]"
         />

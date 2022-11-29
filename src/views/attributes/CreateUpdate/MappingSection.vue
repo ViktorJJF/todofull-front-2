@@ -25,6 +25,12 @@ const handleChangeMercadolibre = (id: string) => {
 </script>
 
 <template>
+  <v-row dense class="mb-2">
+    <v-col cols="12" sm="12" md="12">
+      <h3 class="mt-1">Mapeo de Atributos</h3>
+    </v-col>
+  </v-row>
+  
   <v-row v-for="marketplace of marketplaces">
     <v-col>
       {{ marketplace.name }}
