@@ -323,10 +323,25 @@
                           ref="target"
                         ></div>
                         <div
-                          v-if="message.type === 'image'"
+                          v-if="
+                            message.type === 'image' ||
+                            message.type === 'sticker'
+                          "
                           class="chat-msg-text"
                         >
                           <img :src="message.payload.url" />
+                        </div>
+                        <div
+                          v-if="message.type === 'audio'"
+                          class="chat-msg-text"
+                        >
+                          <audio controls>
+                            <source
+                              :src="message.payload.url"
+                              type="audio/mp3"
+                            />
+                            Tu navegador no soporta audio HTML5.
+                          </audio>
                         </div>
                         <div
                           v-if="message.type === 'template'"

@@ -378,7 +378,7 @@ export const getDataFromLeadDetail = (leadDetail) => {
 export const getFileNameFromUrl = (url) => {
   // get string after .com and before -
   return url.includes(".amazonaws.com")
-    ? decodeURIComponent(url.split(".com/")[1].split("-")[0])
+    ? decodeURIComponent(url.split(".com/")[1].split("-")[1])
     : url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("?"));
 };
 
@@ -445,9 +445,9 @@ export const addTodofullLabelsByChildren = async (
 };
 
 export const getExpiryDateTime = (date: Date) => {
-  const dateISO = date.toISOString()
+  const dateISO = date.toISOString();
 
-  const datePart = dateISO.split('T')[0]
+  const datePart = dateISO.split("T")[0];
 
-  return `${datePart} 23:00:00`
+  return `${datePart} 23:00:00`;
 };
