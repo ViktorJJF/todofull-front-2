@@ -1,47 +1,47 @@
 <script setup lang="ts">
-import { ref, watch, useAttrs } from "vue";
+import { ref, useAttrs } from "vue";
 import type { Marketplace } from "@/types/marketplace";
 import marketplacesService from "@/services/api/marketplaces";
 
 const attrs = useAttrs();
 
 const props = defineProps<{
-  modelValue: String,
+  modelValue?: String;
   marketplace: Marketplace;
-  category: string;
+  categories: String[];
+  attribute: String;
 }>();
 
 const emits = defineEmits<{
-  (e: "update:model-value", payload: string): void
+  (e: "update:model-value", paload: String): void
 }>();
 
-const attributes = ref([]);
+const terms = ref([]);
 
-const fetchAttributes = async () => {
+const fethTerms = async () => {
   const res = await marketplacesService.listCategoryAttributes(
     props.marketplace._id,
-    props.category
+    props.categories[0]
   );
 
-  attributes.value = res.data.payload;
+  const attributes = res.data.payload;
+  const attribute = attributes.find((v) => v.id === props.attribute);
+
+  if (attribute && attribute.values) {
+    terms.value = terms.value = attribute.values;
+  }
 };
 
-const handleChange = (id: string) => {
+fethTerms();
+
+const handleChange = (id: String) => {
   emits("update:model-value", id)
 }
-
-watch(
-  () => props.category,
-  () => {
-    fetchAttributes();
-  },
-  { immediate: true }
-);
 </script>
 
 <template>
   <v-select
-    :items="attributes"
+    :items="terms"
     item-title="name"
     item-value="id"
     v-bind="attrs"
