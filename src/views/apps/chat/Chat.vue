@@ -268,13 +268,12 @@
                       >
                         <v-card
                           class="tooltip-text"
-                          :style="`${
+                          :style="'visibility:visible'"
+                          v-show="
                             showMessageOptions &&
                             this.selectedMessage &&
                             this.selectedMessage._id == message._id
-                              ? 'visibility:visible'
-                              : ''
-                          }`"
+                          "
                           id="top"
                         >
                           <v-btn-toggle divided>
