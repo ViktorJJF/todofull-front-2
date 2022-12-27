@@ -220,7 +220,7 @@
 
               <v-divider></v-divider>
               <!---chat Room-->
-              <div class="chat-room pa-4">
+              <div class="chat-room pa-4" @click="selectChatRoom">
                 <v-progress-circular
                   v-show="!isChatMessageReady"
                   class="v-progress-linear"
@@ -270,9 +270,12 @@
                           class="tooltip-text"
                           :style="'visibility:visible'"
                           v-show="
+                            selectedText &&
                             showMessageOptions &&
                             this.selectedMessage &&
-                            this.selectedMessage._id == message._id
+                            this.selectedMessage._id == message._id &&
+                            this.selectedMessageText._id ==
+                              this.selectedMessage._id
                           "
                           id="top"
                         >
@@ -737,6 +740,7 @@ export default {
       dialog: null,
       isErrorStory: false,
       selectedMessage: null,
+      selectedMessageText:null,
       search: "",
       fieldsToSearch: ["foreign_telefono", "foreign_name"],
       page: 1,
@@ -1222,6 +1226,8 @@ export default {
     onSelectedText() {
       this.showMessageOptions = true;
       this.selectedText = window.getSelection().toString();
+      console.log('🚀 Aqui *** -> this.selectedText', this.selectedText);
+      this.selectedMessageText = JSON.parse(JSON.stringify(this.selectedMessage));
     },
     getSelectedText() {
       return window.getSelection().toString();
@@ -1289,6 +1295,8 @@ export default {
       }
     },openUrl(url){
       window.open( url,'_blank')
+    },selectChatRoom(){
+      this.selectedText = window.getSelection().toString();
     }
   },
   computed: {
@@ -1347,7 +1355,8 @@ export default {
         : !isNaN(this.selectedText)
         ? "phone"
         : "text";
-    }
+    },
+    
   },
   watch: {
     messages() {
