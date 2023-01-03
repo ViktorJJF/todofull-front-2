@@ -550,7 +550,10 @@ text/plain, application/pdf"
                   variant="outlined"
                   hide-details
                   no-resize
-                  @keyup.enter="sendMessage(text)"
+                  @keyup.enter.exact.prevent="
+                    sendMessage(text, 'Agente', 'text')
+                  "
+                  @keydown.enter.shift.exact.prevent="text += '\n'"
                   :label="
                     selectedChat.isBotActive
                       ? 'Desactiva el chatbot para intervenir chat'
@@ -666,6 +669,12 @@ text/plain, application/pdf"
             @onSelectTodofullLabels="onSelectTodofullLabels"
             :key="updateLabels"
           ></TodofullLabelsSelector>
+          <span>Estados de Negociación</span>
+          <NegotiationStatusesSelector
+            class="my-3"
+            @onSelectNegotiationStatuses="onSelectNegotiationStatuses"
+            :key="updateNegotiationStatus"
+          ></NegotiationStatusesSelector>
           <v-textarea
             density="compact"
             hide-details
@@ -746,6 +755,7 @@ import BaseLeftRightPartVue from "@/components/BaseLeftRightPart.vue";
 import { buildSuccess,buildAlert } from "@/utils/utils.ts";
 import AgentsSelector from "@/components/AgentsSelector.vue";
 import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
+import NegotiationStatusesSelector from "@/components/NegotiationStatusesSelector.vue";
 import { useChatSidebarStore } from '@/stores/chatSidebar'
 import PeruFlagR from '@/assets/images/flags/peru.png'
 import ChileFlagR from '@/assets/images/flags/chile.png'
@@ -757,7 +767,7 @@ export default {
     AgentsSelector,
     TodofullLabelsSelector,
     InfiniteScroll,
-    UploadImages,
+    UploadImages,NegotiationStatusesSelector
   },
   data() {
     return {
@@ -797,6 +807,7 @@ export default {
         { value: 'Colombia', icon: ColombiaFlagR },
       ],
       updateLabels: 0,
+      updateNegotiationStatus:0,
       // userData
       userForm: {
         name: "",
@@ -952,6 +963,7 @@ export default {
         this.userForm.todofullLabels = chat.cleanLeadId.todofullLabels;
       }
       this.updateLabels += 1;
+      this.updateNegotiationStatus+=1;
     },
     sendMessage(text, from = "Agente", type = "text", { url } = {}) {
       const user = JSON.parse(localStorage.getItem("user"));
@@ -968,7 +980,18 @@ export default {
         type,
         userId:user._id
       });
+      // set negotiation status
+//       if(this.$store.state.chatsModule.hasPendingNegotiationStatus){
+//         this.$store.dispatch("negotiationStatusesModuleLogs/create",{
+//     "negotiationStatusId": "636fc9aed31e5c701c0bb7c9",
+//     "isCompleted": false,
+//     "chatId": this.selectedChat._id,
+//     "hasCronJob": true
+// })
+// this.$store.state.chatsModule.hasPendingNegotiationStatus=false
+//       }
       scrollBottom();
+    
     },
     clearForm() {
       this.userForm.name = "";
@@ -1331,6 +1354,8 @@ export default {
       window.open( url,'_blank')
     },selectChatRoom(){
       this.selectedText = window.getSelection().toString();
+    },onSelectNegotiationStatuses(){
+
     }
   },
   computed: {

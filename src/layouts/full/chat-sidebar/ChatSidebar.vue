@@ -173,6 +173,7 @@ const handleCopyAnswer = (type: string = "all") => {
     console.log(message)
     navigator.clipboard.writeText(message).then(() => {
       clipboardNotification.value = true;
+      store.state.chatsModule.hasPendingNegotiationStatus = true;
     });
   });
 };

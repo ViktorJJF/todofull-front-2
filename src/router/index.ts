@@ -41,6 +41,11 @@ const router = createRouter({
           component: () => import("@/views/apps/chat/Chat.vue"),
         },
         {
+          name: "NegotiationStatuses",
+          path: "apps/estados-negociacion",
+          component: () => import("@/views/NegotiationStatuses.vue"),
+        },
+        {
           name: "Categories",
           path: "apps/categorias",
           component: () => import("@/views/categories/Categories.vue"),

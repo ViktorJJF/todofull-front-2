@@ -1,0 +1,107 @@
+<template>
+  <v-select
+    hide-details
+    variant="outlined"
+    :disabled="disabled"
+    placeholder="Selecciona el estado de negociación"
+    class="mt-3"
+    v-model="selectedNegotiationStatuses"
+    :items="negotiationStatuses"
+    no-data-text="No se encontraron estados de negociación"
+    outlined
+  >
+  </v-select>
+</template>
+
+<script>
+export default {
+  props: {
+    initialData: {
+      type: Array,
+      default: () => [],
+    },
+    // disabled: {
+    //   type: Boolean,
+    //   default: false,
+    // },
+  },
+  data() {
+    return {
+      disabled: false,
+      negotiationStatuses: [],
+      selectedNegotiationStatuses: [],
+      searchLabel: "",
+      isInidialDataLoading: false,
+      isInitialDataExecuted: false,
+    };
+  },
+  watch: {
+    // initialData: {
+    //   handler() {
+    //     if (!this.isInitialDataExecuted && this.initialData.length > 0) {
+    //       this.selectedNegotiationStatuses = this.initialData.map((el) => el._id);
+    //       this.isInitialDataExecuted = true;
+    //     }
+    //   },
+    //   immediate: true,
+    // },
+    selectedNegotiationStatuses: {
+      handler(newValue, oldValue) {
+        this.searchLabel = "";
+        this.$emit(
+          "onSelectNegotiationStatuses",
+          JSON.parse(JSON.stringify(this.selectedNegotiationStatuses))
+        );
+        this.disabled = true;
+        setTimeout(() => {
+          this.disabled = false;
+        }, 0);
+      },
+      deep: true,
+    },
+  },
+  async mounted() {
+    this.selectedNegotiationStatuses = this.initialData.map((el) => {
+      return el._id;
+    });
+    if (
+      this.$store.state.todofullLabelsModule.negotiationStatuses.length === 0
+    ) {
+      await this.$store.dispatch("negotiationStatusesModule/list", {
+        sort: "name",
+        order: "asc",
+      });
+    }
+    this.negotiationStatuses =
+      this.$store.state.negotiationStatusesModule.negotiationStatuses.map(
+        (el) => ({
+          value: el._id,
+          title: el.name,
+        })
+      );
+    console.log(
+      "🚀 Aqui *** -> this.negotiationStatuses",
+      this.negotiationStatuses
+    );
+  },
+  methods: {
+    async removeLabels(selectedLabels, label) {
+      selectedLabels.splice(
+        selectedLabels.findIndex((el) => el._id === label._id),
+        1
+      );
+      this.$emit(
+        "onSelectNegotiationStatuses",
+        this.selectedNegotiationStatuses
+      );
+    },
+    getLabelTitle(value) {
+      const label = this.negotiationStatuses.find((el) => el.value == value);
+      return label ? label.title : "";
+    },
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+</style>
