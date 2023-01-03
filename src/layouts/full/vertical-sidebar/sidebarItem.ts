@@ -3,13 +3,13 @@ interface sideberItemTo {
 }
 
 interface SidebarItem {
-  header?: string,
-  group?: string,
-  title?: string,
-  icon?: string,
-  model?: boolean,
-  children?: SidebarItem[],
-  to?: string | sideberItemTo,
+  header?: string;
+  group?: string;
+  title?: string;
+  icon?: string;
+  model?: boolean;
+  children?: SidebarItem[];
+  to?: string | sideberItemTo;
 }
 
 const items: SidebarItem[] = [
@@ -40,12 +40,17 @@ const items: SidebarItem[] = [
   {
     title: "Categorias",
     icon: "disc",
-    to: { name: 'Categories' }
+    to: { name: "Categories" },
+  },
+  {
+    title: "Estados de negociación",
+    icon: "disc",
+    to: { name: "NegotiationStatuses" },
   },
   {
     title: "Atributos",
     icon: "grid",
-    to: { name: 'Attributes' }
+    to: { name: "Attributes" },
   },
   {
     title: "Calendar",
@@ -413,4 +418,4 @@ const items: SidebarItem[] = [
   },
 ];
 
-export default items
+export default items;
