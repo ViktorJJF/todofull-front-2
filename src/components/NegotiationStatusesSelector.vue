@@ -17,8 +17,8 @@
 export default {
   props: {
     initialData: {
-      type: Array,
-      default: () => [],
+      type: Object,
+      default: {},
     },
     // disabled: {
     //   type: Boolean,
@@ -36,36 +36,30 @@ export default {
     };
   },
   watch: {
-    // initialData: {
-    //   handler() {
-    //     if (!this.isInitialDataExecuted && this.initialData.length > 0) {
-    //       this.selectedNegotiationStatuses = this.initialData.map((el) => el._id);
-    //       this.isInitialDataExecuted = true;
-    //     }
-    //   },
-    //   immediate: true,
-    // },
     selectedNegotiationStatuses: {
       handler(newValue, oldValue) {
         this.searchLabel = "";
-        this.$emit(
-          "onSelectNegotiationStatuses",
-          JSON.parse(JSON.stringify(this.selectedNegotiationStatuses))
-        );
-        this.disabled = true;
-        setTimeout(() => {
-          this.disabled = false;
-        }, 0);
+        if (this.selectedNegotiationStatuses) {
+          this.$emit(
+            "onSelectNegotiationStatuses",
+            JSON.parse(JSON.stringify(this.selectedNegotiationStatuses))
+          );
+          this.disabled = true;
+          setTimeout(() => {
+            this.disabled = false;
+          }, 0);
+        }
       },
       deep: true,
     },
   },
   async mounted() {
-    this.selectedNegotiationStatuses = this.initialData.map((el) => {
-      return el._id;
-    });
+    if (this.initialData) {
+      this.selectedNegotiationStatuses = this.initialData._id;
+    }
     if (
-      this.$store.state.todofullLabelsModule.negotiationStatuses.length === 0
+      this.$store.state.negotiationStatusesModule.negotiationStatuses.length ===
+      0
     ) {
       await this.$store.dispatch("negotiationStatusesModule/list", {
         sort: "name",

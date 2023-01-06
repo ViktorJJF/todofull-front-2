@@ -30,4 +30,13 @@ export default {
       config.DASHBOARD_BASE_URL + `/api/negotiation-statuses-logs/${id}`
     );
   },
+  listLastByLeadId({ leadId, cleanLeadId }) {
+    return axios.get(
+      config.DASHBOARD_BASE_URL +
+        `/api/negotiation-statuses-logs/last-by-lead-id`,
+      {
+        params: { leadId, cleanLeadId },
+      }
+    );
+  },
 };

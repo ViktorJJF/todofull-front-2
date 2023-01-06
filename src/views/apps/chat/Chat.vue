@@ -62,23 +62,49 @@
                 placeholder="Filtrar por equipo"
               />
             </div>
-            <div class="px-5">
-              <v-chip-group v-model="filterChats" active-class="primary--text">
-                <v-chip
-                  v-for="filter in filtersSource"
-                  color="success"
-                  :multiple="false"
-                  size="small"
-                  :key="filter"
-                >
-                  <strong>{{ filter.text }}</strong>
-                </v-chip>
-              </v-chip-group>
+            <div class="pa-3 pt-1">
+              <v-select
+                v-model="selectedFilterNegotiationStatus"
+                :items="
+                  this.$store.state.negotiationStatusesModule
+                    .negotiationStatuses
+                "
+                item-title="name"
+                item-value="_id"
+                variant="outlined"
+                density="compact"
+                hide-details
+                clearable
+                placeholder="Filtrar por estado de negociación"
+              />
             </div>
             <div class="px-5">
-              <h6>Total: {{ $store.state.chatsModule.total }}</h6>
-              <h6>Mostrando: {{ $store.state.chatsModule.chats.length }}</h6>
+              <v-row>
+                <v-col cols="12" sm="9">
+                  <v-chip-group
+                    v-model="filterChats"
+                    active-class="primary--text"
+                  >
+                    <v-chip
+                      v-for="filter in filtersSource"
+                      color="success"
+                      :multiple="false"
+                      size="small"
+                      :key="filter"
+                    >
+                      <strong>{{ filter.text }}</strong>
+                    </v-chip>
+                  </v-chip-group>
+                </v-col>
+                <v-col cols="12" sm="3">
+                  <h6>Total: {{ $store.state.chatsModule.total }}</h6>
+                  <h6>
+                    Mostrando: {{ $store.state.chatsModule.chats.length }}
+                  </h6>
+                </v-col>
+              </v-row>
             </div>
+            <div class="px-5"></div>
 
             <v-list>
               <!---/chat list -->
@@ -447,7 +473,6 @@
                                   block
                                   outlined
                                   color="primary"
-                                  @click="openLink"
                                   ><a
                                     v-if="button.type == 'web_url'"
                                     :href="button.url"
@@ -671,6 +696,7 @@ text/plain, application/pdf"
           ></TodofullLabelsSelector>
           <span>Estados de Negociación</span>
           <NegotiationStatusesSelector
+            :initialData="selectedNegotiationStatus"
             class="my-3"
             @onSelectNegotiationStatuses="onSelectNegotiationStatuses"
             :key="updateNegotiationStatus"
@@ -771,6 +797,7 @@ export default {
   },
   data() {
     return {
+      selectedFilterNegotiationStatus:null,
       alertDialog:false,
       uploadingImage: false,
       uploadDialog: false,
@@ -838,7 +865,8 @@ export default {
       fileUrl: "",
       chatSidebar: null,
       selectedAgent: null,
-      userPermissions: null
+      userPermissions: null,
+      selectedNegotiationStatus: null,
     };
   },
   created() {
@@ -889,6 +917,9 @@ export default {
       }
       if(this.selectedSellTeam) {
         payload.teamId = this.selectedSellTeam;
+      }
+      if(this.selectedFilterNegotiationStatus){
+        payload.negotiationStatusId=this.selectedFilterNegotiationStatus;
       }
       await Promise.all([
         this.$store.dispatch("botsModule/list"),
@@ -962,6 +993,10 @@ export default {
 
         this.userForm.todofullLabels = chat.cleanLeadId.todofullLabels;
       }
+     let negotiationStatus=await this.$store.dispatch("negotiationStatusesLogsModule/listLastByLeadId",{leadId:this.selectedChat.leadId._id,cleanLeadId:this.selectedChat.cleanLeadId?._id})
+      if(negotiationStatus){
+         this.selectedNegotiationStatus=negotiationStatus.negotiationStatusId;
+      }
       this.updateLabels += 1;
       this.updateNegotiationStatus+=1;
     },
@@ -982,7 +1017,7 @@ export default {
       });
       // set negotiation status
 //       if(this.$store.state.chatsModule.hasPendingNegotiationStatus){
-//         this.$store.dispatch("negotiationStatusesModuleLogs/create",{
+//         this.$store.dispatch("negotiationStatusesLogsModule/create",{
 //     "negotiationStatusId": "636fc9aed31e5c701c0bb7c9",
 //     "isCompleted": false,
 //     "chatId": this.selectedChat._id,
@@ -991,7 +1026,7 @@ export default {
 // this.$store.state.chatsModule.hasPendingNegotiationStatus=false
 //       }
       scrollBottom();
-    
+
     },
     clearForm() {
       this.userForm.name = "";
@@ -1158,8 +1193,9 @@ export default {
       }
     },
     async saveUserForm() {
+      let createdItem;
       if (this.userForm.phone) {
-        let createdItem = await this.$store.dispatch(
+        createdItem = await this.$store.dispatch(
           "cleanLeadsModule/create",
           {
             telefono: this.userForm.phone,
@@ -1195,7 +1231,7 @@ export default {
           }
         );
         // actualizando referencia a lead y chat
-        await Promise.all([
+        let promises=[
           this.$store.dispatch("leadsModule/update", {
             id: this.selectedChat.leadId._id,
             data: { cleanLeadId: createdItem._id },
@@ -1206,7 +1242,9 @@ export default {
             data: { cleanLeadId: createdItem._id },
             notifyUser: false,
           }),
-        ]);
+        ]
+
+        await Promise.all(promises);
       } else {
         await this.$store.dispatch("leadsModule/update", {
           id: this.selectedChat.leadId._id,
@@ -1219,6 +1257,19 @@ export default {
           },
         });
       }
+      if(this.selectedNegotiationStatus){
+          this.$store.dispatch("negotiationStatusesLogsModule/create",{
+            "negotiationStatusId": this.selectedNegotiationStatus,
+            "isCompleted": false,
+            "chatId": this.selectedChat._id,
+            "cleanLeadId": createdItem?._id,"leadId":this.selectedChat.leadId._id,"hasCronJob": true});
+          this.$store.dispatch("chatsModule/update", {
+            id: this.selectedChat._id,
+            data: { negotiationStatusId: this.selectedNegotiationStatus },
+            notifyUser: false,
+          });
+          
+        }
     },
     getFileNameFromUrl(url) {
       return getFileNameFromUrl(url);
@@ -1256,6 +1307,9 @@ export default {
       }
       if (this.selectedCountry) {
         payload.selectedCountry = this.selectedCountry;
+      }
+      if(this.selectedFilterNegotiationStatus){
+        payload.negotiationStatusId=this.selectedFilterNegotiationStatus;
       }
       if (this.filterChats !== undefined) {
         payload.filterChats = this.filtersSource[this.filterChats].value;
@@ -1354,8 +1408,8 @@ export default {
       window.open( url,'_blank')
     },selectChatRoom(){
       this.selectedText = window.getSelection().toString();
-    },onSelectNegotiationStatuses(){
-
+    },onSelectNegotiationStatuses(negotiationStatus){
+      this.selectedNegotiationStatus=negotiationStatus;
     }
   },
   computed: {
@@ -1415,7 +1469,7 @@ export default {
         ? "phone"
         : "text";
     },
-    
+
   },
   watch: {
     messages() {
@@ -1433,6 +1487,15 @@ export default {
       }else {
         this.teamPermissions = []
       }
+    },
+    selectedFilterNegotiationStatus(val) {
+      this.page = 1;
+      this.initialize()
+      // if(val) {
+      //   chatsService.listPermissionsByTeams(val).then(res => this.teamPermissions = res.data.payload)
+      // }else {
+      //   this.teamPermissions = []
+      // }
     },
     async searchContact() {
       this.page = 1;

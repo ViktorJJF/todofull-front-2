@@ -452,7 +452,7 @@ export const getExpiryDateTime = (date: Date) => {
   return `${datePart} 23:00:00`;
 };
 
-export const padTo2Digits = (num: number) => {
+export const padTo2Digits = (num: any) => {
   return num.toString().padStart(2, "0");
 };
 
