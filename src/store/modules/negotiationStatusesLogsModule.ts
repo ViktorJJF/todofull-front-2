@@ -33,6 +33,20 @@ const module = {
           });
       });
     },
+    listLastByLeadId({ commit }, query) {
+      commit("loadingModule/showLoading", false, { root: true });
+      return new Promise((resolve, reject) => {
+        api
+          .listLastByLeadId(query)
+          .then((response) => {
+            commit("loadingModule/showLoading", false, { root: true });
+            resolve(response.data);
+          })
+          .catch((error) => {
+            handleError(error, commit, reject);
+          });
+      });
+    },
     create({ commit }, data) {
       return new Promise((resolve, reject) => {
         api

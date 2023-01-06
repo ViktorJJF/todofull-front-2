@@ -148,6 +148,7 @@ export default {
     };
   },
   mounted() {
+    console.log("gaaa");
     this.initialize();
   },
   methods: {
@@ -162,6 +163,10 @@ export default {
         JSON.stringify(
           this.$store.state.negotiationStatusesModule.negotiationStatuses
         )
+      );
+      console.log(
+        "🚀 Aqui *** -> this.negotiationStatuses",
+        this.negotiationStatuses
       );
       // dar formato a autoActivateAfter
       for (const negotiationStatus of this.negotiationStatuses) {
