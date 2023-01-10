@@ -25,7 +25,10 @@ export default {
     // Detect when scrolled to bottom.
     const listElm = document.querySelector("#infinite-list");
     listElm.addEventListener("scroll", () => {
-      if (listElm.scrollTop + listElm.clientHeight >= listElm.scrollHeight) {
+      if (
+        listElm.scrollTop + listElm.clientHeight >=
+        listElm.scrollHeight * 0.7
+      ) {
         this.loadMore();
         this.$emit("loadMore");
       }
