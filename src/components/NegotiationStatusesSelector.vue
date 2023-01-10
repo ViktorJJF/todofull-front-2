@@ -9,6 +9,7 @@
     :items="negotiationStatuses"
     no-data-text="No se encontraron estados de negociación"
     outlined
+    clearable
   >
   </v-select>
 </template>
@@ -39,16 +40,18 @@ export default {
     selectedNegotiationStatuses: {
       handler(newValue, oldValue) {
         this.searchLabel = "";
-        if (this.selectedNegotiationStatuses) {
-          this.$emit(
-            "onSelectNegotiationStatuses",
-            JSON.parse(JSON.stringify(this.selectedNegotiationStatuses))
-          );
-          this.disabled = true;
-          setTimeout(() => {
-            this.disabled = false;
-          }, 0);
-        }
+        // if (this.selectedNegotiationStatuses) {
+        this.$emit(
+          "onSelectNegotiationStatuses",
+          this.selectedNegotiationStatuses
+            ? JSON.parse(JSON.stringify(this.selectedNegotiationStatuses))
+            : null
+        );
+        this.disabled = true;
+        setTimeout(() => {
+          this.disabled = false;
+        }, 0);
+        // }
       },
       deep: true,
     },
