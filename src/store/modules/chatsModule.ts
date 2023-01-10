@@ -150,7 +150,14 @@ const module = {
       return state.chats.filter((chat) => chat._id === chatId);
     },
     getSortedChats: (state) => {
-      return state.chats.sort((a, b) => b.updatedAt - a.updatedAt);
+      // separate array chats with pending_messages_count
+      const chatsWithPendingMessages = state.chats
+        .filter((chat) => chat.pending_messages_count > 0)
+        .sort((a, b) => b.updatedAt - a.updatedAt);
+      const chatsWithoutPendingMessages = state.chats
+        .filter((chat) => !chat.pending_messages_count)
+        .sort((a, b) => b.updatedAt - a.updatedAt);
+      return [...chatsWithPendingMessages, ...chatsWithoutPendingMessages];
     },
     getSelectedChat: (state) => {
       return state.selectedChat;
