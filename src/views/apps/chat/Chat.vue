@@ -97,9 +97,9 @@
                   </v-chip-group>
                 </v-col>
                 <v-col cols="12" sm="3">
-                  <h6>Total: {{ $store.state.chatsModule.total }}</h6>
                   <h6>
-                    Mostrando: {{ $store.state.chatsModule.chats.length }}
+                    {{ $store.state.chatsModule.total }} -
+                    {{ $store.state.chatsModule.chats.length }}
                   </h6>
                 </v-col>
               </v-row>
@@ -629,7 +629,7 @@ text/plain, application/pdf"
       </v-card>
     </v-col>
     <v-col cols="12" sm="3" v-if="selectedChat">
-      <v-card style="background-color: #ffffff" class="mb-7 detail-part">
+      <v-card style="background-color: #ffffff" class="detail-part">
         <v-card-text class="pa-5 border-bottom">
           <h3 class="title text-h6">Usuario</h3>
           <h4>
@@ -1537,8 +1537,7 @@ export default {
   overflow: visible;
 }
 .detail-part {
-  height: calc(100vh - 90px);
-  overflow: scroll;
+  height: 100%;
 }
 
 .tooltip-text {
