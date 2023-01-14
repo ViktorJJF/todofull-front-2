@@ -345,11 +345,28 @@
                           </v-btn-toggle>
                         </v-card>
                         <div
-                          v-if="message.type === 'text' || !message.type"
                           class="chat-msg-text"
-                          v-html="parseMarkdown(message.text)"
-                          ref="target"
-                        ></div>
+                          v-if="message.type === 'text' || !message.type"
+                        >
+                          <div
+                            v-if="
+                              message.payload &&
+                              message.payload.reply_to &&
+                              message.payload.reply_to.story
+                            "
+                          >
+                            <b>Historia Instagram: </b
+                            ><img
+                              style="height: 100%"
+                              :src="message.payload.reply_to.story.url"
+                            />
+                          </div>
+                          <div
+                            v-html="parseMarkdown(message.text)"
+                            ref="target"
+                          ></div>
+                        </div>
+
                         <div
                           v-if="message.type === 'referral'"
                           class="chat-msg-text"
@@ -724,7 +741,7 @@ text/plain, application/pdf"
         </v-card-text>
       </v-card>
     </v-col>
-    <v-dialog v-model="uploadDialog">
+    <v-dialog v-model="uploadDialog" style="max-width: 800px">
       <v-card>
         <v-container class="pa-5">
           <UploadImages
@@ -732,15 +749,13 @@ text/plain, application/pdf"
             value="/uploads/grodnobot.png"
             ref="image"
             @change="handleImages"
+            @drop="handleImages"
             :max="1"
             uploadMsg="Click para insertar o arrastrar una imagen"
             fileError="Solo se aceptan archivos imágenes"
             clearAll="Borrar todo"
             class="mb-2"
           />
-          <div>
-            <v-btn color="success" @click="handleImages">Cargar</v-btn>
-          </div>
         </v-container>
       </v-card>
     </v-dialog>
@@ -1344,7 +1359,9 @@ export default {
       return window.getSelection().toString();
     },
     handleImages() {
+      console.log("aaa")
       // this.editedItem.img = files;
+      console.log('🚀 Aqui *** -> this.$refs.image', this.$refs.image);
       [this.image] = this.$refs.image.files;
       this.sendImageMessage();
     },
@@ -1354,6 +1371,7 @@ export default {
       this.imageUploaded = false;
     },
     handleFileUpload() {
+      console.log("aaa")
       const files = this.$refs.file.files;
       this.file = this.$refs.file.files[0];
       if (files[0] !== undefined) {
