@@ -345,11 +345,28 @@
                           </v-btn-toggle>
                         </v-card>
                         <div
-                          v-if="message.type === 'text' || !message.type"
                           class="chat-msg-text"
-                          v-html="parseMarkdown(message.text)"
-                          ref="target"
-                        ></div>
+                          v-if="message.type === 'text' || !message.type"
+                        >
+                          <div
+                            v-if="
+                              message.payload &&
+                              message.payload.reply_to &&
+                              message.payload.reply_to.story
+                            "
+                          >
+                            <b>Historia Instagram: </b
+                            ><img
+                              style="height: 100%"
+                              :src="message.payload.reply_to.story.url"
+                            />
+                          </div>
+                          <div
+                            v-html="parseMarkdown(message.text)"
+                            ref="target"
+                          ></div>
+                        </div>
+
                         <div
                           v-if="message.type === 'referral'"
                           class="chat-msg-text"
@@ -1344,6 +1361,7 @@ export default {
       return window.getSelection().toString();
     },
     handleImages() {
+      console.log("aaa")
       // this.editedItem.img = files;
       [this.image] = this.$refs.image.files;
       this.sendImageMessage();
