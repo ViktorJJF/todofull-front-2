@@ -355,11 +355,39 @@
                               message.payload.reply_to.story
                             "
                           >
-                            <b>Historia Instagram: </b
+                            <b class="mb-1"
+                              >Hice un comentario en esta historia </b
                             ><img
-                              style="height: 100%"
+                              style="height: 60%"
                               :src="message.payload.reply_to.story.url"
                             />
+                            <v-divider class="my-2"></v-divider>
+                          </div>
+                          <div
+                            v-html="parseMarkdown(message.text)"
+                            ref="target"
+                          ></div>
+                        </div>
+
+                        <div
+                          class="chat-msg-text"
+                          v-if="message.type === 'comment'"
+                        >
+                          <div>
+                            <b class="mb-1"
+                              >Hice un comentario en esta
+                              <a
+                                :href="message.payload.post_url"
+                                target="_blank"
+                                >publicación</a
+                              > </b
+                            ><img
+                              v-if="message.payload.media_type === 'IMAGE'"
+                              :src="message.payload.media_url"
+                              style="cursor: pointer; height: 60%"
+                              @click="openUrl(message.payload.post_url)"
+                            />
+                            <v-divider class="my-2"></v-divider>
                           </div>
                           <div
                             v-html="parseMarkdown(message.text)"
