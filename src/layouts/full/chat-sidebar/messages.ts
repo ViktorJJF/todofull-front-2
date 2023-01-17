@@ -15,12 +15,11 @@ export default {
   "answers.price": (ref, price) => `El valor de la ref: ${ref} es de ${price}`,
   "answers.all": (ref, size: string[], price, url) => {
     if (size.length) {
-      return `En la ref: ${ref}, tenemos disponibles las tallas: ${size.join(
-        ", "
-      )},
-      su valor es de ${price} y puedes adquirirla en ${url}`;
+      return `En la ref: *${ref}*,\ntenemos disponibles las tallas: ${size.join(
+        ","
+      )}.\n\nSu valor es de ${price}\ny puedes adquirirla en\n${url}`;
     }
 
-    return `Si tenemos disponible la ref ${ref} en tall ${size[0]}, su valor es de ${price} y puedes adquirirla en ${url}`;
+    return `Si tenemos disponible la ref ${ref} en talla ${size[0]}, su valor es de ${price} y puedes adquirirla en ${url}`;
   },
 };

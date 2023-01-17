@@ -396,7 +396,6 @@ export const sendMessage = (
   const user = JSON.parse(localStorage.getItem("user"));
   const selectedChat = store.getters["chatsModule/getSelectedChat"];
   if (selectedChat) {
-    console.log("🚀 Aqui *** -> selectedChat", selectedChat);
     socket.emit("AGENT_MESSAGE", {
       senderId: selectedChat.leadId.contactId,
       chatId: selectedChat._id,
@@ -468,7 +467,7 @@ export const convertMsToTime = (milliseconds: number) => {
   // 👇️ comment (or remove) the line below
   // commenting next line gets you `24:00:00` instead of `00:00:00`
   // or `36:15:31` instead of `12:15:31`, etc.
-  hours = hours % 24;
+  // hours = hours % 24;
 
   return `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(
     seconds

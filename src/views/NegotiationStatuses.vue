@@ -164,10 +164,6 @@ export default {
           this.$store.state.negotiationStatusesModule.negotiationStatuses
         )
       );
-      console.log(
-        "🚀 Aqui *** -> this.negotiationStatuses",
-        this.negotiationStatuses
-      );
       // dar formato a autoActivateAfter
       for (const negotiationStatus of this.negotiationStatuses) {
         negotiationStatus["isEditing"] = false;
