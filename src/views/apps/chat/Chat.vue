@@ -187,7 +187,7 @@
                     width="45"
                 /></v-avatar>
                 <div class="user-about">
-                  <h4>
+                  <h4 style="display: inline">
                     <i
                       :class="`mr-2 mdi text-h7 ${getPlatformIconStyle(
                         selectedChat.platform
@@ -195,6 +195,12 @@
                     ></i>
                     {{ getChatUserName(selectedChat) }}
                   </h4>
+                  <Countdown
+                    v-if="selectedChat.platform === 'whatsapp'"
+                    :millis="remainingMillis"
+                    :key="updateCountdown"
+                  ></Countdown>
+
                   <span
                     class="h6"
                     v-if="
@@ -220,6 +226,7 @@
                 <v-tooltip top>
                   <template v-slot:activator="{ on, attrs }">
                     <v-btn
+                      :disabled="remainingMillis <= 0"
                       size="small"
                       v-bind="attrs"
                       v-on="on"
@@ -627,9 +634,11 @@ text/plain, application/pdf"
                   :label="
                     selectedChat.isBotActive
                       ? 'Desactiva el chatbot para intervenir chat'
+                      : remainingMillis <= 0
+                      ? 'No se pueden enviar mensaje pasadas las 24h en WhatsApp'
                       : 'Escribe y presiona Enter'
                   "
-                  :disabled="selectedChat.isBotActive"
+                  :disabled="selectedChat.isBotActive || remainingMillis <= 0"
                 ></v-textarea>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -824,6 +833,7 @@ import BaseLeftRightPartVue from "@/components/BaseLeftRightPart.vue";
 import { buildSuccess,buildAlert } from "@/utils/utils.ts";
 import AgentsSelector from "@/components/AgentsSelector.vue";
 import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
+import Countdown from "@/components/Countdown.vue";
 import NegotiationStatusesSelector from "@/components/NegotiationStatusesSelector.vue";
 import { useChatSidebarStore } from '@/stores/chatSidebar'
 import PeruFlagR from '@/assets/images/flags/peru.png'
@@ -836,10 +846,13 @@ export default {
     AgentsSelector,
     TodofullLabelsSelector,
     InfiniteScroll,
-    UploadImages,NegotiationStatusesSelector
+    UploadImages,NegotiationStatusesSelector,
+    Countdown
   },
   data() {
     return {
+      updateCountdown:0,
+      remainingMillis:24*60*60*1000,
       selectedFilterNegotiationStatus:null,
       alertDialog:false,
       uploadingImage: false,
@@ -986,6 +999,7 @@ export default {
         return;
       }
         }
+      this.remainingMillis=24*60*60*1000;
       this.clearForm();
       // salvar cantidad de mensajes pendientes, por si se quiere marcar no leido
       this.selectedPendingMessagesCount = chat.pending_messages_count;
@@ -1005,6 +1019,8 @@ export default {
         })
       ).data.payload;
       chat = (await chatsService.listOne(chat._id)).data.payload;
+      // get last client message
+      
       this.$store.commit("chatsModule/setMessages", this.messages);
       this.messages = this.$store.state.chatsModule.messages;
       this.chat = chat;
@@ -1014,6 +1030,11 @@ export default {
       this.chatSidebar.SET_CURRENT_BOT(bot);
       scrollBottom();
       this.isChatMessageReady = true;
+      // get millis if whatsapp
+      if(chat.platform === "whatsapp") {
+        this.remainingMillis=24*60*60*1000-(Date.now()-new Date(this.selectedChat.last_message.createdAt).getTime())
+        this.updateCountdown+=1;
+      }
       if (chat.leadId) {
         this.userForm.name = chat.leadId.sourceName || chat.leadId.appName;
         this.userForm.email = chat.leadId.email;
@@ -1380,7 +1401,6 @@ export default {
     onSelectedText() {
       this.showMessageOptions = true;
       this.selectedText = window.getSelection().toString();
-      console.log('🚀 Aqui *** -> this.selectedText', this.selectedText);
       this.selectedMessageText = JSON.parse(JSON.stringify(this.selectedMessage));
     },
     getSelectedText() {
@@ -1389,7 +1409,6 @@ export default {
     handleImages() {
       console.log("aaa")
       // this.editedItem.img = files;
-      console.log('🚀 Aqui *** -> this.$refs.image', this.$refs.image);
       [this.image] = this.$refs.image.files;
       this.sendImageMessage();
     },
@@ -1427,7 +1446,6 @@ export default {
         formData.append("file", this.image);
         let response = await filesService.create(formData);
         const url = response.data.payload.url;
-        console.log("🚀 Aqui *** -> path", url);
         this.sendMessage("", "Agente", "image", { url });
         this.uploadDialog = false;
         this.uploadingImage = false;
@@ -1514,7 +1532,7 @@ export default {
         : !isNaN(this.selectedText)
         ? "phone"
         : "text";
-    },
+    }
 
   },
   watch: {
