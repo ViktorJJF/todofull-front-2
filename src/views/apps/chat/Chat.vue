@@ -1409,6 +1409,8 @@ export default {
     handleImages() {
       console.log("aaa")
       // this.editedItem.img = files;
+      console.log('🚀 Aqui *** ->  this.$refs.image',  this.$refs.image);
+      // console.log('🚀 Aqui *** -> this.$refs.image.files', this.$refs.image.files);
       [this.image] = this.$refs.image.files;
       this.sendImageMessage();
     },
