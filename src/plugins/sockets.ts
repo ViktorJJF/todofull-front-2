@@ -31,6 +31,7 @@ socket.on("NEW_MESSAGE", (data) => {
       chatId,
       isActive: true,
       payload: data.payload,
+      context: data.context,
       createdAt: new Date().toUTCString(),
       updatedAt: new Date().toUTCString(),
     });
