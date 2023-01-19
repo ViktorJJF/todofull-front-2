@@ -20,6 +20,6 @@ export default {
       )}.\n\nSu valor es de ${price}\ny puedes adquirirla en\n${url}`;
     }
 
-    return `Si tenemos disponible la ref ${ref} en talla ${size[0]}, su valor es de ${price} y puedes adquirirla en ${url}`;
+    return `Si tenemos disponible la ref *${ref}* en talla ${size[0]}.\nSu valor es de ${price} y puedes adquirirla en ${url}`;
   },
 };
