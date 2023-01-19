@@ -354,6 +354,7 @@
                         <div
                           class="chat-msg-text"
                           v-if="message.type === 'text' || !message.type"
+                          :id="message._id"
                         >
                           <div
                             v-if="
@@ -368,6 +369,40 @@
                               style="height: 60%"
                               :src="message.payload.reply_to.story.url"
                             />
+                            <v-divider class="my-2"></v-divider>
+                          </div>
+                          <div
+                            v-if="
+                              message.context &&
+                              Object.keys(message.context).length > 0
+                            "
+                          >
+                            <v-alert
+                              @click="
+                                goToMessage(
+                                  getMessageByPlatformId(message.context.id)
+                                )
+                              "
+                              class="mb-1"
+                              border="start"
+                              border-color="deep-purple accent-4"
+                              style="cursor: pointer"
+                            >
+                              <h6
+                                v-if="
+                                  getMessageByPlatformId(message.context.id) &&
+                                  getMessageByPlatformId(message.context.id)
+                                    .from == 'Cliente'
+                                "
+                                style="color: #06cf9c"
+                              >
+                                Cliente
+                              </h6>
+                              <h6 v-else style="color: #53bdeb">Tú</h6>
+                              {{
+                                getMessageByPlatformId(message.context.id)?.text
+                              }}
+                            </v-alert>
                             <v-divider class="my-2"></v-divider>
                           </div>
                           <div
@@ -1476,6 +1511,24 @@ export default {
       this.selectedText = window.getSelection().toString();
     },onSelectNegotiationStatuses(negotiationStatus){
       this.selectedNegotiationStatus=negotiationStatus;
+    },getMessageByPlatformId(mid){
+      return this.messages.find(message=>message.mid===mid);
+    },goToMessage(message){
+      if(message){
+        console.log('🚀 Aqui *** -> message', message);
+        const id=message._id;
+        const element = document.getElementById(id);
+          console.log('🚀 Aqui *** -> element', element);
+        if(element){
+          element.scrollIntoView({behavior: 'auto',
+            block: 'center',
+            inline: 'center'});
+                  element.classList.add("effect-message");
+                  setTimeout(function() {
+                    element.classList.remove("effect-message");
+                  }, 3000);
+        }
+      }
     }
   },
   computed: {
@@ -1523,7 +1576,7 @@ export default {
         if (group) {
           group.messages.push(el);
         } else {
-          acc.push({ from: el.from, messages: [el], date: el.createdAt });
+          acc.push({ from: el.from, messages: [el], date: el.createdAt,_id:el._id });
         }
         return acc;
       }, []);
@@ -1534,7 +1587,7 @@ export default {
         : !isNaN(this.selectedText)
         ? "phone"
         : "text";
-    }
+    },
 
   },
   watch: {
@@ -1635,5 +1688,12 @@ export default {
 
 .hover-text {
   position: relative;
+}
+
+.effect-message {
+  text-decoration: underline;
+  font-weight: bold;
+  background-color: yellow;
+  size: 30px;
 }
 </style>
