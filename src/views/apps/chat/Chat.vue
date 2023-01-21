@@ -356,59 +356,11 @@
                           v-if="message.type === 'text' || !message.type"
                           :id="message._id"
                         >
-                          <div
-                            v-if="
-                              message.payload &&
-                              message.payload.reply_to &&
-                              message.payload.reply_to.story
-                            "
-                          >
-                            <b class="mb-1"
-                              >Hice un comentario en esta historia </b
-                            ><img
-                              style="height: 60%"
-                              :src="message.payload.reply_to.story.url"
-                            />
-                            <v-divider class="my-2"></v-divider>
-                          </div>
-                          <div
-                            v-if="
-                              message.context &&
-                              Object.keys(message.context).length > 0
-                            "
-                          >
-                            <v-alert
-                              @click="
-                                goToMessage(
-                                  getMessageByPlatformId(message.context.id)
-                                )
-                              "
-                              class="mb-1"
-                              border="start"
-                              border-color="deep-purple accent-4"
-                              style="cursor: pointer"
-                            >
-                              <h6
-                                v-if="
-                                  getMessageByPlatformId(message.context.id) &&
-                                  getMessageByPlatformId(message.context.id)
-                                    .from == 'Cliente'
-                                "
-                                style="color: #06cf9c"
-                              >
-                                Cliente
-                              </h6>
-                              <h6 v-else style="color: #53bdeb">Tú</h6>
-                              {{
-                                getMessageByPlatformId(message.context.id)?.text
-                              }}
-                            </v-alert>
-                            <v-divider class="my-2"></v-divider>
-                          </div>
-                          <div
-                            v-html="parseMarkdown(message.text)"
-                            ref="target"
-                          ></div>
+                          <TextMessageChat
+                            :message="message"
+                            :messages="messages"
+                            @goToMessage="goToMessage"
+                          ></TextMessageChat>
                         </div>
 
                         <div
@@ -441,35 +393,7 @@
                           v-if="message.type === 'referral'"
                           class="chat-msg-text"
                         >
-                          <v-row
-                            style="cursor: pointer"
-                            @click="openUrl(message.payload.source_url)"
-                          >
-                            <v-col cols="12" sm="3">
-                              <img
-                                style="height: 100%"
-                                :src="message.payload.image_url"
-                              />
-                            </v-col>
-                            <v-col cols="12" sm="9">
-                              <b>{{ message.payload.headline }}</b>
-                              <div
-                                style="overflow: hidden"
-                                v-html="
-                                  parseMarkdown(
-                                    message.payload.body.substring(0, 90) +
-                                      '...'
-                                  )
-                                "
-                                ref="target"
-                              ></div>
-                            </v-col>
-                          </v-row>
-                          <div
-                            class="mt-2"
-                            v-html="parseMarkdown(message.text)"
-                            ref="target"
-                          ></div>
+                          <Referral :message="message"></Referral>
                         </div>
                         <div
                           v-if="
@@ -478,19 +402,13 @@
                           "
                           class="chat-msg-text"
                         >
-                          <img :src="message.payload.url" />
+                          <ImageChat :message="message"></ImageChat>
                         </div>
                         <div
                           v-if="message.type === 'audio'"
                           class="chat-msg-text"
                         >
-                          <audio controls>
-                            <source
-                              :src="message.payload.url"
-                              type="audio/mp3"
-                            />
-                            Tu navegador no soporta audio HTML5.
-                          </audio>
+                          <AudioChat :message="message"></AudioChat>
                         </div>
                         <div
                           v-if="message.type === 'template'"
@@ -594,10 +512,7 @@
                           v-if="message.type === 'file'"
                           class="chat-msg-text"
                         >
-                          <i class="mr-2 mdi text-h5 mdi-file"></i>
-                          <a target="_blank" :href="message.payload.url">{{
-                            getFileNameFromUrl(message.payload.url)
-                          }}</a>
+                          <FileChat :message="message"></FileChat>
                         </div>
                       </div>
                     </div>
@@ -874,6 +789,11 @@ import { useChatSidebarStore } from '@/stores/chatSidebar'
 import PeruFlagR from '@/assets/images/flags/peru.png'
 import ChileFlagR from '@/assets/images/flags/chile.png'
 import ColombiaFlagR from '@/assets/images/flags/colombia.png'
+import Referral from "@/components/chat/Referral.vue";
+import AudioChat from "@/components/chat/AudioChat.vue";
+import FileChat from "@/components/chat/FileChat.vue";
+import ImageChat from "@/components/chat/ImageChat.vue";
+import TextMessageChat from "@/components/chat/TextMessageChat.vue";
 
 export default {
   components: {
@@ -882,7 +802,7 @@ export default {
     TodofullLabelsSelector,
     InfiniteScroll,
     UploadImages,NegotiationStatusesSelector,
-    Countdown
+    Countdown,Referral,AudioChat,FileChat,ImageChat,TextMessageChat
   },
   data() {
     return {
@@ -1511,11 +1431,8 @@ export default {
       this.selectedText = window.getSelection().toString();
     },onSelectNegotiationStatuses(negotiationStatus){
       this.selectedNegotiationStatus=negotiationStatus;
-    },getMessageByPlatformId(mid){
-      return this.messages.find(message=>message.mid===mid);
     },goToMessage(message){
       if(message){
-        console.log('🚀 Aqui *** -> message', message);
         const id=message._id;
         const element = document.getElementById(id);
           console.log('🚀 Aqui *** -> element', element);
@@ -1691,9 +1608,9 @@ export default {
 }
 
 .effect-message {
-  text-decoration: underline;
-  font-weight: bold;
-  background-color: yellow;
-  size: 30px;
+  text-decoration: underline !important;
+  font-weight: bold !important;
+  background-color: yellow !important;
+  size: 30px !important;
 }
 </style>
