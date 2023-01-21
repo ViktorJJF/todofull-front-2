@@ -22,6 +22,10 @@ import { parseMarkdown } from "@/utils/utils";
 const props = defineProps({ message: { type: Object, default: () => ({}) } });
 
 const { message } = toRefs(props);
+
+function openUrl(url) {
+  window.open(url, "_blank");
+}
 </script>
 
 <style lang="scss" scoped>

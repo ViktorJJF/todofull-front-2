@@ -66,7 +66,7 @@ const props = defineProps({
 
 const { message, messages } = toRefs(props);
 
-const messageContext = ref({});
+const messageContext = ref<any>({});
 const emit = defineEmits(["goToMessage"]);
 
 onMounted(() => {
