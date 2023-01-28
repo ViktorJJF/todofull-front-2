@@ -457,6 +457,27 @@ html {
   text-decoration: none;
 }
 
+.chat-msg-text > div {
+  margin-right: 16px;
+}
+.tooltip-controls {
+  position: relative;
+}
+
+.tooltip-controls .tooltiptext {
+  visibility: hidden;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip-controls:hover .tooltiptext {
+  visibility: visible;
+  left: 88%;
+  bottom: 50%;
+}
+
 .owner {
   flex-direction: row-reverse;
   .chat-msg-content {
@@ -468,6 +489,7 @@ html {
     background-color: var(--theme-color);
     color: #f85289;
     border-radius: 20px 20px 0 20px;
+    padding-right: 22px;
   }
   .chat-msg-date {
     left: auto;

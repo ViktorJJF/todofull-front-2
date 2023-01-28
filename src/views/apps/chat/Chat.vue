@@ -294,11 +294,34 @@
                     </div>
                     <div class="chat-msg-content">
                       <div
-                        class="mb-1 hover-text"
+                        class="mb-1 hover-text chat-message tooltip-controls"
                         v-for="message in formattedMessage.messages"
                         :key="message._id"
                         @mouseover="selectedMessage = message"
                       >
+                        <!-- <span class="tooltiptext">Tooltip text</span> -->
+                        <div class="tooltiptext">
+                          <v-menu>
+                            <template v-slot:activator="{ props }">
+                              <v-btn
+                                color="primary"
+                                v-bind="props"
+                                icon="mdi-chevron-down mdi"
+                                small
+                              >
+                              </v-btn>
+                            </template>
+                            <v-list>
+                              <v-list-item>
+                                <v-list-item-title
+                                  @click="replyToMessage(selectedMessage)"
+                                  >Responder</v-list-item-title
+                                >
+                              </v-list-item>
+                            </v-list>
+                          </v-menu>
+                        </div>
+
                         <v-card
                           class="tooltip-text"
                           :style="'visibility:visible'"
@@ -351,65 +374,12 @@
                             ></v-btn>
                           </v-btn-toggle>
                         </v-card>
-                        <div
-                          class="chat-msg-text"
-                          v-if="message.type === 'text' || !message.type"
-                          :id="message._id"
-                        >
-                          <TextMessageChat
-                            :message="message"
-                            :messages="messages"
-                            @goToMessage="goToMessage"
-                          ></TextMessageChat>
-                        </div>
+                        <SelectorMessage
+                          :message="message"
+                          :messages="messages"
+                          @goToMessage="goToMessage"
+                        ></SelectorMessage>
 
-                        <div
-                          class="chat-msg-text"
-                          v-if="message.type === 'comment'"
-                        >
-                          <div>
-                            <b class="mb-1"
-                              >Hice un comentario en esta
-                              <a
-                                :href="message.payload.post_url"
-                                target="_blank"
-                                >publicación</a
-                              > </b
-                            ><img
-                              v-if="message.payload.media_type === 'IMAGE'"
-                              :src="message.payload.media_url"
-                              style="cursor: pointer; height: 60%"
-                              @click="openUrl(message.payload.post_url)"
-                            />
-                            <v-divider class="my-2"></v-divider>
-                          </div>
-                          <div
-                            v-html="parseMarkdown(message.text)"
-                            ref="target"
-                          ></div>
-                        </div>
-
-                        <div
-                          v-if="message.type === 'referral'"
-                          class="chat-msg-text"
-                        >
-                          <Referral :message="message"></Referral>
-                        </div>
-                        <div
-                          v-if="
-                            message.type === 'image' ||
-                            message.type === 'sticker'
-                          "
-                          class="chat-msg-text"
-                        >
-                          <ImageChat :message="message"></ImageChat>
-                        </div>
-                        <div
-                          v-if="message.type === 'audio'"
-                          class="chat-msg-text"
-                        >
-                          <AudioChat :message="message"></AudioChat>
-                        </div>
                         <div
                           v-if="message.type === 'template'"
                           class="chat-msg-text pa-3"
@@ -508,12 +478,6 @@
                             </div>
                           </v-row>
                         </div>
-                        <div
-                          v-if="message.type === 'file'"
-                          class="chat-msg-text"
-                        >
-                          <FileChat :message="message"></FileChat>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -524,10 +488,50 @@
                       color="primary"
                     ></v-progress-circular>
                   </div>
+                  <v-alert
+                    id="reply-alert"
+                    v-if="!!messageToReply"
+                    v-model="messageToReply"
+                    class="mb-1"
+                    border="start"
+                    border-color="deep-purple accent-4"
+                    closable
+                  >
+                    <h6
+                      v-if="messageToReply.from == 'Cliente'"
+                      style="color: #06cf9c"
+                    >
+                      Cliente
+                    </h6>
+                    <h6 v-else style="color: #53bdeb">Tú</h6>
+                    <div>
+                      <div>
+                        {{ messageToReply.text }}
+                      </div>
+                    </div>
+                    <v-spacer></v-spacer>
+                    <div
+                      v-if="messageToReply.type === 'audio'"
+                      class="chat-msg-text"
+                    >
+                      <AudioChat :message="messageToReply"></AudioChat>
+                    </div>
+                    <div
+                      v-if="
+                        messageToReply.type === 'image' ||
+                        messageToReply.type === 'sticker'
+                      "
+                      class="chat-msg-text"
+                    >
+                      <ImageChat
+                        :message="messageToReply"
+                        style="width: 90px"
+                      ></ImageChat>
+                    </div>
+                  </v-alert>
                 </perfect-scrollbar>
               </div>
 
-              <!---Send Message Footer-->
               <div class="chat-area-footer">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -789,11 +793,8 @@ import { useChatSidebarStore } from '@/stores/chatSidebar'
 import PeruFlagR from '@/assets/images/flags/peru.png'
 import ChileFlagR from '@/assets/images/flags/chile.png'
 import ColombiaFlagR from '@/assets/images/flags/colombia.png'
-import Referral from "@/components/chat/Referral.vue";
-import AudioChat from "@/components/chat/AudioChat.vue";
-import FileChat from "@/components/chat/FileChat.vue";
-import ImageChat from "@/components/chat/ImageChat.vue";
-import TextMessageChat from "@/components/chat/TextMessageChat.vue";
+
+import SelectorMessage from "@/components/chat/SelectorMessage.vue";
 
 export default {
   components: {
@@ -802,10 +803,11 @@ export default {
     TodofullLabelsSelector,
     InfiniteScroll,
     UploadImages,NegotiationStatusesSelector,
-    Countdown,Referral,AudioChat,FileChat,ImageChat,TextMessageChat
+    Countdown,SelectorMessage
   },
   data() {
     return {
+      messageToReply:null,
       updateCountdown:0,
       remainingMillis:24*60*60*1000,
       selectedFilterNegotiationStatus:null,
@@ -962,6 +964,7 @@ export default {
       socket.emit("RESTART_PENDING_MESSAGES", {
         chatId: chat._id,
       });
+      this.messageToReply=null;
       this.isChatMessageReady = false;
       this.selectedChat = chat;
       this.$store.commit("chatsModule/setSelectedChat", chat);
@@ -975,7 +978,7 @@ export default {
       ).data.payload;
       chat = (await chatsService.listOne(chat._id)).data.payload;
       // get last client message
-      
+
       this.$store.commit("chatsModule/setMessages", this.messages);
       this.messages = this.$store.state.chatsModule.messages;
       this.chat = chat;
@@ -1028,6 +1031,7 @@ export default {
         text: text,
         pageID: this.selectedChat.pageID,
         platform: this.selectedChat.platform,
+        context:this.messageToReply,
         payload: {
           url,
         },
@@ -1044,6 +1048,7 @@ export default {
 // })
 // this.$store.state.chatsModule.hasPendingNegotiationStatus=false
 //       }
+      this.messageToReply=null;
       scrollBottom();
 
     },
@@ -1287,7 +1292,7 @@ export default {
             data: { negotiationStatusId: this.selectedNegotiationStatus },
             notifyUser: false,
           });
-          
+
         // }
     },
     getFileNameFromUrl(url) {
@@ -1403,7 +1408,7 @@ export default {
         formData.append("file", this.image);
         let response = await filesService.create(formData);
         const url = response.data.payload.url;
-        this.sendMessage("", "Agente", "image", { url });
+        this.sendMessage(this.text, "Agente", "image", { url });
         this.uploadDialog = false;
         this.uploadingImage = false;
         this.clear();
@@ -1419,7 +1424,7 @@ export default {
         let response = await filesService.create(formData);
         const url = response.data.payload.url;
         console.log("🚀 Aqui *** -> path", url);
-        this.sendMessage("", "Agente", "file", { url });
+        this.sendMessage(this.text, "Agente", "file", { url });
         this.uploadDialog = false;
         this.uploadingImage = false;
         this.clear();
@@ -1446,6 +1451,20 @@ export default {
                   }, 3000);
         }
       }
+    },replyToMessage(selectedMessage){
+      this.messageToReply=selectedMessage;
+      // wait next tick
+      this.$nextTick(() => {
+        // focuse element
+      const replyAlert=document.getElementById("reply-alert");
+      if(replyAlert){
+        console.log("encontrado!")
+        replyAlert.scrollIntoView({behavior: 'auto',
+          block: 'center',
+          inline: 'center'});
+          scrollBottom()
+      }
+      });
     }
   },
   computed: {
@@ -1504,7 +1523,32 @@ export default {
         : !isNaN(this.selectedText)
         ? "phone"
         : "text";
-    },
+    },getDynamicComponent(messageContext) {
+  const type = messageContext.type;
+  let selectedComponent;
+  if (type) {
+    switch (type) {
+      case "referral":
+        selectedComponent = Referral;
+        break;
+      case "audio":
+        selectedComponent = AudioChat;
+        break;
+      case "file":
+        selectedComponent = FileChat;
+        break;
+      case "image":
+        selectedComponent = ImageChat;
+        break;
+      case "sticker":
+        selectedComponent = ImageChat;
+        break;
+      default:
+        break;
+    }
+  }
+  return selectedComponent;
+}
 
   },
   watch: {
@@ -1583,9 +1627,21 @@ export default {
   width: 100px !important;
 }
 
+.tooltip-dropdown {
+  visibility: hidden;
+  position: absolute;
+  z-index: 9999999999 !important;
+  width: 100px !important;
+}
+
 #top {
   top: -40px;
   left: -5%;
+}
+
+#top-right {
+  top: -40px;
+  left: 320%;
 }
 
 #bottom {
@@ -1612,5 +1668,52 @@ export default {
   font-weight: bold !important;
   background-color: yellow !important;
   size: 30px !important;
+}
+
+/* Reply button */
+.chat-message .reply-btn {
+  /* Style the reply button */
+  background-color: #4caf50; /* Green */
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+}
+
+/* Icon dropdown */
+.chat-message .icon-dropdown {
+  /* Style the icon dropdown */
+  position: absolute; /* Position absolute to align it on top right corner */
+  top: 0;
+  right: 0;
+  display: none;
+}
+
+/* Show icon dropdown on hover */
+.chat-message:hover .icon-dropdown {
+  display: block;
+}
+
+/* Dropdown content (hidden by default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+/* Show message controls on hover */
+.chat-message:hover .message-controls {
+  display: flex;
+}
+
+/* Message controls */
+.chat-message .message-controls {
+  /* Style the message controls container */
+  display: none;
 }
 </style>
