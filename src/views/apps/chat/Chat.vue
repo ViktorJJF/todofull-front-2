@@ -803,17 +803,6 @@ export default {
     AgentsSelector,
     TodofullLabelsSelector,
     InfiniteScroll,
-<<<<<<< HEAD
-    UploadImages, NegotiationStatusesSelector,
-    Countdown, Referral, AudioChat, FileChat, ImageChat, TextMessageChat
-  },
-  data() {
-    return {
-      updateCountdown: 0,
-      remainingMillis: 24 * 60 * 60 * 1000,
-      selectedFilterNegotiationStatus: null,
-      alertDialog: false,
-=======
     UploadImages,NegotiationStatusesSelector,
     Countdown,SelectorMessage
   },
@@ -824,7 +813,6 @@ export default {
       remainingMillis:24*60*60*1000,
       selectedFilterNegotiationStatus:null,
       alertDialog:false,
->>>>>>> dist
       uploadingImage: false,
       uploadDialog: false,
       chat: null,
@@ -1052,17 +1040,6 @@ export default {
         userId: user._id
       });
       // set negotiation status
-<<<<<<< HEAD
-      //       if(this.$store.state.chatsModule.hasPendingNegotiationStatus){
-      //         this.$store.dispatch("negotiationStatusesLogsModule/create",{
-      //     "negotiationStatusId": "636fc9aed31e5c701c0bb7c9",
-      //     "isCompleted": false,
-      //     "chatId": this.selectedChat._id,
-      //     "hasCronJob": true
-      // })
-      // this.$store.state.chatsModule.hasPendingNegotiationStatus=false
-      //       }
-=======
 //       if(this.$store.state.chatsModule.hasPendingNegotiationStatus){
 //         this.$store.dispatch("negotiationStatusesLogsModule/create",{
 //     "negotiationStatusId": "636fc9aed31e5c701c0bb7c9",
@@ -1073,7 +1050,6 @@ export default {
 // this.$store.state.chatsModule.hasPendingNegotiationStatus=false
 //       }
       this.messageToReply=null;
->>>>>>> dist
       scrollBottom();
 
     },
@@ -1314,15 +1290,6 @@ export default {
       //       "isCompleted": false,
       //       "chatId": this.selectedChat._id,
       //       "cleanLeadId": createdItem?._id,"leadId":this.selectedChat.leadId._id,"hasCronJob": true});
-<<<<<<< HEAD
-      this.$store.dispatch("chatsModule/update", {
-        id: this.selectedChat._id,
-        data: { negotiationStatusId: this.selectedNegotiationStatus },
-        notifyUser: false,
-      });
-
-      // }
-=======
           this.$store.dispatch("chatsModule/update", {
             id: this.selectedChat._id,
             data: { negotiationStatusId: this.selectedNegotiationStatus },
@@ -1330,7 +1297,6 @@ export default {
           });
 
         // }
->>>>>>> dist
     },
     getFileNameFromUrl(url) {
       return getFileNameFromUrl(url);
@@ -1560,40 +1526,9 @@ export default {
       return this.selectedText.includes("@")
         ? "email"
         : !isNaN(this.selectedText)
-<<<<<<< HEAD
-          ? "phone"
-          : "text";
-    },
-=======
         ? "phone"
         : "text";
-    },getDynamicComponent(messageContext) {
-  const type = messageContext.type;
-  let selectedComponent;
-  if (type) {
-    switch (type) {
-      case "referral":
-        selectedComponent = Referral;
-        break;
-      case "audio":
-        selectedComponent = AudioChat;
-        break;
-      case "file":
-        selectedComponent = FileChat;
-        break;
-      case "image":
-        selectedComponent = ImageChat;
-        break;
-      case "sticker":
-        selectedComponent = ImageChat;
-        break;
-      default:
-        break;
     }
-  }
-  return selectedComponent;
-}
->>>>>>> dist
 
   },
   watch: {
