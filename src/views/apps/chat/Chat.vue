@@ -504,30 +504,11 @@
                       Cliente
                     </h6>
                     <h6 v-else style="color: #53bdeb">Tú</h6>
-                    <div>
-                      <div>
-                        {{ messageToReply.text }}
-                      </div>
-                    </div>
-                    <v-spacer></v-spacer>
-                    <div
-                      v-if="messageToReply.type === 'audio'"
-                      class="chat-msg-text"
-                    >
-                      <AudioChat :message="messageToReply"></AudioChat>
-                    </div>
-                    <div
-                      v-if="
-                        messageToReply.type === 'image' ||
-                        messageToReply.type === 'sticker'
-                      "
-                      class="chat-msg-text"
-                    >
-                      <ImageChat
-                        :message="messageToReply"
-                        style="width: 90px"
-                      ></ImageChat>
-                    </div>
+                    <SelectorMessage
+                      :is_reply="true"
+                      :message="messageToReply"
+                      :messages="messages"
+                    ></SelectorMessage>
                   </v-alert>
                 </perfect-scrollbar>
               </div>
@@ -987,7 +968,10 @@ export default {
       this.selectedChat.pending_messages_count = 0; // reiniciar contador mensajes sin leer
       const bot = this.$store.state.botsModule.bots.find((el) => el.fanpageId == chat.pageID)
       this.chatSidebar.SET_CURRENT_BOT(bot);
-      scrollBottom();
+      this.$nextTick(() => {
+        scrollBottom();
+      });
+
       this.isChatMessageReady = true;
       // get millis if whatsapp
       if (chat.platform === "whatsapp") {

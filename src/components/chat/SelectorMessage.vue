@@ -63,7 +63,10 @@
     <div v-if="message.type === 'referral'">
       <Referral :message="message"></Referral>
     </div>
-    <div v-if="message.type === 'image' || message.type === 'sticker'">
+    <div
+      :class="{ 'reply-message': is_reply }"
+      v-if="message.type === 'image' || message.type === 'sticker'"
+    >
       <ImageChat :message="message"></ImageChat>
     </div>
     <div v-if="message.type === 'audio'">
@@ -88,6 +91,7 @@ import { getFileNameFromUrl, parseMarkdown } from "@/utils/utils";
 const props = defineProps({
   message: { type: Object, default: () => ({}) },
   messages: { type: Array, default: () => [] },
+  is_reply: { type: Boolean, default: false },
 });
 
 const { message, messages } = toRefs(props);
@@ -140,4 +144,8 @@ function openUrl(url) {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.reply-message {
+  width: 50px;
+}
+</style>
