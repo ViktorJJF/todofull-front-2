@@ -1085,7 +1085,12 @@ export default {
         let response = await filesService.create(formData);
         const url = response.data.payload.url;
         console.log("🚀 Aqui *** -> path", url);
-        this.sendMessage(this.text, "Agente", "file", { url });
+        // if platform is instagram, send simple message with url
+        if(this.selectedChat.platform === 'instagram') {
+          this.sendMessage(`📎 ${url}`, "Agente", "text");
+        } else {
+          this.sendMessage(this.text, "Agente", "file", { url });
+        }
         this.uploadDialog = false;
         this.uploadingImage = false;
         this.clear();
