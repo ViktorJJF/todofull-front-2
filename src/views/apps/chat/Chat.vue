@@ -7,18 +7,31 @@
           <!---/Left chat list -->
           <template v-slot:channels>
             <div class="d-flex justify-space-evenly">
-              <v-btn v-for="platform of platformsSource" small icon color="white" @click="addPlatform(platform.value)"
+              <v-btn
+                v-for="platform of platformsSource"
+                small
+                icon
+                color="white"
+                @click="addPlatform(platform.value)"
                 :class="{
                   selected: activePlatforms.includes(platform.value),
-                }" :key="platform.value">
+                }"
+                :key="platform.value"
+              >
                 <v-icon :class="platform.iconClass">{{ platform.icon }}</v-icon>
                 <v-tooltip activator="parent" anchor="bottom">{{
                   platform.text
                 }}</v-tooltip>
               </v-btn>
               <v-divider class="mt-1" vertical />
-              <v-btn v-for="country of countriesSource" small icon color="white" @click="toggleCountry(country)"
-                :class="{ selected: selectedCountry === country.value }">
+              <v-btn
+                v-for="country of countriesSource"
+                small
+                icon
+                color="white"
+                @click="toggleCountry(country)"
+                :class="{ selected: selectedCountry === country.value }"
+              >
                 <img style="width: 25px" :src="country.icon" />
                 <v-tooltip activator="parent" anchor="bottom">
                   {{ country.value }}
@@ -28,26 +41,57 @@
           </template>
           <template v-slot:leftpart>
             <div class="pa-3 border-bottom">
-              <v-text-field label="Buscar contacto" variant="outlined" density="compact" hide-details
-                v-model="searchContact"></v-text-field>
+              <v-text-field
+                label="Buscar contacto"
+                variant="outlined"
+                density="compact"
+                hide-details
+                v-model="searchContact"
+              ></v-text-field>
             </div>
             <div class="pa-3 pt-1" v-if="sellTeams.length">
-              <v-select v-model="selectedSellTeam" :items="sellTeams" item-title="nombre" item-value="_id"
-                variant="outlined" density="compact" hide-details clearable placeholder="Filtrar por equipo" />
+              <v-select
+                v-model="selectedSellTeam"
+                :items="sellTeams"
+                item-title="nombre"
+                item-value="_id"
+                variant="outlined"
+                density="compact"
+                hide-details
+                clearable
+                placeholder="Filtrar por equipo"
+              />
             </div>
             <div class="pa-3 pt-1">
-              <v-select v-model="selectedFilterNegotiationStatus" :items="
-                this.$store.state.negotiationStatusesModule
-                  .negotiationStatuses
-              " item-title="name" item-value="_id" variant="outlined" density="compact" hide-details clearable
-                placeholder="Filtrar por estado de negociación" />
+              <v-select
+                v-model="selectedFilterNegotiationStatus"
+                :items="
+                  this.$store.state.negotiationStatusesModule
+                    .negotiationStatuses
+                "
+                item-title="name"
+                item-value="_id"
+                variant="outlined"
+                density="compact"
+                hide-details
+                clearable
+                placeholder="Filtrar por estado de negociación"
+              />
             </div>
             <div class="px-5">
               <v-row>
                 <v-col cols="12" sm="9">
-                  <v-chip-group v-model="filterChats" active-class="primary--text">
-                    <v-chip v-for="filter in filtersSource" color="success" :multiple="false" size="small"
-                      :key="filter">
+                  <v-chip-group
+                    v-model="filterChats"
+                    active-class="primary--text"
+                  >
+                    <v-chip
+                      v-for="filter in filtersSource"
+                      color="success"
+                      :multiple="false"
+                      size="small"
+                      :key="filter"
+                    >
                       <strong>{{ filter.text }}</strong>
                     </v-chip>
                   </v-chip-group>
@@ -64,39 +108,61 @@
 
             <v-list>
               <!---/chat list -->
-              <v-progress-circular v-if="!isDataReady" class="v-progress-linear" indeterminate color="primary" />
+              <v-progress-circular
+                v-if="!isDataReady"
+                class="v-progress-linear"
+                indeterminate
+                color="primary"
+              />
 
               <div v-else class="">
                 <!---/Icon -->
                 <InfiniteScroll :key="updateScroll" @loadMore="loadMore">
-                  <div :class="{
-                    msg: true,
-                    online: true,
-                    'chat-active':
-                      selectedChat && chat._id == selectedChat._id,
-                  }" v-for="(chat, i) in filteredChats" :key="i" @click="selectChat(chat)">
-                    <img class="msg-profile" :src="getProfilePic(chat) || `/assets/images/users/3.jpg`" width="45"
-                      alt="" />
+                  <div
+                    :class="{
+                      msg: true,
+                      online: true,
+                      'chat-active':
+                        selectedChat && chat._id == selectedChat._id,
+                    }"
+                    v-for="(chat, i) in filteredChats"
+                    :key="i"
+                    @click="selectChat(chat)"
+                  >
+                    <img
+                      class="msg-profile"
+                      :src="getProfilePic(chat) || `/assets/images/users/1.jpg`"
+                      width="45"
+                      alt=""
+                    />
                     <div class="msg-detail">
                       <div class="msg-username">
-                        <i :class="`mr-2 mdi text-h7 ${getPlatformIconStyle(
-                          chat.platform
-                        )}`"></i>
+                        <i
+                          :class="`mr-2 mdi text-h7 ${getPlatformIconStyle(
+                            chat.platform
+                          )}`"
+                        ></i>
                         {{ getChatUserName(chat) }}
                       </div>
                       <div class="msg-content">
-                        <span :class="{
-                          'msg-message': true,
-                          'bold-text': chat.pending_messages_count > 0,
-                        }">{{
-  chat.lastMessage ? chat.lastMessage.text : ""
-}}</span>
+                        <span
+                          :class="{
+                            'msg-message': true,
+                            'bold-text': chat.pending_messages_count > 0,
+                          }"
+                          >{{
+                            chat.lastMessage ? chat.lastMessage.text : ""
+                          }}</span
+                        >
                         <span class="msg-date">{{
                           formatDate(chat.updatedAt, "HH:mm")
                         }}</span>
-                        <div v-if="chat.pending_messages_count > 0" :class="{
-                          'not-viewed': true,
-                        }">
+                        <div
+                          v-if="chat.pending_messages_count > 0"
+                          :class="{
+                            'not-viewed': true,
+                          }"
+                        >
                           {{ chat.pending_messages_count }}
                         </div>
                       </div>
@@ -112,133 +178,243 @@
             <template v-if="Object.keys(selectedChat).length > 0">
               <!---chat header-->
               <div class="d-flex pa-1 align-center">
-                <v-avatar size="35" class="mr-3"><img :src="
-                  getProfilePic(selectedChat) ||
-                  `/assets/images/users/3.jpg`
-                " width="45" /></v-avatar>
+                <v-avatar size="35" class="mr-3"
+                  ><img
+                    :src="
+                      getProfilePic(selectedChat) ||
+                      `/assets/images/users/3.jpg`
+                    "
+                    width="45"
+                /></v-avatar>
                 <div class="user-about">
                   <h4 style="display: inline">
-                    <i :class="`mr-2 mdi text-h7 ${getPlatformIconStyle(
-                      selectedChat.platform
-                    )}`"></i>
+                    <i
+                      :class="`mr-2 mdi text-h7 ${getPlatformIconStyle(
+                        selectedChat.platform
+                      )}`"
+                    ></i>
                     {{ getChatUserName(selectedChat) }}
                   </h4>
-                  <Countdown v-if="selectedChat.platform === 'whatsapp'" :millis="remainingMillis"
-                    :key="updateCountdown"></Countdown>
+                  <Countdown
+                    v-if="selectedChat.platform === 'whatsapp'"
+                    :millis="remainingMillis"
+                    :key="updateCountdown"
+                  ></Countdown>
 
-                  <span class="h6" v-if="
-                    selectedChat.leadId && selectedChat.leadId.follower_count
-                  "><b>({{ selectedChat.leadId.follower_count }}</b>
-                    Seguidores)</span>
+                  <span
+                    class="h6"
+                    v-if="
+                      selectedChat.leadId && selectedChat.leadId.follower_count
+                    "
+                    ><b>({{ selectedChat.leadId.follower_count }}</b>
+                    Seguidores)</span
+                  >
                 </div>
                 <v-spacer></v-spacer>
-                <v-btn @click="undoPendingMessagesCount" fab large color="bot" class="undo-pending-message mr-2">
+                <v-btn
+                  @click="undoPendingMessagesCount"
+                  fab
+                  large
+                  color="bot"
+                  class="undo-pending-message mr-2"
+                >
                   <v-icon class="wechat-color">mdi-wechat</v-icon>
-                  <v-tooltip activator="parent" anchor="bottom">Marcar como no leído</v-tooltip>
+                  <v-tooltip activator="parent" anchor="bottom"
+                    >Marcar como no leído</v-tooltip
+                  >
                 </v-btn>
                 <v-tooltip top>
                   <template v-slot:activator="{ on, attrs }">
-                    <v-btn :disabled="remainingMillis <= 0" size="small" v-bind="attrs" v-on="on" @click="
-                      selectedChat.isBotActive
-                        ? connectAgent(selectedChat)
-                        : endConversation(selectedChat)
-                    " icon="mdi-robot" :color="selectedChat.isBotActive ? 'success' : 'error'"></v-btn>
+                    <v-btn
+                      :disabled="remainingMillis <= 0"
+                      size="small"
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="
+                        selectedChat.isBotActive
+                          ? connectAgent(selectedChat)
+                          : endConversation(selectedChat)
+                      "
+                      icon="mdi-robot"
+                      :color="selectedChat.isBotActive ? 'success' : 'error'"
+                    ></v-btn>
                   </template>
                   <span>Tooltip</span>
                 </v-tooltip>
-                <AgentsSelector :telefonoId="
-                  selectedChat.cleanLeadId
-                    ? selectedChat.cleanLeadId?.telefonoId?._id
-                    : selectedChat.leadId?.telefonoId?._id
-                " @onSelectedAgent="onSelectedAgent"></AgentsSelector>
+                <AgentsSelector
+                  :telefonoId="
+                    selectedChat.cleanLeadId
+                      ? selectedChat.cleanLeadId?.telefonoId?._id
+                      : selectedChat.leadId?.telefonoId?._id
+                  "
+                  @onSelectedAgent="onSelectedAgent"
+                ></AgentsSelector>
               </div>
 
               <v-divider></v-divider>
               <!---chat Room-->
-              <div class="chat-room pa-4" @click="selectChatRoom">
-                <v-progress-circular v-show="!isChatMessageReady" class="v-progress-linear" indeterminate
-                  color="primary"></v-progress-circular>
-                <perfect-scrollbar v-show="isChatMessageReady" class="chat-room-box-height" id="content_section">
-                  <div v-for="formattedMessage in formattedMessages" :key="formattedMessage._id" :class="{
-                    'chat-msg': true,
-                    'ma-0': true,
-                    'pa-0': true,
-                    owner: formattedMessage.from != 'Cliente',
-                  }">
+
+              <div
+                class="chat-room pa-4"
+                @dragover="onDragOver"
+                @dragleave="onDragLeave"
+                @drop="onDrop"
+                @click="selectChatRoom"
+              >
+                <v-progress-circular
+                  v-show="!isChatMessageReady"
+                  class="v-progress-linear"
+                  indeterminate
+                  color="primary"
+                ></v-progress-circular>
+                <perfect-scrollbar
+                  v-show="isChatMessageReady"
+                  class="chat-room-box-height"
+                  id="content_section"
+                >
+                  <div class="drag-message" v-show="isDragOver">
+                    Arrastra un archivo aquí
+                  </div>
+                  <div
+                    v-show="!isDragOver"
+                    v-for="formattedMessage in formattedMessages"
+                    :key="formattedMessage._id"
+                    :class="{
+                      'chat-msg': true,
+                      'ma-0': true,
+                      'pa-0': true,
+                      owner: formattedMessage.from != 'Cliente',
+                    }"
+                  >
                     <div class="chat-msg-profile">
-                      <img class="chat-msg-img" :src="
-                        formattedMessage.from == 'Chatbot'
-                          ? '/assets/images/users/bot.jpg'
-                          : formattedMessage.from == 'Agente'
+                      <img
+                        class="chat-msg-img"
+                        :src="
+                          formattedMessage.from == 'Chatbot'
+                            ? '/assets/images/users/bot.jpg'
+                            : formattedMessage.from == 'Agente'
                             ? '/assets/images/users/3.jpg'
                             : getProfilePic(selectedChat) ||
-                            `/assets/images/users/3.jpg`
-                      " alt="" />
+                              `/assets/images/users/1.jpg`
+                        "
+                        alt=""
+                      />
                       <div class="chat-msg-date">
                         {{ formatDate(formattedMessage.date) }}
                       </div>
                     </div>
                     <div class="chat-msg-content">
-                      <div class="mb-1 hover-text chat-message tooltip-controls"
-                        v-for="message in formattedMessage.messages" :key="message._id"
-                        @mouseover="selectedMessage = message">
+                      <div
+                        class="mb-1 hover-text chat-message tooltip-controls"
+                        draggable="false"
+                        v-for="message in formattedMessage.messages"
+                        :key="message._id"
+                        @mouseover="selectedMessage = message"
+                      >
                         <!-- <span class="tooltiptext">Tooltip text</span> -->
                         <div class="tooltiptext">
                           <v-menu>
                             <template v-slot:activator="{ props }">
-                              <v-btn color="primary" v-bind="props" icon="mdi-chevron-down mdi" small>
+                              <v-btn
+                                color="primary"
+                                v-bind="props"
+                                icon="mdi-chevron-down mdi"
+                                small
+                              >
                               </v-btn>
                             </template>
                             <v-list>
                               <v-list-item>
                                 <v-list-item-title
-                                  @click="replyToMessage(selectedMessage)">Responder</v-list-item-title>
+                                  @click="replyToMessage(selectedMessage)"
+                                  >Responder</v-list-item-title
+                                >
                               </v-list-item>
                             </v-list>
                           </v-menu>
                         </div>
 
-                        <v-card class="tooltip-text" :style="'visibility:visible'" v-show="
-                          selectedText &&
-                          showMessageOptions &&
-                          this.selectedMessage &&
-                          this.selectedMessage._id == message._id &&
-                          this.selectedMessageText._id ==
-                          this.selectedMessage._id
-                        " id="top">
+                        <v-card
+                          class="tooltip-text"
+                          :style="'visibility:visible'"
+                          v-show="
+                            selectedText &&
+                            showMessageOptions &&
+                            this.selectedMessage &&
+                            this.selectedMessage._id == message._id &&
+                            this.selectedMessageText._id ==
+                              this.selectedMessage._id
+                          "
+                          id="top"
+                        >
                           <v-btn-toggle divided>
-                            <v-btn v-show="getFieldTextSelection == 'text'" @click="
-  userForm.name = selectedText;
-saveUserForm();
-showMessageOptions = false;
-                            " icon="mdi-account"></v-btn>
-                            <v-btn v-show="getFieldTextSelection == 'phone'" @click="
-  userForm.phone = selectedText;
-saveUserForm();
-showMessageOptions = false;
-                            " icon="mdi-cellphone"></v-btn>
-                            <v-btn v-show="getFieldTextSelection == 'email'" @click="
-  userForm.email = selectedText;
-saveUserForm();
-showMessageOptions = false;
-                            " icon="mdi-email"></v-btn>
-                            <v-btn v-show="getFieldTextSelection == 'text'" @click="
-  userForm.city = selectedText;
-saveUserForm();
-showMessageOptions = false;
-                            " icon="mdi-city"></v-btn>
+                            <v-btn
+                              v-show="getFieldTextSelection == 'text'"
+                              @click="
+                                userForm.name = selectedText;
+                                saveUserForm();
+                                showMessageOptions = false;
+                              "
+                              icon="mdi-account"
+                            ></v-btn>
+                            <v-btn
+                              v-show="getFieldTextSelection == 'phone'"
+                              @click="
+                                userForm.phone = selectedText;
+                                saveUserForm();
+                                showMessageOptions = false;
+                              "
+                              icon="mdi-cellphone"
+                            ></v-btn>
+                            <v-btn
+                              v-show="getFieldTextSelection == 'email'"
+                              @click="
+                                userForm.email = selectedText;
+                                saveUserForm();
+                                showMessageOptions = false;
+                              "
+                              icon="mdi-email"
+                            ></v-btn>
+                            <v-btn
+                              v-show="getFieldTextSelection == 'text'"
+                              @click="
+                                userForm.city = selectedText;
+                                saveUserForm();
+                                showMessageOptions = false;
+                              "
+                              icon="mdi-city"
+                            ></v-btn>
                           </v-btn-toggle>
                         </v-card>
-                        <SelectorMessage :message="message" :messages="messages" @goToMessage="goToMessage">
+                        <SelectorMessage
+                          :message="message"
+                          :messages="messages"
+                          @goToMessage="goToMessage"
+                        >
                         </SelectorMessage>
 
-                        <div v-if="message.type === 'template'" class="chat-msg-text pa-3">
+                        <div
+                          v-if="message.type === 'template'"
+                          class="chat-msg-text pa-3"
+                        >
                           <v-row justify="center ma-2">
-                            <div v-if="message.payload.hasOwnProperty('product')">
-                              <v-img class="rounded-corners" :src="
-                                message.payload.product.elements[0].image_url
-                              " aspect-ratio="1" contain></v-img>
-                              <v-card color="#F0F2F5" outlined class="pa-3" width="200">
+                            <div
+                              v-if="message.payload.hasOwnProperty('product')"
+                            >
+                              <v-img
+                                class="rounded-corners"
+                                :src="
+                                  message.payload.product.elements[0].image_url
+                                "
+                                aspect-ratio="1"
+                                contain
+                              ></v-img>
+                              <v-card
+                                color="#F0F2F5"
+                                outlined
+                                class="pa-3"
+                                width="200"
+                              >
                                 <strong>{{
                                   message.payload.product.elements[0].title
                                 }}</strong>
@@ -250,11 +426,22 @@ showMessageOptions = false;
                               </v-card>
                             </div>
                             <div v-else>
-                              <v-img class="rounded-corners ma-0 pa-0" :src="
-                                message.payload.attachment.payload.elements[0]
-                                  .image_url
-                              " aspect-ratio="1" contain @click="openUrl(message.payload.post_url)"></v-img>
-                              <v-card color="#F0F2F5" outlined class="pa-3 mb-1" width="200">
+                              <v-img
+                                class="rounded-corners ma-0 pa-0"
+                                :src="
+                                  message.payload.attachment.payload.elements[0]
+                                    .image_url
+                                "
+                                aspect-ratio="1"
+                                contain
+                                @click="openUrl(message.payload.post_url)"
+                              ></v-img>
+                              <v-card
+                                color="#F0F2F5"
+                                outlined
+                                class="pa-3 mb-1"
+                                width="200"
+                              >
                                 <strong>{{
                                   message.payload.attachment.payload.elements[0]
                                     .title
@@ -265,20 +452,39 @@ showMessageOptions = false;
                                       .elements[0].subtitle
                                   }}
                                 </p>
-                                <v-btn v-for="(button, btnIndex) in message.payload
-                                .attachment.payload.elements[0].buttons" :key="btnIndex" small class="wrapText mb-2"
-                                  block outlined color="primary"><a v-if="button.type == 'web_url'" :href="button.url"
-                                    target="_blank">{{
-                                      button.title
-                                    }}</a><span v-else>{{ button.title }}
-                                    <v-tooltip activator="parent" anchor="bottom">
+                                <v-btn
+                                  v-for="(button, btnIndex) in message.payload
+                                    .attachment.payload.elements[0].buttons"
+                                  :key="btnIndex"
+                                  small
+                                  class="wrapText mb-2"
+                                  block
+                                  outlined
+                                  color="primary"
+                                  ><a
+                                    v-if="button.type == 'web_url'"
+                                    :href="button.url"
+                                    target="_blank"
+                                    >{{ button.title }}</a
+                                  ><span v-else
+                                    >{{ button.title }}
+                                    <v-tooltip
+                                      activator="parent"
+                                      anchor="bottom"
+                                    >
                                       {{ button.payload }}
-                                    </v-tooltip></span>
+                                    </v-tooltip></span
+                                  >
                                 </v-btn>
                               </v-card>
                               <div v-if="message.payload.quick_replies">
-                                <v-chip v-for="(reply, replyIdx) in message.payload
-                                .quick_replies" :multiple="false" size="small" :key="replyIdx">
+                                <v-chip
+                                  v-for="(reply, replyIdx) in message.payload
+                                    .quick_replies"
+                                  :multiple="false"
+                                  size="small"
+                                  :key="replyIdx"
+                                >
                                   <strong>{{ reply.title }}</strong>
                                 </v-chip>
                               </div>
@@ -289,61 +495,133 @@ showMessageOptions = false;
                     </div>
                   </div>
                   <div v-if="uploadingImage" class="chat-msg-text">
-                    <v-progress-circular class="v-progress-linear" indeterminate color="primary"></v-progress-circular>
+                    <v-progress-circular
+                      class="v-progress-linear"
+                      indeterminate
+                      color="primary"
+                    ></v-progress-circular>
                   </div>
-                  <v-alert id="reply-alert" v-if="!!messageToReply" v-model="messageToReply" class="mb-1" border="start"
-                    border-color="deep-purple accent-4" closable>
-                    <h6 v-if="messageToReply.from == 'Cliente'" style="color: #06cf9c">
+                  <v-alert
+                    id="reply-alert"
+                    v-if="!!messageToReply"
+                    v-model="messageToReply"
+                    class="mb-1"
+                    border="start"
+                    border-color="deep-purple accent-4"
+                    closable
+                  >
+                    <h6
+                      v-if="messageToReply.from == 'Cliente'"
+                      style="color: #06cf9c"
+                    >
                       Cliente
                     </h6>
                     <h6 v-else style="color: #53bdeb">Tú</h6>
-                    <SelectorMessage :is_reply="true" :message="messageToReply" :messages="messages"></SelectorMessage>
+                    <SelectorMessage
+                      :is_reply="true"
+                      :message="messageToReply"
+                      :messages="messages"
+                    ></SelectorMessage>
                   </v-alert>
                 </perfect-scrollbar>
               </div>
 
               <div class="chat-area-footer">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-image"
-                  @click="uploadDialog = true">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="feather feather-image"
+                  @click="uploadDialog = true"
+                >
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                   <circle cx="8.5" cy="8.5" r="1.5"></circle>
                   <path d="M21 15l-5-5L5 21"></path>
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-paperclip"
-                  @click="pickFile">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="feather feather-paperclip"
+                  @click="pickFile"
+                >
                   <path
-                    d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48">
-                  </path>
+                    d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"
+                  ></path>
                 </svg>
-                <input type="file" id="file" ref="file" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint,
-text/plain, application/pdf, video/mp4,video/x-m4v,video/*" capture @change="handleFileUpload" style="display: none" />
-                <v-textarea v-model="text" class="mx-1" name="input-4-1" rows="2" variant="outlined" hide-details
-                  no-resize @keyup.enter.exact.prevent="
+                <input
+                  type="file"
+                  id="file"
+                  ref="file"
+                  accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint,
+text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
+                  capture
+                  @change="handleFileUpload"
+                  style="display: none"
+                />
+                <v-textarea
+                  v-model="text"
+                  class="mx-1"
+                  name="input-4-1"
+                  rows="2"
+                  variant="outlined"
+                  hide-details
+                  no-resize
+                  @keyup.enter.exact.prevent="
                     sendMessage(text, 'Agente', 'text')
-                  " @keydown.enter.shift.exact.prevent="text += '\n'" :label="
-  selectedChat.isBotActive
-    ? 'Desactiva el chatbot para intervenir chat'
-    : remainingMillis <= 0
-      ? 'No se pueden enviar mensaje pasadas las 24h en WhatsApp'
-      : 'Escribe y presiona Enter'
-" :disabled="selectedChat.isBotActive || remainingMillis <= 0"></v-textarea>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-smile">
+                  "
+                  @keydown.enter.shift.exact.prevent="text += '\n'"
+                  :label="
+                    selectedChat.isBotActive
+                      ? 'Desactiva el chatbot para intervenir chat'
+                      : remainingMillis <= 0
+                      ? 'No se pueden enviar mensaje pasadas las 24h en WhatsApp'
+                      : 'Escribe y presiona Enter'
+                  "
+                  :disabled="selectedChat.isBotActive || remainingMillis <= 0"
+                ></v-textarea>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="feather feather-smile"
+                >
                   <circle cx="12" cy="12" r="10"></circle>
                   <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"></path>
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-up">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="feather feather-thumbs-up"
+                >
                   <path
-                    d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3">
-                  </path>
+                    d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"
+                  ></path>
                 </svg>
               </div>
             </template>
             <template v-else>
-              <div id="content_section" class="d-flex justify-center h-100 align-center">
+              <div
+                id="content_section"
+                class="d-flex justify-center h-100 align-center"
+              >
                 <h4>Start conversation</h4>
               </div>
             </template>
@@ -363,34 +641,88 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*" capture @change="han
                 (el) => el.fanpageId == selectedChat.pageID
               )
                 ? $store.state.botsModule.bots.find(
-                  (el) => el.fanpageId == selectedChat.pageID
-                ).name
+                    (el) => el.fanpageId == selectedChat.pageID
+                  ).name
                 : "Sin fuente"
             }}
           </h4>
         </v-card-text>
         <v-divider></v-divider>
         <v-card-text class="pa-5 border-bottom">
-          <v-text-field density="compact" hide-details variant="outlined" label="Nombres" placeholder="Nombres"
-            append-icon="mdi-account" v-model="userForm.name" class="mb-2"></v-text-field>
-          <v-text-field density="compact" hide-details variant="outlined" label="Teléfonos" placeholder="Teléfonos"
-            append-icon="mdi-cellphone" v-model="userForm.phone" class="mb-2"></v-text-field>
-          <v-text-field density="compact" hide-details variant="outlined" label="Correo" placeholder="Correo"
-            append-icon="mdi-email" v-model="userForm.email" class="mb-2"></v-text-field>
-          <v-text-field density="compact" hide-details variant="outlined" label="Ciudad" placeholder="Ciudad"
-            append-icon="mdi-city" v-model="userForm.city" class="mb-2"></v-text-field>
+          <v-text-field
+            density="compact"
+            hide-details
+            variant="outlined"
+            label="Nombres"
+            placeholder="Nombres"
+            append-icon="mdi-account"
+            v-model="userForm.name"
+            class="mb-2"
+          ></v-text-field>
+          <v-text-field
+            density="compact"
+            hide-details
+            variant="outlined"
+            label="Teléfonos"
+            placeholder="Teléfonos"
+            append-icon="mdi-cellphone"
+            v-model="userForm.phone"
+            class="mb-2"
+          ></v-text-field>
+          <v-text-field
+            density="compact"
+            hide-details
+            variant="outlined"
+            label="Correo"
+            placeholder="Correo"
+            append-icon="mdi-email"
+            v-model="userForm.email"
+            class="mb-2"
+          ></v-text-field>
+          <v-text-field
+            density="compact"
+            hide-details
+            variant="outlined"
+            label="Ciudad"
+            placeholder="Ciudad"
+            append-icon="mdi-city"
+            v-model="userForm.city"
+            class="mb-2"
+          ></v-text-field>
           <span>Etiquetas</span>
-          <TodofullLabelsSelector :initialData="userForm.todofullLabels" class="my-3"
-            @onSelectTodofullLabels="onSelectTodofullLabels" :key="updateLabels"></TodofullLabelsSelector>
+          <TodofullLabelsSelector
+            :initialData="userForm.todofullLabels"
+            class="my-3"
+            @onSelectTodofullLabels="onSelectTodofullLabels"
+            :key="updateLabels"
+          ></TodofullLabelsSelector>
           <span>Estados de Negociación</span>
-          <NegotiationStatusesSelector :initialData="selectedNegotiationStatus" class="my-3"
-            @onSelectNegotiationStatuses="onSelectNegotiationStatuses" :key="updateNegotiationStatus">
+          <NegotiationStatusesSelector
+            :initialData="selectedNegotiationStatus"
+            class="my-3"
+            @onSelectNegotiationStatuses="onSelectNegotiationStatuses"
+            :key="updateNegotiationStatus"
+          >
           </NegotiationStatusesSelector>
-          <v-textarea density="compact" hide-details variant="outlined" clearable clear-icon="mdi-close-circle"
-            label="Notas" v-model="userForm.notes" class="mb-2"></v-textarea>
+          <v-textarea
+            density="compact"
+            hide-details
+            variant="outlined"
+            clearable
+            clear-icon="mdi-close-circle"
+            label="Notas"
+            v-model="userForm.notes"
+            class="mb-2"
+          ></v-textarea>
 
           <div class="mt-4">
-            <v-btn color="success" @click="saveUserForm" variant="outlined" class="text-capitalize mr-2">Guardar</v-btn>
+            <v-btn
+              color="success"
+              @click="saveUserForm"
+              variant="outlined"
+              class="text-capitalize mr-2"
+              >Guardar</v-btn
+            >
           </div>
         </v-card-text>
       </v-card>
@@ -398,9 +730,18 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*" capture @change="han
     <v-dialog v-model="uploadDialog" style="max-width: 800px">
       <v-card>
         <v-container class="pa-5">
-          <UploadImages :key="resetImage" value="/uploads/grodnobot.png" ref="image" @change="handleImages"
-            @drop="handleImages" :max="1" uploadMsg="Click para insertar o arrastrar una imagen"
-            fileError="Solo se aceptan archivos imágenes" clearAll="Borrar todo" class="mb-2" />
+          <UploadImages
+            :key="resetImage"
+            value="/uploads/grodnobot.png"
+            ref="image"
+            @change="handleImages"
+            @drop="handleImages"
+            :max="1"
+            uploadMsg="Click para insertar o arrastrar una imagen"
+            fileError="Solo se aceptan archivos imágenes"
+            clearAll="Borrar todo"
+            class="mb-2"
+          />
         </v-container>
       </v-card>
     </v-dialog>
@@ -536,6 +877,8 @@ export default {
       selectedAgent: null,
       userPermissions: null,
       selectedNegotiationStatus: null,
+      isDragOver: false,
+      hasDraggedOver: false
     };
   },
   created() {
@@ -680,6 +1023,7 @@ export default {
       // }
       this.updateLabels += 1;
       this.updateNegotiationStatus += 1;
+      this.clear();
     },
     sendMessage(text, from = "Agente", type = "text", { url } = {}) {
       const user = JSON.parse(localStorage.getItem("user"));
@@ -1039,6 +1383,9 @@ export default {
       this.image = null;
       this.resetImage += 1;
       this.imageUploaded = false;
+      this.isDragOver = false;
+      this.hasDraggedOver = false;
+      this.uploadDialog=false;
     },
     handleFileUpload() {
       console.log("aaa")
@@ -1094,6 +1441,7 @@ export default {
         this.uploadDialog = false;
         this.uploadingImage = false;
         this.clear();
+        document.getElementById('file').value = '';
         return url;
       }
     }, openUrl(url) {
@@ -1135,6 +1483,36 @@ export default {
           scrollBottom()
         }
       });
+    }, onDragOver(e) {
+      if (!this.isDragOver) {
+        // this.uploadDialog=true;
+        console.log("dragging")
+        this.isDragOver = true;
+      }
+        e.preventDefault();
+    },onDragLeave(e){
+      if (e.currentTarget.contains(e.relatedTarget)) {
+        return;
+      }
+      console.log("fuera xd")
+       e.preventDefault();
+      this.isDragOver = false;
+      this.uploadDialog = false;
+    },
+    onDrop(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      console.log("dropped")
+      this.isDragOver = false;
+      // check if is image or file
+      if (e.dataTransfer.files[0].type.includes("image")) {
+        this.image = e.dataTransfer.files[0];
+        this.sendImageMessage();
+      } else {
+        this.file = e.dataTransfer.files[0];
+        this.sendFileMessage();
+      }
+      // Handle the dropped element here
     }
   },
   computed: {
@@ -1248,6 +1626,8 @@ export default {
       }
     }
   },
+
+    
 };
 </script>
 <style lang="scss">
@@ -1364,5 +1744,20 @@ export default {
 .chat-message .message-controls {
   /* Style the message controls container */
   display: none;
+}
+
+.drag-message {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  border: 2px dotted black;
+  text-align: center;
+  z-index: 1;
 }
 </style>
