@@ -731,6 +731,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
       <v-card>
         <v-container class="pa-5">
           <UploadImages
+            id="uploadImages"
             :key="resetImage"
             value="/uploads/grodnobot.png"
             ref="image"
@@ -891,6 +892,7 @@ export default {
     sellTeamsService.list({ byAgent: true }).then(res => this.sellTeams = res.data.payload)
   },
   mounted() {
+    window.addEventListener('paste', this.handlePaste);
     document.addEventListener("mouseup", (event) => {
       if (
         (event.target.tagName.toLowerCase() === "p" ||
@@ -905,6 +907,17 @@ export default {
     });
   },
   methods: {
+      handlePaste (event) {
+      const items = event.clipboardData.items;
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.indexOf('image') !== -1) {
+          const blob = item.getAsFile();
+          this.image = blob;
+          this.sendImageMessage();
+        }
+      }
+    },
     pickFile() {
       this.$refs.file.click();
     },
