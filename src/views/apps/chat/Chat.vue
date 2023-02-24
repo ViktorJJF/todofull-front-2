@@ -494,6 +494,7 @@
                       </div>
                     </div>
                   </div>
+
                   <div v-if="uploadingImage" class="chat-msg-text">
                     <v-progress-circular
                       class="v-progress-linear"
@@ -501,6 +502,12 @@
                       color="primary"
                     ></v-progress-circular>
                   </div>
+                  <EmojiPicker
+                    v-if="showEmojis"
+                    class="chat-emoji-picker"
+                    :native="true"
+                    @select="onSelectEmoji"
+                  />
                   <v-alert
                     id="reply-alert"
                     v-if="!!messageToReply"
@@ -568,8 +575,9 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                   style="display: none"
                 />
                 <v-textarea
+                  ref="chat-input"
                   v-model="text"
-                  class="mx-1"
+                  class="mx-1 chat-input"
                   name="input-4-1"
                   rows="2"
                   variant="outlined"
@@ -588,6 +596,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                   "
                   :disabled="selectedChat.isBotActive || remainingMillis <= 0"
                 ></v-textarea>
+
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -597,6 +606,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   class="feather feather-smile"
+                  @click="handleEmojis"
                 >
                   <circle cx="12" cy="12" r="10"></circle>
                   <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"></path>
@@ -762,6 +772,8 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
 
 <script lang="js">
 import UploadImages from "vue-upload-drop-images";
+import EmojiPicker from 'vue3-emoji-picker'
+import 'vue3-emoji-picker/css'
 import { formatDistance } from "date-fns";
 import chatsService from "@/services/api/chats";
 import filesService from "@/services/api/files";
@@ -793,6 +805,7 @@ import EspaniaFlag from '@/assets/images/flags/espania.png'
 
 import SelectorMessage from "@/components/chat/SelectorMessage.vue";
 
+
 export default {
   components: {
     BaseLeftRightPartVue,
@@ -800,10 +813,11 @@ export default {
     TodofullLabelsSelector,
     InfiniteScroll,
     UploadImages, NegotiationStatusesSelector,
-    Countdown, SelectorMessage
+    Countdown, SelectorMessage,EmojiPicker
   },
   data() {
     return {
+      showEmojis:false,
       messageToReply: null,
       updateCountdown: 0,
       remainingMillis: 24 * 60 * 60 * 1000,
@@ -879,7 +893,8 @@ export default {
       userPermissions: null,
       selectedNegotiationStatus: null,
       isDragOver: false,
-      hasDraggedOver: false
+      hasDraggedOver: false,
+      emojiSet :'google'
     };
   },
   created() {
@@ -1526,6 +1541,26 @@ export default {
         this.sendFileMessage();
       }
       // Handle the dropped element here
+    },
+    handleEmojis(){
+      this.showEmojis = !this.showEmojis;
+      this.$nextTick(() => {
+        // scroll to emojis
+        const emojis = document.querySelector(".chat-emoji-picker");
+        if (emojis) {
+          emojis.scrollIntoView({
+            behavior: 'auto',
+            block: 'center',
+            inline: 'center'
+          });
+        }
+      });
+    },async onSelectEmoji(emoji){
+      this.text += emoji.i;
+      this.$nextTick(() => {
+        console.log('🚀 Aqui *** -> t:', this.$refs['chat-input']);
+        this.$refs['chat-input'].focus()
+      });
     }
   },
   computed: {
@@ -1637,7 +1672,8 @@ export default {
           console.log(error)
         }
       }
-    }
+    },
+    
   },
 
     
@@ -1772,5 +1808,14 @@ export default {
   border: 2px dotted black;
   text-align: center;
   z-index: 1;
+}
+
+.chat-emoji-picker {
+  width: 100% !important;
+}
+.v3-emojis button {
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: 45px !important;
 }
 </style>
