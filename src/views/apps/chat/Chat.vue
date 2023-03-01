@@ -611,20 +611,16 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                   <circle cx="12" cy="12" r="10"></circle>
                   <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"></path>
                 </svg>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="feather feather-thumbs-up"
+                <v-btn
+                  @click="templateMessagesDialog = true"
+                  small
+                  color="white"
                 >
-                  <path
-                    d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"
-                  ></path>
-                </svg>
+                  <v-icon>mdi-message-bulleted</v-icon>
+                  <v-tooltip activator="parent" anchor="bottom">
+                    Mensajes de Plantilla
+                  </v-tooltip>
+                </v-btn>
               </div>
             </template>
             <template v-else>
@@ -767,6 +763,110 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
         </v-container>
       </v-card>
     </v-dialog>
+    <v-dialog
+      v-model="templateMessagesDialog"
+      max-width="900"
+      max-height="900px"
+    >
+      <v-card>
+        <v-container fluid>
+          <div class="template-modal">
+            <div v-if="!dynamicTemplateDialog" class="modal-content">
+              <div class="header">
+                <h2>Escoge un mensaje de plantilla</h2>
+              </div>
+              <ul class="template-list">
+                <li
+                  v-for="(template, templateIndex) in templateMessages"
+                  :key="template._idid"
+                >
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on, attrs }">
+                      <span v-bind="attrs" v-on="on" class="template-name"
+                        >{{ template.name }}
+                      </span>
+                    </template>
+                    <span>{{
+                      template.components.find(
+                        (el) => el.type.toLowerCase() === "body"
+                      ).text
+                    }}</span>
+                  </v-tooltip>
+                  <v-btn
+                    @click="
+                      selectedTemplateMessage = template;
+                      verifyTemplateMessage(template);
+                    "
+                    small
+                    dark
+                    color="green"
+                    :loading="
+                      isSendingTemplate &&
+                      selectedTemplateMessage._id === template._id
+                    "
+                  >
+                    <v-icon>mdi-send</v-icon>
+                  </v-btn>
+                </li>
+              </ul>
+            </div>
+            <div v-else class="modal-content">
+              <div class="header">
+                <h2>Completa los campos dinámicos</h2>
+              </div>
+              <div v-show="qtyHeaderDynamics > 0">
+                <h6>Rellena {{ qtyHeaderDynamics }} campos header</h6>
+                <div
+                  v-for="(number, numberIndex) in qtyHeaderDynamics"
+                  :key="numberIndex"
+                >
+                  <v-text-field
+                    :id="`header${number}`"
+                    :label="`{{${number}}}`"
+                    v-model="dynamic_parameters.header[numberIndex]"
+                    class="mb-2"
+                  ></v-text-field>
+                </div>
+              </div>
+              <div v-show="qtyBodyDynamics > 0">
+                <h6>Rellena {{ qtyBodyDynamics }} campos body</h6>
+                <div
+                  v-for="(number, numberIndex) in qtyBodyDynamics"
+                  :key="numberIndex"
+                >
+                  <v-text-field
+                    :id="`body${number}`"
+                    :label="`{{${number}}}`"
+                    v-model="dynamic_parameters.body[numberIndex]"
+                    class="mb-2"
+                  ></v-text-field>
+                </div>
+              </div>
+              <div>
+                <v-spacer></v-spacer>
+                <v-btn
+                  @click="dynamicTemplateDialog = false"
+                  small
+                  dark
+                  color="alert"
+                >
+                  Atrás
+                </v-btn>
+                <v-btn
+                  @click="sendTemplateMessage(selectedTemplateMessage)"
+                  small
+                  dark
+                  color="green"
+                  :loading="isSendingTemplate"
+                >
+                  <v-icon>mdi-send</v-icon>
+                </v-btn>
+              </div>
+            </div>
+          </div>
+        </v-container>
+      </v-card>
+    </v-dialog>
   </v-row>
 </template>
 
@@ -804,6 +904,7 @@ import ColombiaFlagR from '@/assets/images/flags/colombia.png'
 import EspaniaFlag from '@/assets/images/flags/espania.png'
 
 import SelectorMessage from "@/components/chat/SelectorMessage.vue";
+import graphApiService from "@/services/api/graphApi";
 
 
 export default {
@@ -817,6 +918,17 @@ export default {
   },
   data() {
     return {
+      dynamic_parameters:{
+        header:[],
+        body:[]
+      },
+      dynamicTemplateDialog:false,
+      qtyHeaderDynamics: 0,
+      qtyBodyDynamics: 0,
+      selectedTemplateMessage:null,
+      isSendingTemplate:false,
+      templateMessages:[],
+      templateMessagesDialog:false,
       showEmojis:false,
       messageToReply: null,
       updateCountdown: 0,
@@ -922,7 +1034,44 @@ export default {
     });
   },
   methods: {
-      handlePaste (event) {
+    async verifyTemplateMessage(template){
+       // check if has header
+      const header=template.components.find(el=>el.type && el.type.toLowerCase()==='header');
+      const body=template.components.find(el=>el.type && el.type.toLowerCase()==='body');
+      if(header){
+        const regex = /{{/g;
+        this.qtyHeaderDynamics=header.text.match(regex)?.length;
+      }
+      if(body){
+        const regex = /{{/g;
+       this.qtyBodyDynamics=body.text.match(regex)?.length;
+      }
+      if(this.qtyHeaderDynamics>0 || this.qtyBodyDynamics>0){
+        this.dynamicTemplateDialog=true;
+      } else {
+        this.sendTemplateMessage(template);
+      }
+    },
+    async sendTemplateMessage(template){
+     try {
+      this.isSendingTemplate=true;
+      await graphApiService.sendWhatsappMessageTemplates(this.selectedChat.cleanLeadId.telefono,template.name,this.dynamic_parameters,this.selectedChat.leadId.fuente,this.selectedChat.cleanLeadId._id,);
+     } catch (error) {
+       console.log('🚀 error *** -> error:', error);
+     } finally{
+       this.isSendingTemplate=false;
+        this.dynamicTemplateDialog=false;
+        this.qtyHeaderDynamics=0;
+        this.qtyBodyDynamics=0;
+        this.dynamic_parameters={
+        header:[],
+        body:[]
+      }
+      this.templateMessagesDialog=false;
+     }
+    
+    },
+    handlePaste (event) {
       const items = event.clipboardData.items;
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
@@ -1622,6 +1771,16 @@ export default {
 
   },
   watch: {
+    async templateMessagesDialog(val){
+      if(val){
+        // get template messages
+      this.templateMessages = (
+        await graphApiService.getWhatsappMessageTemplates(
+          {botId: this.selectedChat.leadId.fuente}
+        )
+      ).data.payload.filter(el=>(!el.name.toLowerCase().includes('sample_') && !el.name.toLowerCase().includes('prueba') && !el.name.toLowerCase().includes('test')) && el.status==='APPROVED');
+      }
+    },
     messages() {
       scrollBottom();
     },
@@ -1817,5 +1976,82 @@ export default {
   padding: 0 !important;
   margin: 0 !important;
   max-width: 45px !important;
+}
+
+// custom template list
+.template-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.header h2 {
+  margin: 0;
+}
+
+.close-button {
+  background-color: #f2f2f2;
+  border: none;
+  color: #333;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.close-button:hover {
+  background-color: #ddd;
+}
+
+.template-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.template-list li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.template-name {
+  flex-grow: 1;
+  font-size: 1.2rem;
+}
+
+.send-button {
+  background-color: #5f9ea0;
+  color: #fff;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.send-button:hover {
+  background-color: #4682b4;
 }
 </style>
