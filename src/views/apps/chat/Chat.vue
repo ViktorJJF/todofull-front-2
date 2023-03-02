@@ -300,7 +300,8 @@
                         alt=""
                       />
                       <div class="chat-msg-date">
-                        {{ formatDate(formattedMessage.date) }}
+                        {{ formatDate(formattedMessage.date) }} -
+                        {{ formattedMessage.user?.alias }}
                       </div>
                     </div>
                     <div class="chat-msg-content">
@@ -1040,7 +1041,11 @@ export default {
       const body=template.components.find(el=>el.type && el.type.toLowerCase()==='body');
       if(header){
         const regex = /{{/g;
-        this.qtyHeaderDynamics=header.text.match(regex)?.length;
+        this.qtyHeaderDynamics=header.text?.match(regex)?.length;
+        if(header.format.toLowerCase()==='image' || header.format.toLowerCase()==='document' ){
+           this.qtyHeaderDynamics=1;
+           this.dynamic_parameters.header=[header.example.header_handle[0]]
+        }
       }
       if(body){
         const regex = /{{/g;
@@ -1756,7 +1761,7 @@ export default {
         if (group) {
           group.messages.push(el);
         } else {
-          acc.push({ from: el.from, messages: [el], date: el.createdAt, _id: el._id });
+          acc.push({ from: el.from, messages: [el], date: el.createdAt, _id: el._id,user:el.user });
         }
         return acc;
       }, []);
