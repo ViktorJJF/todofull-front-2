@@ -764,14 +764,10 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
         </v-container>
       </v-card>
     </v-dialog>
-    <v-dialog
-      v-model="templateMessagesDialog"
-      max-width="900"
-      max-height="900px"
-    >
-      <v-card>
-        <v-container fluid>
-          <div class="template-modal">
+    <v-dialog v-model="templateMessagesDialog" max-width="900" scrollable>
+      <v-card style="height: 300px">
+        <div fluid>
+          <div>
             <div v-if="!dynamicTemplateDialog" class="modal-content">
               <div class="header">
                 <h2>Escoge un mensaje de plantilla</h2>
@@ -865,7 +861,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
               </div>
             </div>
           </div>
-        </v-container>
+        </div>
       </v-card>
     </v-dialog>
   </v-row>
@@ -906,6 +902,7 @@ import EspaniaFlag from '@/assets/images/flags/espania.png'
 
 import SelectorMessage from "@/components/chat/SelectorMessage.vue";
 import graphApiService from "@/services/api/graphApi";
+import templateMessagesService from "@/services/api/templateMessages";
 
 
 export default {
@@ -1779,11 +1776,13 @@ export default {
     async templateMessagesDialog(val){
       if(val){
         // get template messages
-      this.templateMessages = (
-        await graphApiService.getWhatsappMessageTemplates(
-          {botId: this.selectedChat.leadId.fuente}
-        )
-      ).data.payload.filter(el=>(!el.name.toLowerCase().includes('sample_') && !el.name.toLowerCase().includes('prueba') && !el.name.toLowerCase().includes('test')) && el.status==='APPROVED');
+      this.templateMessages = (await templateMessagesService.list({
+          botId: this.selectedChat.leadId.fuente,
+          sort: "name",
+          order: "1",
+          status:'APPROVED',
+          is_active:true
+        })).data.payload
       }
     },
     messages() {

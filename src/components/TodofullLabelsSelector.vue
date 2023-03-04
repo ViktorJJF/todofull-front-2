@@ -79,6 +79,7 @@ export default {
       await this.$store.dispatch("todofullLabelsModule/list", {
         sort: "name",
         order: "asc",
+        is_active: true,
       });
     }
     this.todofullLabels =
