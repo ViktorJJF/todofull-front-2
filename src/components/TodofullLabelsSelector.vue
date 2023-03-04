@@ -7,7 +7,7 @@
     class="mt-3"
     :search-input.sync="searchLabel"
     v-model="selectedTodofullLabels"
-    :items="todofullLabels"
+    :items="filteredTodofullLabels"
     multiple
     no-data-text="No se encontraron etiquetas"
     outlined
@@ -46,6 +46,13 @@ export default {
       isInitialDataExecuted: false,
     };
   },
+  computed: {
+    filteredTodofullLabels() {
+      return this.todofullLabels.filter((el) => {
+        return el.is_active;
+      });
+    },
+  },
   watch: {
     // initialData: {
     //   handler() {
@@ -79,13 +86,14 @@ export default {
       await this.$store.dispatch("todofullLabelsModule/list", {
         sort: "name",
         order: "asc",
-        is_active: true,
+        // is_active: true,
       });
     }
     this.todofullLabels =
       this.$store.state.todofullLabelsModule.todofullLabels.map((el) => ({
         value: el._id,
         title: el.name,
+        is_active: el.is_active,
       }));
   },
   methods: {
