@@ -1171,7 +1171,7 @@ export default {
       this.isChatMessageReady = true;
       // get millis if whatsapp
       if (chat.platform === "whatsapp") {
-        this.remainingMillis = 24 * 60 * 60 * 1000 - (Date.now() - new Date(this.selectedChat.last_message.createdAt).getTime())
+        this.remainingMillis = this.selectedChat.last_message?24 * 60 * 60 * 1000 - (Date.now() - new Date(this.selectedChat.last_message.createdAt).getTime()):0
         this.updateCountdown += 1;
       }
       if (chat.leadId) {
