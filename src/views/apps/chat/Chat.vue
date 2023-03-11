@@ -49,16 +49,15 @@
                 v-model="searchContact"
               ></v-text-field>
             </div>
-            <div class="pa-3 pt-1" v-if="sellTeams.length">
+            <div class="pa-3 pt-1" v-if="filteredSellTeams.length">
               <v-select
                 v-model="selectedSellTeam"
-                :items="sellTeams"
+                :items="filteredSellTeams"
                 item-title="nombre"
                 item-value="_id"
                 variant="outlined"
                 density="compact"
                 hide-details
-                clearable
                 placeholder="Filtrar por equipo"
               />
             </div>
@@ -1004,17 +1003,25 @@ export default {
       selectedNegotiationStatus: null,
       isDragOver: false,
       hasDraggedOver: false,
-      emojiSet :'google'
+      emojiSet :'google',
+      isInitialized:false
     };
   },
   created() {
     this.chatSidebar = useChatSidebarStore()
-    this.initialize();
+    sellTeamsService.list({ byAgent: true }).then(async (res) => {
+      this.selectedSellTeam=res.data.payload.length>0?res.data.payload[0]._id:null;
+      this.sellTeams = res.data.payload
+      // init bots
+      await this.$store.dispatch("botsModule/list"),
+      await this.initialize();
+      this.isInitialized=true;
+      })
     chatsService.listPermissions().then(res => {
       this.userPermissions = res.data.payload
       this.selectedCountry = this.userPermissions.countries[0]
     });
-    sellTeamsService.list({ byAgent: true }).then(res => this.sellTeams = res.data.payload)
+    
   },
   mounted() {
     window.addEventListener('paste', this.handlePaste);
@@ -1113,7 +1120,6 @@ export default {
         payload.negotiationStatusId = this.selectedFilterNegotiationStatus;
       }
       await Promise.all([
-        this.$store.dispatch("botsModule/list"),
         this.$store.dispatch("chatsModule/list", payload),
       ]);
       this.chats = this.$store.state.chatsModule.chats;
@@ -1497,6 +1503,7 @@ export default {
       return formatDistance(new Date(), date, { addSuffix: true, locale: es });
     },
     async loadMore() {
+      if(!this.isInitialized) return;
       if (this.isLoadingMore === true) { return; }
 
       if (this.searchContact.trim().length !== 0) { return; }
@@ -1521,6 +1528,9 @@ export default {
       }
       if (this.filterChats !== undefined) {
         payload.filterChats = this.filtersSource[this.filterChats].value;
+      }
+      if (this.selectedSellTeam) {
+        payload.teamId = this.selectedSellTeam;
       }
       const response = await chatsService.list(payload);
       for (const chat of response.data.payload) {
@@ -1769,6 +1779,8 @@ export default {
         : !isNaN(this.selectedText)
           ? "phone"
           : "text";
+    },filteredSellTeams(){
+      return this.sellTeams
     }
 
   },
@@ -1789,10 +1801,12 @@ export default {
       scrollBottom();
     },
     selectedCountry() {
+      if(!this.isInitialized) return
       this.page = 1;
       this.initialize();
     },
     selectedSellTeam(val) {
+      if(!this.isInitialized) return
       this.page = 1;
       this.initialize()
       if (val) {
@@ -1802,6 +1816,7 @@ export default {
       }
     },
     selectedFilterNegotiationStatus(val) {
+      if(!this.isInitialized) return
       this.page = 1;
       this.initialize()
       // if(val) {
@@ -1811,6 +1826,7 @@ export default {
       // }
     },
     async searchContact() {
+      if(!this.isInitialized) return
       this.page = 1;
       clearTimeout(this.delayTimer);
       this.delayTimer = setTimeout(() => {
@@ -1818,6 +1834,7 @@ export default {
       }, 600);
     },
     filterChats() {
+      if(!this.isInitialized) return
       this.page = 1;
       this.initialize();
     }, async '$store.state.chatsModule.hasToUpdateSelectedChat'() {
