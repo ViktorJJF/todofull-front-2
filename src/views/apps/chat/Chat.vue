@@ -1761,7 +1761,7 @@ export default {
         }
         // filter for negotiation status
         if (this.selectedNegotiationStatus) {
-          if (chat.negotiationStatusId._id !== this.selectedNegotiationStatus) return false;
+          if (chat.negotiationStatusId && (chat.negotiationStatusId._id !== this.selectedNegotiationStatus)) return false;
         }
         // filter by selectedSellTeamObject todofullLabels
         if (this.selectedSellTeamObject) {
