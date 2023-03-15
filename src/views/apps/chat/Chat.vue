@@ -1004,13 +1004,15 @@ export default {
       isDragOver: false,
       hasDraggedOver: false,
       emojiSet :'google',
-      isInitialized:false
+      isInitialized:false,
+      selectedSellTeamObject:null,
     };
   },
   created() {
     this.chatSidebar = useChatSidebarStore()
     sellTeamsService.list({ byAgent: true }).then(async (res) => {
       this.selectedSellTeam=res.data.payload.length>0?res.data.payload[0]._id:null;
+      this.selectedSellTeamObject=res.data.payload.length>0?res.data.payload[0]:null;
       this.sellTeams = res.data.payload
       // init bots
       await this.$store.dispatch("botsModule/list"),
@@ -1748,11 +1750,40 @@ export default {
     },
     filteredChats() {
       return this.$store.getters["chatsModule/getSortedChats"].filter(chat => {
+        if(chat._id=='63fe82a78d26c222486a3754'){
+          console.log("Existe: ",chat)
+        }
         if (this.activePlatforms.length > 0) {
           if (!this.activePlatforms.includes(chat.platform)) return false;
         }
         if (this.selectedCountry) {
           if (chat.leadId.pais !== this.selectedCountry) return false;
+        }
+        // filter for negotiation status
+        if (this.selectedNegotiationStatus) {
+          if (chat.negotiationStatusId._id !== this.selectedNegotiationStatus) return false;
+        }
+        // filter by selectedSellTeamObject todofullLabels
+        if (this.selectedSellTeamObject) {
+          let todofullLabels=this.selectedSellTeamObject.todofullLabels;
+          if(todofullLabels){
+            // check if chat has any of the labels
+            let chatTodofullLabels = [];
+            for (const leadLabel of (chat.leadId?.todofullLabels || [])) {
+              if(leadLabel){
+                chatTodofullLabels.push(leadLabel);
+              }
+            }
+            if(chat.cleanLeadId && chat.cleanLeadId.todofullLabels){
+              for (const cleanLeadLabel of chat.cleanLeadId.todofullLabels) {
+                if(cleanLeadLabel){
+                  chatTodofullLabels.push(cleanLeadLabel);
+                }
+              }
+            }
+            let hasLabel = todofullLabels.some(r=> chatTodofullLabels.includes(r) || chatTodofullLabels.length===0);
+            return hasLabel
+          }
         }
 
         return true;
@@ -1811,6 +1842,7 @@ export default {
       this.initialize()
       if (val) {
         chatsService.listPermissionsByTeams(val).then(res => this.teamPermissions = res.data.payload)
+        this.selectedSellTeamObject= this.sellTeams.find(o=>o._id===val)
       } else {
         this.teamPermissions = []
       }
