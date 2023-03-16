@@ -1,4 +1,8 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useStore } from "vuex";
+
+const store = useStore();
+</script>
 <template>
   <v-card>
     <img
@@ -7,7 +11,8 @@
     />
     <v-card-text>
       <h3 class="h3 title overlay-title font-weight-medium mb-1">
-        Hey John, <br />Download latest report
+        Hey {{ store.state.authModule?.user?.email }}, <br />Download latest
+        report
       </h3>
       <v-btn color="secondary" class="mt-4"> Download </v-btn>
     </v-card-text>

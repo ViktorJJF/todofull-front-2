@@ -4,11 +4,25 @@ import { useCustomizerStore } from "@/stores/customizer";
 import sidebarItems from "./sidebarItem";
 import LogoLight from "../logo/LogoLight.vue";
 import LogoDark from "../logo/LogoDark.vue";
-import { useDisplay } from 'vuetify'
+import { useDisplay } from "vuetify";
+import { useStore } from "vuex";
 
 const customizer = useCustomizerStore();
 const sidebarMenu = ref(sidebarItems);
 const { mdAndUp } = useDisplay();
+
+const store = useStore();
+
+function handleOption(item) {
+  if (item.title === "Cerrar sesión") {
+    store
+      .dispatch("authModule/logout")
+      .then(() => {})
+      .catch((err) => {
+        console.log("algo salio mal en logout:", err);
+      });
+  }
+}
 </script>
 
 <template>
@@ -112,7 +126,12 @@ const { mdAndUp } = useDisplay();
                 class="feather-sm v-icon v-icon--size-default"
               ></vue-feather>
             </span>
-            <v-list-item-title dark v-text="item.title"></v-list-item-title>
+            <v-list-item-title
+              style="cursor: pointer"
+              @click="handleOption(item)"
+              dark
+              v-text="item.title"
+            ></v-list-item-title>
           </v-list-item>
           <!-- ---------------------------------------------- -->
           <!---End Single Item-->

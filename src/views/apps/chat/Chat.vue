@@ -1759,33 +1759,7 @@ export default {
         if (this.selectedCountry) {
           if (chat.leadId.pais !== this.selectedCountry) return false;
         }
-        // filter for negotiation status
-        if (this.selectedNegotiationStatus) {
-          if (chat.negotiationStatusId && (chat.negotiationStatusId._id !== this.selectedNegotiationStatus)) return false;
-        }
-        // filter by selectedSellTeamObject todofullLabels
-        if (this.selectedSellTeamObject) {
-          let todofullLabels=this.selectedSellTeamObject.todofullLabels;
-          if(todofullLabels){
-            // check if chat has any of the labels
-            let chatTodofullLabels = [];
-            for (const leadLabel of (chat.leadId?.todofullLabels || [])) {
-              if(leadLabel){
-                chatTodofullLabels.push(leadLabel);
-              }
-            }
-            if(chat.cleanLeadId && chat.cleanLeadId.todofullLabels){
-              for (const cleanLeadLabel of chat.cleanLeadId.todofullLabels) {
-                if(cleanLeadLabel){
-                  chatTodofullLabels.push(cleanLeadLabel);
-                }
-              }
-            }
-            let hasLabel = todofullLabels.some(r=> chatTodofullLabels.includes(r) || chatTodofullLabels.length===0);
-            return hasLabel
-          }
-        }
-
+        
         return true;
       })
     },
@@ -1837,12 +1811,18 @@ export default {
       this.initialize();
     },
     selectedSellTeam(val) {
+
+      this.selectedSellTeamObject= this.sellTeams.find(o=>o._id===val)
+        // set to store
+      this.$store.commit("chatsModule/updateFilter", {key:'selectedSellTeamObject',value:this.selectedSellTeamObject});
+
       if(!this.isInitialized) return
+
       this.page = 1;
       this.initialize()
       if (val) {
         chatsService.listPermissionsByTeams(val).then(res => this.teamPermissions = res.data.payload)
-        this.selectedSellTeamObject= this.sellTeams.find(o=>o._id===val)
+        
       } else {
         this.teamPermissions = []
       }
@@ -1851,6 +1831,8 @@ export default {
       if(!this.isInitialized) return
       this.page = 1;
       this.initialize()
+      // set to store
+      this.$store.commit("chatsModule/updateFilter", {key:'negotiationStatusId',value:val});
       // if(val) {
       //   chatsService.listPermissionsByTeams(val).then(res => this.teamPermissions = res.data.payload)
       // }else {

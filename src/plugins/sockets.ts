@@ -51,6 +51,54 @@ socket.on("NEW_MESSAGE", (data) => {
 });
 
 socket.on("NEW_CHAT", (data) => {
+  console.log("🚀 Aqui *** -> data:", data);
+  let chat = data;
+  // @ts-ignore
+  let chatsModule = store.state.chatsModule;
+  let { negotiationStatusId, selectedSellTeamObject } = chatsModule.filters;
+  // filter for negotiation status
+  if (negotiationStatusId) {
+    if (
+      chat.negotiationStatusId &&
+      chat.negotiationStatusId._id !== negotiationStatusId
+    ) {
+      console.log("se quedo en negotiationStatus");
+      return false;
+    }
+  }
+
+  // filter by selectedSellTeamObject todofullLabels
+  if (selectedSellTeamObject) {
+    let isMayoristaSellTeam = selectedSellTeamObject.nombre
+      ?.toLowerCase()
+      .includes("mayorista");
+    let todofullLabels = selectedSellTeamObject.todofullLabels;
+    if (todofullLabels) {
+      // check if chat has any of the labels
+      let chatTodofullLabels = [];
+      for (const leadLabel of chat.leadId?.todofullLabels || []) {
+        if (leadLabel) {
+          chatTodofullLabels.push(leadLabel._id);
+        }
+      }
+      if (chat.cleanLeadId && chat.cleanLeadId.todofullLabels) {
+        for (const cleanLeadLabel of chat.cleanLeadId.todofullLabels) {
+          if (cleanLeadLabel) {
+            chatTodofullLabels.push(cleanLeadLabel._id);
+          }
+        }
+      }
+      let hasLabel = Array.from(todofullLabels).some(
+        (r) =>
+          chatTodofullLabels.includes(r) ||
+          (isMayoristaSellTeam ? false : chatTodofullLabels.length === 0)
+      );
+      if (!hasLabel) {
+        console.log("no pasa!!");
+        return;
+      }
+    }
+  }
   store.commit("chatsModule/addChat", data);
 });
 socket.on("RESTART_PENDING_MESSAGES", (data) => {

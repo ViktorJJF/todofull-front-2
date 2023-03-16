@@ -15,6 +15,10 @@ const module = {
     totalPages: 0,
     hasToUpdateSelectedChat: false,
     hasPendingNegotiationStatus: false,
+    filters: {
+      negotiationStatusId: null,
+      selectedSellTeamObject: null,
+    },
   },
   actions: {
     list({ commit }, query) {
@@ -143,6 +147,9 @@ const module = {
     },
     addMessage(state, data) {
       state.messages.push(data);
+    },
+    updateFilter(state, { key, value }: { key: string; value: string }) {
+      state.filters[key] = value;
     },
   },
   getters: {

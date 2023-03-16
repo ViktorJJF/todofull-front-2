@@ -48,6 +48,10 @@ const items: SidebarItem[] = [
     to: { name: "NegotiationStatuses" },
   },
   {
+    title: "Cerrar sesión",
+    icon: "log-in",
+  },
+  {
     title: "Atributos",
     icon: "grid",
     to: { name: "Attributes" },
@@ -380,11 +384,7 @@ const items: SidebarItem[] = [
     to: "/editable-table",
   },
   { header: "Authentication" },
-  {
-    title: "Boxed Login",
-    icon: "log-in",
-    to: "/authentication/boxedlogin",
-  },
+
   {
     title: "Login",
     icon: "unlock",
