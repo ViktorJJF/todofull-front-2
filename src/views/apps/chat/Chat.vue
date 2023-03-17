@@ -1505,7 +1505,8 @@ export default {
       return formatDistance(new Date(), date, { addSuffix: true, locale: es });
     },
     async loadMore() {
-      if(!this.isInitialized) return;
+      setTimeout(() => {
+        
       if (this.isLoadingMore === true) { return; }
 
       if (this.searchContact.trim().length !== 0) { return; }
@@ -1540,6 +1541,8 @@ export default {
       }
 
       this.isLoadingMore = false;
+    
+      }, 0);
     },
     undoPendingMessagesCount() {
       let count =
@@ -1803,7 +1806,6 @@ export default {
       scrollBottom();
     },
     selectedCountry() {
-      if(!this.isInitialized) return
       this.page = 1;
       this.initialize();
     },
@@ -1812,8 +1814,6 @@ export default {
       this.selectedSellTeamObject= this.sellTeams.find(o=>o._id===val)
         // set to store
       this.$store.commit("chatsModule/updateFilter", {key:'selectedSellTeamObject',value:this.selectedSellTeamObject});
-
-      if(!this.isInitialized) return
 
       this.page = 1;
       this.initialize()
@@ -1825,7 +1825,6 @@ export default {
       }
     },
     selectedFilterNegotiationStatus(val) {
-      if(!this.isInitialized) return
       this.page = 1;
       this.initialize()
       // set to store
@@ -1837,7 +1836,6 @@ export default {
       // }
     },
     async searchContact() {
-      if(!this.isInitialized) return
       this.page = 1;
       clearTimeout(this.delayTimer);
       this.delayTimer = setTimeout(() => {
@@ -1845,7 +1843,6 @@ export default {
       }, 600);
     },
     filterChats() {
-      if(!this.isInitialized) return
       this.page = 1;
       this.initialize();
     }, async '$store.state.chatsModule.hasToUpdateSelectedChat'() {
