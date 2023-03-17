@@ -19,14 +19,20 @@ const module = {
       negotiationStatusId: null,
       selectedSellTeamObject: null,
     },
+    currentController: null,
   },
   actions: {
-    list({ commit }, query) {
+    list({ commit, state }, query) {
       let finalQuery = buildQueryWithPagination(query);
       commit("loadingModule/showLoading", true, { root: true });
+      if (state.currentController) {
+        state.currentController.abort();
+      }
+      // Create a new AbortController for the new request
+      state.currentController = new AbortController();
       return new Promise((resolve, reject) => {
         api
-          .list(finalQuery)
+          .list(finalQuery, state.currentController)
           .then((response) => {
             commit("loadingModule/showLoading", false, { root: true });
             commit("list", response.data.payload);

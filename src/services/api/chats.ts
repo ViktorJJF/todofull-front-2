@@ -2,8 +2,12 @@ import axios from "axios";
 import config from "@/config";
 
 export default {
-  list(query = { sort: "name", order: "1", limit: 10, page: 1 }) {
+  list(
+    query = { sort: "name", order: "1", limit: 10, page: 1 },
+    abortController
+  ) {
     return axios.get(config.DASHBOARD_BASE_URL + "/api/chats", {
+      signal: abortController?.signal,
       params: query,
     });
   },
@@ -14,7 +18,9 @@ export default {
     return axios.get(config.DASHBOARD_BASE_URL + `/api/chats/permissions`);
   },
   listPermissionsByTeams(id) {
-    return axios.get(config.DASHBOARD_BASE_URL + `/api/chats/permissions/teams/${id}`);
+    return axios.get(
+      config.DASHBOARD_BASE_URL + `/api/chats/permissions/teams/${id}`
+    );
   },
   update(id, payload) {
     return axios.put(config.DASHBOARD_BASE_URL + `/api/chats/${id}`, payload);
@@ -26,7 +32,10 @@ export default {
     return axios.delete(config.DASHBOARD_BASE_URL + `/api/chats/${id}`);
   },
   shortenLink(form) {
-    return axios.post(`${config.DASHBOARD_BASE_URL}/api/chats/shorten-link`, form);
+    return axios.post(
+      `${config.DASHBOARD_BASE_URL}/api/chats/shorten-link`,
+      form
+    );
   },
   undoPendingMessagesCount(id, count) {
     return axios.post(

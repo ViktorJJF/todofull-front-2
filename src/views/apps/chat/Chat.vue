@@ -1750,9 +1750,6 @@ export default {
     },
     filteredChats() {
       return this.$store.getters["chatsModule/getSortedChats"].filter(chat => {
-        if(chat._id=='63fe82a78d26c222486a3754'){
-          console.log("Existe: ",chat)
-        }
         if (this.activePlatforms.length > 0) {
           if (!this.activePlatforms.includes(chat.platform)) return false;
         }
