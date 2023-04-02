@@ -1505,7 +1505,7 @@ export default {
       return formatDistance(new Date(), date, { addSuffix: true, locale: es });
     },
     async loadMore() {
-      setTimeout(() => {
+      setTimeout(async() => {
         
       if (this.isLoadingMore === true) { return; }
 
