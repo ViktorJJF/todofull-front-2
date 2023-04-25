@@ -12,12 +12,7 @@ export default defineConfig({
     outDir: "./dist",
     emptyOutDir: false,
   },
-  plugins: [
-    vue(),
-    vuetify({
-      autoImport: true,
-    }),
-  ],
+  plugins: [vue()],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

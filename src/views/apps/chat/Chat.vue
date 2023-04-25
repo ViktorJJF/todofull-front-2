@@ -621,6 +621,41 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                     Mensajes de Plantilla
                   </v-tooltip>
                 </v-btn>
+                <v-btn
+                  color="white"
+                  v-if="!isRecording && !isPaused"
+                  @click="startRecording"
+                  small
+                >
+                  <v-icon>mdi-microphone</v-icon>
+                </v-btn>
+                <v-btn color="white" v-else @click="stopRecording" small>
+                  <v-icon>mdi-stop</v-icon>
+                </v-btn>
+                <button
+                  v-if="isRecording && !isPaused"
+                  @click="pauseRecording"
+                  color="white"
+                  small
+                >
+                  <v-icon>mdi-pause-circle</v-icon>
+                </button>
+                <button
+                  v-if="isPaused"
+                  color="white"
+                  small
+                  @click="resumeRecording"
+                >
+                  <v-icon>mdi-play-circle</v-icon>
+                </button>
+                <button
+                  v-if="isRecording || isPaused"
+                  @click="deleteRecording"
+                  color="white"
+                  small
+                >
+                  <v-icon>mdi-delete-circle</v-icon>
+                </button>
               </div>
             </template>
             <template v-else>
@@ -866,10 +901,10 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
   </v-row>
 </template>
 
-<script lang="js">
+<script>
 import UploadImages from "vue-upload-drop-images";
-import EmojiPicker from 'vue3-emoji-picker'
-import 'vue3-emoji-picker/css'
+import EmojiPicker from "vue3-emoji-picker";
+import "vue3-emoji-picker/css";
 import { formatDistance } from "date-fns";
 import chatsService from "@/services/api/chats";
 import filesService from "@/services/api/files";
@@ -893,16 +928,15 @@ import AgentsSelector from "@/components/AgentsSelector.vue";
 import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
 import Countdown from "@/components/Countdown.vue";
 import NegotiationStatusesSelector from "@/components/NegotiationStatusesSelector.vue";
-import { useChatSidebarStore } from '@/stores/chatSidebar'
-import PeruFlagR from '@/assets/images/flags/peru.png'
-import ChileFlagR from '@/assets/images/flags/chile.png'
-import ColombiaFlagR from '@/assets/images/flags/colombia.png'
-import EspaniaFlag from '@/assets/images/flags/espania.png'
+import { useChatSidebarStore } from "@/stores/chatSidebar";
+import PeruFlagR from "@/assets/images/flags/peru.png";
+import ChileFlagR from "@/assets/images/flags/chile.png";
+import ColombiaFlagR from "@/assets/images/flags/colombia.png";
+import EspaniaFlag from "@/assets/images/flags/espania.png";
 
 import SelectorMessage from "@/components/chat/SelectorMessage.vue";
 import graphApiService from "@/services/api/graphApi";
 import templateMessagesService from "@/services/api/templateMessages";
-
 
 export default {
   components: {
@@ -910,23 +944,26 @@ export default {
     AgentsSelector,
     TodofullLabelsSelector,
     InfiniteScroll,
-    UploadImages, NegotiationStatusesSelector,
-    Countdown, SelectorMessage,EmojiPicker
+    UploadImages,
+    NegotiationStatusesSelector,
+    Countdown,
+    SelectorMessage,
+    EmojiPicker,
   },
   data() {
     return {
-      dynamic_parameters:{
-        header:[],
-        body:[]
+      dynamic_parameters: {
+        header: [],
+        body: [],
       },
-      dynamicTemplateDialog:false,
+      dynamicTemplateDialog: false,
       qtyHeaderDynamics: 0,
       qtyBodyDynamics: 0,
-      selectedTemplateMessage:null,
-      isSendingTemplate:false,
-      templateMessages:[],
-      templateMessagesDialog:false,
-      showEmojis:false,
+      selectedTemplateMessage: null,
+      isSendingTemplate: false,
+      templateMessages: [],
+      templateMessagesDialog: false,
+      showEmojis: false,
       messageToReply: null,
       updateCountdown: 0,
       remainingMillis: 24 * 60 * 60 * 1000,
@@ -956,16 +993,31 @@ export default {
       isChatMessageReady: false,
       activePlatforms: [],
       platforms: [
-        { text: 'Whatsapp', value: 'whatsapp', icon: 'mdi-whatsapp', iconClass: 'whatsapp-color' },
-        { text: 'Instagram', value: 'instagram', icon: 'mdi-instagram', iconClass: 'instagram-color' },
-        { text: 'Facebook', value: 'facebook', icon: 'mdi-facebook-messenger', iconClass: 'messenger-color' },
+        {
+          text: "Whatsapp",
+          value: "whatsapp",
+          icon: "mdi-whatsapp",
+          iconClass: "whatsapp-color",
+        },
+        {
+          text: "Instagram",
+          value: "instagram",
+          icon: "mdi-instagram",
+          iconClass: "instagram-color",
+        },
+        {
+          text: "Facebook",
+          value: "facebook",
+          icon: "mdi-facebook-messenger",
+          iconClass: "messenger-color",
+        },
       ],
       selectedCountry: null,
       countries: [
-        { value: 'Peru', icon: PeruFlagR },
-        { value: 'Chile', icon: ChileFlagR },
-        { value: 'Colombia', icon: ColombiaFlagR },
-        { value: 'España', icon: EspaniaFlag },
+        { value: "Peru", icon: PeruFlagR },
+        { value: "Chile", icon: ChileFlagR },
+        { value: "Colombia", icon: ColombiaFlagR },
+        { value: "España", icon: EspaniaFlag },
       ],
       updateLabels: 0,
       updateNegotiationStatus: 0,
@@ -983,9 +1035,9 @@ export default {
       showMessageOptions: false,
       filterChats: undefined,
       filters: [
-        { text: 'Pendientes', value: 'pending' },
-        { text: 'Sin Bot', value: 'no-bot' },
-        { text: 'Recientes', value: 'recents' },
+        { text: "Pendientes", value: "pending" },
+        { text: "Sin Bot", value: "no-bot" },
+        { text: "Recientes", value: "recents" },
       ],
       sellTeams: [],
       selectedSellTeam: null,
@@ -1003,30 +1055,36 @@ export default {
       selectedNegotiationStatus: null,
       isDragOver: false,
       hasDraggedOver: false,
-      emojiSet :'google',
-      isInitialized:false,
-      selectedSellTeamObject:null,
+      emojiSet: "google",
+      isInitialized: false,
+      selectedSellTeamObject: null,
+      // for audio recording
+      isRecording: false,
+      mediaRecorder: null,
+      chunks: [],
+      stream: null,
+      isPaused: false,
     };
   },
   created() {
-    this.chatSidebar = useChatSidebarStore()
+    this.chatSidebar = useChatSidebarStore();
     sellTeamsService.list({ byAgent: true }).then(async (res) => {
-      this.selectedSellTeam=res.data.payload.length>0?res.data.payload[0]._id:null;
-      this.selectedSellTeamObject=res.data.payload.length>0?res.data.payload[0]:null;
-      this.sellTeams = res.data.payload
+      this.selectedSellTeam =
+        res.data.payload.length > 0 ? res.data.payload[0]._id : null;
+      this.selectedSellTeamObject =
+        res.data.payload.length > 0 ? res.data.payload[0] : null;
+      this.sellTeams = res.data.payload;
       // init bots
-      await this.$store.dispatch("botsModule/list"),
-      await this.initialize();
-      this.isInitialized=true;
-      })
-    chatsService.listPermissions().then(res => {
-      this.userPermissions = res.data.payload
-      this.selectedCountry = this.userPermissions.countries[0]
+      await this.$store.dispatch("botsModule/list"), await this.initialize();
+      this.isInitialized = true;
     });
-    
+    chatsService.listPermissions().then((res) => {
+      this.userPermissions = res.data.payload;
+      this.selectedCountry = this.userPermissions.countries[0];
+    });
   },
   mounted() {
-    window.addEventListener('paste', this.handlePaste);
+    window.addEventListener("paste", this.handlePaste);
     document.addEventListener("mouseup", (event) => {
       if (
         (event.target.tagName.toLowerCase() === "p" ||
@@ -1041,52 +1099,64 @@ export default {
     });
   },
   methods: {
-    async verifyTemplateMessage(template){
-       // check if has header
-      const header=template.components.find(el=>el.type && el.type.toLowerCase()==='header');
-      const body=template.components.find(el=>el.type && el.type.toLowerCase()==='body');
-      if(header){
+    async verifyTemplateMessage(template) {
+      // check if has header
+      const header = template.components.find(
+        (el) => el.type && el.type.toLowerCase() === "header"
+      );
+      const body = template.components.find(
+        (el) => el.type && el.type.toLowerCase() === "body"
+      );
+      if (header) {
         const regex = /{{/g;
-        this.qtyHeaderDynamics=header.text?.match(regex)?.length;
-        if(header.format.toLowerCase()==='image' || header.format.toLowerCase()==='document' ){
-           this.qtyHeaderDynamics=1;
-           this.dynamic_parameters.header=[header.example.header_handle[0]]
+        this.qtyHeaderDynamics = header.text?.match(regex)?.length;
+        if (
+          header.format.toLowerCase() === "image" ||
+          header.format.toLowerCase() === "document"
+        ) {
+          this.qtyHeaderDynamics = 1;
+          this.dynamic_parameters.header = [header.example.header_handle[0]];
         }
       }
-      if(body){
+      if (body) {
         const regex = /{{/g;
-       this.qtyBodyDynamics=body.text.match(regex)?.length;
+        this.qtyBodyDynamics = body.text.match(regex)?.length;
       }
-      if(this.qtyHeaderDynamics>0 || this.qtyBodyDynamics>0){
-        this.dynamicTemplateDialog=true;
+      if (this.qtyHeaderDynamics > 0 || this.qtyBodyDynamics > 0) {
+        this.dynamicTemplateDialog = true;
       } else {
         this.sendTemplateMessage(template);
       }
     },
-    async sendTemplateMessage(template){
-     try {
-      this.isSendingTemplate=true;
-      await graphApiService.sendWhatsappMessageTemplates(this.selectedChat.cleanLeadId.telefono,template.name,this.dynamic_parameters,this.selectedChat.leadId.fuente,this.selectedChat.cleanLeadId._id,);
-     } catch (error) {
-       console.log('🚀 error *** -> error:', error);
-     } finally{
-       this.isSendingTemplate=false;
-        this.dynamicTemplateDialog=false;
-        this.qtyHeaderDynamics=0;
-        this.qtyBodyDynamics=0;
-        this.dynamic_parameters={
-        header:[],
-        body:[]
+    async sendTemplateMessage(template) {
+      try {
+        this.isSendingTemplate = true;
+        await graphApiService.sendWhatsappMessageTemplates(
+          this.selectedChat.cleanLeadId.telefono,
+          template.name,
+          this.dynamic_parameters,
+          this.selectedChat.leadId.fuente,
+          this.selectedChat.cleanLeadId._id
+        );
+      } catch (error) {
+        console.log("🚀 error *** -> error:", error);
+      } finally {
+        this.isSendingTemplate = false;
+        this.dynamicTemplateDialog = false;
+        this.qtyHeaderDynamics = 0;
+        this.qtyBodyDynamics = 0;
+        this.dynamic_parameters = {
+          header: [],
+          body: [],
+        };
+        this.templateMessagesDialog = false;
       }
-      this.templateMessagesDialog=false;
-     }
-    
     },
-    handlePaste (event) {
+    handlePaste(event) {
       const items = event.clipboardData.items;
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
-        if (item.type.indexOf('image') !== -1) {
+        if (item.type.indexOf("image") !== -1) {
           const blob = item.getAsFile();
           this.image = blob;
           this.sendImageMessage();
@@ -1121,23 +1191,23 @@ export default {
       if (this.selectedFilterNegotiationStatus) {
         payload.negotiationStatusId = this.selectedFilterNegotiationStatus;
       }
-      await Promise.all([
-        this.$store.dispatch("chatsModule/list", payload),
-      ]);
+      await Promise.all([this.$store.dispatch("chatsModule/list", payload)]);
       this.chats = this.$store.state.chatsModule.chats;
       this.isDataReady = true;
     },
     async selectChat(chat) {
-      if (Object.keys(this.selectedChat).length > 0 && this.userForm.todofullLabels.length === 0) {
+      if (
+        Object.keys(this.selectedChat).length > 0 &&
+        this.userForm.todofullLabels.length === 0
+      ) {
         // si existia chat antes y no habia etiquetas,mandar alerta
-        let resp = await this
-          .$swal({
-            title: "No se agregaron etiquetas",
-            text: "No agregaste etiquetas a este chat ¿Seguro que quieres cambiar de chat?",
-            icon: "warning",
-            showCancelButton: true,
-            cancelButtonText: "Cancelar",
-          })
+        let resp = await this.$swal({
+          title: "No se agregaron etiquetas",
+          text: "No agregaste etiquetas a este chat ¿Seguro que quieres cambiar de chat?",
+          icon: "warning",
+          showCancelButton: true,
+          cancelButtonText: "Cancelar",
+        });
         if (!resp.isConfirmed) {
           return;
         }
@@ -1170,7 +1240,9 @@ export default {
       this.chat = chat;
       this.selectedChat = chat;
       this.selectedChat.pending_messages_count = 0; // reiniciar contador mensajes sin leer
-      const bot = this.$store.state.botsModule.bots.find((el) => el.fanpageId == chat.pageID)
+      const bot = this.$store.state.botsModule.bots.find(
+        (el) => el.fanpageId == chat.pageID
+      );
       this.chatSidebar.SET_CURRENT_BOT(bot);
       this.$nextTick(() => {
         scrollBottom();
@@ -1179,7 +1251,11 @@ export default {
       this.isChatMessageReady = true;
       // get millis if whatsapp
       if (chat.platform === "whatsapp") {
-        this.remainingMillis = this.selectedChat.last_message?24 * 60 * 60 * 1000 - (Date.now() - new Date(this.selectedChat.last_message.createdAt).getTime()):0
+        this.remainingMillis = this.selectedChat.last_message
+          ? 24 * 60 * 60 * 1000 -
+            (Date.now() -
+              new Date(this.selectedChat.last_message.createdAt).getTime())
+          : 0;
         this.updateCountdown += 1;
       }
       if (chat.leadId) {
@@ -1226,7 +1302,7 @@ export default {
           url,
         },
         type,
-        userId: user._id
+        userId: user._id,
       });
       // set negotiation status
       //       if(this.$store.state.chatsModule.hasPendingNegotiationStatus){
@@ -1240,7 +1316,6 @@ export default {
       //       }
       this.messageToReply = null;
       scrollBottom();
-
     },
     clearForm() {
       this.userForm.name = "";
@@ -1249,7 +1324,7 @@ export default {
       this.userForm.todofullLabels = [];
       this.userForm.notes = "";
       this.userForm.phone = "";
-      this.selectedAgent = null
+      this.selectedAgent = null;
     },
     connectAgent(chat) {
       if (chat.isBotActive) {
@@ -1259,9 +1334,7 @@ export default {
         const user = JSON.parse(localStorage.getItem("user"));
         let message =
           "🤝👩🏻‍💼 Ahora estás conversando con el agente " +
-          (user.alias || (user.first_name +
-            " " +
-            user.last_name));
+          (user.alias || user.first_name + " " + user.last_name);
         console.log("CONECTANDO AGENTE");
         this.sendMessage(message, "Chatbot");
         this.isAgentConnected = true;
@@ -1270,7 +1343,7 @@ export default {
           isBotActive: false,
         });
         // se agrega el agente usuario al chat
-        chatsService.addUser(this.selectedChat._id, user._id)
+        chatsService.addUser(this.selectedChat._id, user._id);
         scrollBottom();
         socket.emit("CONNECT_AGENT", {
           senderId: this.selectedChat.leadId.contactId,
@@ -1286,9 +1359,9 @@ export default {
       chat.isBotActive = true;
       buildSuccess("Chatbot reactivado");
       const user = JSON.parse(localStorage.getItem("user"));
-      let message = `El agente ${(user.alias || (user.first_name +
-        " " +
-        user.last_name))} se ha desconectado`;
+      let message = `El agente ${
+        user.alias || user.first_name + " " + user.last_name
+      } se ha desconectado`;
       this.sendMessage(message, "Chatbot");
       this.isAgentConnected = false;
       this.selectedChat.userId = null;
@@ -1318,8 +1391,8 @@ export default {
       let userData = chat.cleanLeadId
         ? this.getChatUserData(chat)
         : chat.leadId
-          ? chat.leadId.sourceName
-          : "Usuario";
+        ? chat.leadId.sourceName
+        : "Usuario";
       if (chat.leadId && (chat.leadId.sourceName || chat.leadId.appName)) {
         return chat.leadId.sourceName || chat.leadId.appName;
       }
@@ -1354,24 +1427,24 @@ export default {
     },
     toggleCountry(country) {
       if (this.selectedCountry === country.value) {
-        return this.selectedCountry = null;
+        return (this.selectedCountry = null);
       }
 
-      this.selectedCountry = country.value
+      this.selectedCountry = country.value;
     },
     mergePermissions(teamPermissions, userPermissions) {
       return teamPermissions.reduce((permissions, current) => {
-        const countries = [...permissions.countries]
+        const countries = [...permissions.countries];
         for (const country of current.countries) {
-          if (!countries.includes(country)) countries.push(country)
+          if (!countries.includes(country)) countries.push(country);
         }
-        const platforms = [...permissions.platforms]
+        const platforms = [...permissions.platforms];
         for (const platform of current.platforms) {
-          if (!platforms.includes(platform)) platforms.push(platform)
+          if (!platforms.includes(platform)) platforms.push(platform);
         }
-        const status = [...permissions.status]
+        const status = [...permissions.status];
         for (const status of current.status) {
-          if (!status.includes(status)) status.push(status)
+          if (!status.includes(status)) status.push(status);
         }
 
         return {
@@ -1380,11 +1453,11 @@ export default {
           platforms,
           status,
         };
-      }, userPermissions)
+      }, userPermissions);
     },
     onSelectedAgent(agent) {
       this.selectedAgent = agent;
-      console.log('🚀 Aqui *** -> this.selectedAgent ', this.selectedAgent);
+      console.log("🚀 Aqui *** -> this.selectedAgent ", this.selectedAgent);
       if (this.selectedChat.cleanLeadId) {
         // es lead (dejó datos)
         this.selectedChat.cleanLeadId.telefonoId = agent;
@@ -1410,42 +1483,41 @@ export default {
     async saveUserForm() {
       let createdItem;
       if (this.userForm.phone) {
-        createdItem = await this.$store.dispatch(
-          "cleanLeadsModule/create",
-          {
-            telefono: this.userForm.phone,
-            estado:
-              this.selectedChat.cleanLeadId &&
-                this.selectedChat.cleanLeadId.estado &&
-                this.selectedChat.cleanLeadId.estado !== 'SIN ASIGNAR'
-                ? this.selectedChat.cleanLeadId.estado
-                : (this.selectedChat.cleanLeadId &&
+        createdItem = await this.$store.dispatch("cleanLeadsModule/create", {
+          telefono: this.userForm.phone,
+          estado:
+            this.selectedChat.cleanLeadId &&
+            this.selectedChat.cleanLeadId.estado &&
+            this.selectedChat.cleanLeadId.estado !== "SIN ASIGNAR"
+              ? this.selectedChat.cleanLeadId.estado
+              : (this.selectedChat.cleanLeadId &&
                   this.selectedChat.cleanLeadId.telefonoId) ||
-                  this.selectedChat.leadId.telefonoId
-                  ? "RE-CONECTAR"
-                  : "SIN ASIGNAR",
-            telefonoId: this.selectedChat.leadId.telefonoId
-              ? this.selectedChat.leadId.telefonoId._id
-              : this.selectedChat.cleanLeadId?.telefonoId?._id,
+                this.selectedChat.leadId.telefonoId
+              ? "RE-CONECTAR"
+              : "SIN ASIGNAR",
+          telefonoId: this.selectedChat.leadId.telefonoId
+            ? this.selectedChat.leadId.telefonoId._id
+            : this.selectedChat.cleanLeadId?.telefonoId?._id,
 
-            todofullLabels: this.getIdTodofullLabels(this.userForm.todofullLabels),
-            details: [
-              {
-                type: "CHATBOT",
-                contactId: this.selectedChat.leadId.contactId,
-                fuente: this.selectedChat.leadId.fuente,
-                appName:
-                  this.selectedChat.leadId.sourceName ||
-                  this.selectedChat.leadId.appName,
-                nombre: this.userForm.name,
-                email: this.userForm.email,
-                ciudad: this.userForm.city,
-                nota: this.userForm.notes,
-                pais: this.selectedChat.leadId.pais,
-              },
-            ],
-          }
-        );
+          todofullLabels: this.getIdTodofullLabels(
+            this.userForm.todofullLabels
+          ),
+          details: [
+            {
+              type: "CHATBOT",
+              contactId: this.selectedChat.leadId.contactId,
+              fuente: this.selectedChat.leadId.fuente,
+              appName:
+                this.selectedChat.leadId.sourceName ||
+                this.selectedChat.leadId.appName,
+              nombre: this.userForm.name,
+              email: this.userForm.email,
+              ciudad: this.userForm.city,
+              nota: this.userForm.notes,
+              pais: this.selectedChat.leadId.pais,
+            },
+          ],
+        });
         // actualizando referencia a lead y chat
         let promises = [
           this.$store.dispatch("leadsModule/update", {
@@ -1458,7 +1530,7 @@ export default {
             data: { cleanLeadId: createdItem._id },
             notifyUser: false,
           }),
-        ]
+        ];
 
         await Promise.all(promises);
       } else {
@@ -1469,7 +1541,9 @@ export default {
             email: this.userForm.email,
             ciudad: this.userForm.city,
             nota: this.userForm.notes,
-            todofullLabels: this.getIdTodofullLabels(this.userForm.todofullLabels),
+            todofullLabels: this.getIdTodofullLabels(
+              this.userForm.todofullLabels
+            ),
           },
         });
       }
@@ -1492,7 +1566,9 @@ export default {
     },
     getIdTodofullLabels(todofullLabels) {
       // if is object, get id
-      return todofullLabels.filter(el => el).map((label) => typeof label === 'object' ? label.value : label);
+      return todofullLabels
+        .filter((el) => el)
+        .map((label) => (typeof label === "object" ? label.value : label));
     },
     parseMarkdown(text) {
       return parseMarkdown(text);
@@ -1505,43 +1581,45 @@ export default {
       return formatDistance(new Date(), date, { addSuffix: true, locale: es });
     },
     async loadMore() {
-      setTimeout(async() => {
-        
-      if (this.isLoadingMore === true) { return; }
+      setTimeout(async () => {
+        if (this.isLoadingMore === true) {
+          return;
+        }
 
-      if (this.searchContact.trim().length !== 0) { return; }
+        if (this.searchContact.trim().length !== 0) {
+          return;
+        }
 
-      this.isLoadingMore = true;
+        this.isLoadingMore = true;
 
-      this.page += 1;
-      let payload = {
-        page: this.page,
-        limit: 50,
-        sort: "updatedAt",
-        order: "desc",
-      };
-      if (this.activePlatforms.length > 0) {
-        payload.platforms = this.activePlatforms;
-      }
-      if (this.selectedCountry) {
-        payload.selectedCountry = this.selectedCountry;
-      }
-      if (this.selectedFilterNegotiationStatus) {
-        payload.negotiationStatusId = this.selectedFilterNegotiationStatus;
-      }
-      if (this.filterChats !== undefined) {
-        payload.filterChats = this.filtersSource[this.filterChats].value;
-      }
-      if (this.selectedSellTeam) {
-        payload.teamId = this.selectedSellTeam;
-      }
-      const response = await chatsService.list(payload);
-      for (const chat of response.data.payload) {
-        this.$store.commit("chatsModule/addChatToEnd", chat);
-      }
+        this.page += 1;
+        let payload = {
+          page: this.page,
+          limit: 50,
+          sort: "updatedAt",
+          order: "desc",
+        };
+        if (this.activePlatforms.length > 0) {
+          payload.platforms = this.activePlatforms;
+        }
+        if (this.selectedCountry) {
+          payload.selectedCountry = this.selectedCountry;
+        }
+        if (this.selectedFilterNegotiationStatus) {
+          payload.negotiationStatusId = this.selectedFilterNegotiationStatus;
+        }
+        if (this.filterChats !== undefined) {
+          payload.filterChats = this.filtersSource[this.filterChats].value;
+        }
+        if (this.selectedSellTeam) {
+          payload.teamId = this.selectedSellTeam;
+        }
+        const response = await chatsService.list(payload);
+        for (const chat of response.data.payload) {
+          this.$store.commit("chatsModule/addChatToEnd", chat);
+        }
 
-      this.isLoadingMore = false;
-    
+        this.isLoadingMore = false;
       }, 0);
     },
     undoPendingMessagesCount() {
@@ -1560,15 +1638,17 @@ export default {
     onSelectedText() {
       this.showMessageOptions = true;
       this.selectedText = window.getSelection().toString();
-      this.selectedMessageText = JSON.parse(JSON.stringify(this.selectedMessage));
+      this.selectedMessageText = JSON.parse(
+        JSON.stringify(this.selectedMessage)
+      );
     },
     getSelectedText() {
       return window.getSelection().toString();
     },
     handleImages() {
-      console.log("aaa")
+      console.log("aaa");
       // this.editedItem.img = files;
-      console.log('🚀 Aqui *** ->  this.$refs.image', this.$refs.image);
+      console.log("🚀 Aqui *** ->  this.$refs.image", this.$refs.image);
       // console.log('🚀 Aqui *** -> this.$refs.image.files', this.$refs.image.files);
       [this.image] = this.$refs.image.files;
       this.sendImageMessage();
@@ -1579,10 +1659,70 @@ export default {
       this.imageUploaded = false;
       this.isDragOver = false;
       this.hasDraggedOver = false;
-      this.uploadDialog=false;
+      this.uploadDialog = false;
+      this.isRecording = false;
+      this.mediaRecorder = null;
+      this.chunks = [];
+      this.stream = null;
+    },
+    async startRecording() {
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+
+        // Check if microphone permission was granted
+        const permissions = await navigator.permissions.query({
+          name: "microphone",
+        });
+        if (permissions.state === "denied") {
+          console.log("Microphone permission was denied");
+          this.stream.getTracks().forEach((track) => track.stop());
+          this.isRecording = false;
+          this.mediaRecorder = null;
+          return;
+        }
+
+        this.isRecording = true;
+        this.chunks = [];
+        this.mediaRecorder = new MediaRecorder(this.stream);
+
+        this.mediaRecorder.addEventListener("dataavailable", (event) => {
+          this.chunks.push(event.data);
+        });
+
+        this.mediaRecorder.addEventListener("stop", async () => {
+          this.stream.getTracks().forEach((track) => track.stop());
+          this.sendAudioMessage();
+        });
+
+        this.mediaRecorder.start();
+      } catch (error) {
+        console.error(error);
+        alert("Please grant permission to access the microphone");
+      }
+    },
+    stopRecording() {
+      this.mediaRecorder.stop();
+      this.isRecording = false;
+    },
+    pauseRecording() {
+      this.mediaRecorder.pause();
+      this.isPaused = true;
+    },
+    resumeRecording() {
+      this.mediaRecorder.resume();
+      this.isPaused = false;
+      this.isRecording = true;
+    },
+    deleteRecording() {
+      this.stream.getTracks().forEach((track) => track.stop());
+      this.chunks = [];
+      this.mediaRecorder.stop();
+      this.clear();
     },
     handleFileUpload() {
-      console.log("aaa")
+      console.log("aaa");
       const files = this.$refs.file.files;
       this.file = this.$refs.file.files[0];
       if (files[0] !== undefined) {
@@ -1617,6 +1757,28 @@ export default {
         return url;
       }
     },
+    async sendAudioMessage() {
+      const blob = new Blob(this.chunks, { type: "audio/wav" });
+      if (blob) {
+        try {
+          const formData = new FormData();
+          formData.append("file", blob, "audio.wav");
+
+          // Send audio to aws
+          let response = await filesService.createAudio(formData);
+          const url = response.data.payload.url;
+          console.log("🚀 Aqui *** -> url:", url);
+          this.sendMessage(this.text, "Agente", "audio", { url });
+        } catch (error) {
+          console.log(error);
+        } finally {
+          this.isRecording = false;
+          this.mediaRecorder = null;
+          this.stream.getTracks().forEach((track) => track.stop());
+          this.clear();
+        }
+      }
+    },
     async sendFileMessage() {
       if (this.file) {
         console.log("cargando archivo: ", this.file);
@@ -1627,7 +1789,7 @@ export default {
         const url = response.data.payload.url;
         console.log("🚀 Aqui *** -> path", url);
         // if platform is instagram, send simple message with url
-        if(this.selectedChat.platform === 'instagram') {
+        if (this.selectedChat.platform === "instagram") {
           this.sendMessage(`📎 ${url}`, "Agente", "text");
         } else {
           this.sendMessage(this.text, "Agente", "file", { url });
@@ -1635,25 +1797,29 @@ export default {
         this.uploadDialog = false;
         this.uploadingImage = false;
         this.clear();
-        document.getElementById('file').value = '';
+        document.getElementById("file").value = "";
         return url;
       }
-    }, openUrl(url) {
-      window.open(url, '_blank')
-    }, selectChatRoom() {
+    },
+    openUrl(url) {
+      window.open(url, "_blank");
+    },
+    selectChatRoom() {
       this.selectedText = window.getSelection().toString();
-    }, onSelectNegotiationStatuses(negotiationStatus) {
+    },
+    onSelectNegotiationStatuses(negotiationStatus) {
       this.selectedNegotiationStatus = negotiationStatus;
-    }, goToMessage(message) {
+    },
+    goToMessage(message) {
       if (message) {
         const id = message._id;
         const element = document.getElementById(id);
-        console.log('🚀 Aqui *** -> element', element);
+        console.log("🚀 Aqui *** -> element", element);
         if (element) {
           element.scrollIntoView({
-            behavior: 'auto',
-            block: 'center',
-            inline: 'center'
+            behavior: "auto",
+            block: "center",
+            inline: "center",
           });
           element.classList.add("effect-message");
           setTimeout(function () {
@@ -1661,42 +1827,45 @@ export default {
           }, 3000);
         }
       }
-    }, replyToMessage(selectedMessage) {
+    },
+    replyToMessage(selectedMessage) {
       this.messageToReply = selectedMessage;
       // wait next tick
       this.$nextTick(() => {
         // focuse element
         const replyAlert = document.getElementById("reply-alert");
         if (replyAlert) {
-          console.log("encontrado!")
+          console.log("encontrado!");
           replyAlert.scrollIntoView({
-            behavior: 'auto',
-            block: 'center',
-            inline: 'center'
+            behavior: "auto",
+            block: "center",
+            inline: "center",
           });
-          scrollBottom()
+          scrollBottom();
         }
       });
-    }, onDragOver(e) {
+    },
+    onDragOver(e) {
       if (!this.isDragOver) {
         // this.uploadDialog=true;
-        console.log("dragging")
+        console.log("dragging");
         this.isDragOver = true;
       }
-        e.preventDefault();
-    },onDragLeave(e){
+      e.preventDefault();
+    },
+    onDragLeave(e) {
       if (e.currentTarget.contains(e.relatedTarget)) {
         return;
       }
-      console.log("fuera xd")
-       e.preventDefault();
+      console.log("fuera xd");
+      e.preventDefault();
       this.isDragOver = false;
       this.uploadDialog = false;
     },
     onDrop(e) {
       e.stopPropagation();
       e.preventDefault();
-      console.log("dropped")
+      console.log("dropped");
       this.isDragOver = false;
       // check if is image or file
       if (e.dataTransfer.files[0].type.includes("image")) {
@@ -1708,60 +1877,72 @@ export default {
       }
       // Handle the dropped element here
     },
-    handleEmojis(){
+    handleEmojis() {
       this.showEmojis = !this.showEmojis;
       this.$nextTick(() => {
         // scroll to emojis
         const emojis = document.querySelector(".chat-emoji-picker");
         if (emojis) {
           emojis.scrollIntoView({
-            behavior: 'auto',
-            block: 'center',
-            inline: 'center'
+            behavior: "auto",
+            block: "center",
+            inline: "center",
           });
         }
       });
-    },async onSelectEmoji(emoji){
+    },
+    async onSelectEmoji(emoji) {
       this.text += emoji.i;
       this.$nextTick(() => {
-        console.log('🚀 Aqui *** -> t:', this.$refs['chat-input']);
-        this.$refs['chat-input'].focus()
+        console.log("🚀 Aqui *** -> t:", this.$refs["chat-input"]);
+        this.$refs["chat-input"].focus();
       });
-    }
+    },
   },
   computed: {
     permissions() {
       if (this.teamPermissions.length) {
-        return this.mergePermissions(this.teamPermissions, this.userPermissions)
+        return this.mergePermissions(
+          this.teamPermissions,
+          this.userPermissions
+        );
       }
       return this.userPermissions;
     },
     countriesSource() {
       if (!this.permissions) return [];
 
-      return this.countries.filter(o => this.permissions.countries.includes(o.value))
+      return this.countries.filter((o) =>
+        this.permissions.countries.includes(o.value)
+      );
     },
     platformsSource() {
       if (!this.permissions) return [];
 
-      return this.platforms.filter(o => this.permissions.platforms.includes(o.value))
+      return this.platforms.filter((o) =>
+        this.permissions.platforms.includes(o.value)
+      );
     },
     filtersSource() {
       if (!this.permissions) return [];
 
-      return this.filters.filter(o => this.permissions.status.includes(o.value))
+      return this.filters.filter((o) =>
+        this.permissions.status.includes(o.value)
+      );
     },
     filteredChats() {
-      return this.$store.getters["chatsModule/getSortedChats"].filter(chat => {
-        if (this.activePlatforms.length > 0) {
-          if (!this.activePlatforms.includes(chat.platform)) return false;
+      return this.$store.getters["chatsModule/getSortedChats"].filter(
+        (chat) => {
+          if (this.activePlatforms.length > 0) {
+            if (!this.activePlatforms.includes(chat.platform)) return false;
+          }
+          if (this.selectedCountry) {
+            if (chat.leadId.pais !== this.selectedCountry) return false;
+          }
+
+          return true;
         }
-        if (this.selectedCountry) {
-          if (chat.leadId.pais !== this.selectedCountry) return false;
-        }
-        
-        return true;
-      })
+      );
     },
     formattedMessages() {
       return this.messages.reduce((acc, el) => {
@@ -1773,7 +1954,13 @@ export default {
         if (group) {
           group.messages.push(el);
         } else {
-          acc.push({ from: el.from, messages: [el], date: el.createdAt, _id: el._id,user:el.user });
+          acc.push({
+            from: el.from,
+            messages: [el],
+            date: el.createdAt,
+            _id: el._id,
+            user: el.user,
+          });
         }
         return acc;
       }, []);
@@ -1782,24 +1969,26 @@ export default {
       return this.selectedText.includes("@")
         ? "email"
         : !isNaN(this.selectedText)
-          ? "phone"
-          : "text";
-    },filteredSellTeams(){
-      return this.sellTeams
-    }
-
+        ? "phone"
+        : "text";
+    },
+    filteredSellTeams() {
+      return this.sellTeams;
+    },
   },
   watch: {
-    async templateMessagesDialog(val){
-      if(val){
+    async templateMessagesDialog(val) {
+      if (val) {
         // get template messages
-      this.templateMessages = (await templateMessagesService.list({
-          botId: this.selectedChat.leadId.fuente,
-          sort: "name",
-          order: "1",
-          status:'APPROVED',
-          is_active:true
-        })).data.payload
+        this.templateMessages = (
+          await templateMessagesService.list({
+            botId: this.selectedChat.leadId.fuente,
+            sort: "name",
+            order: "1",
+            status: "APPROVED",
+            is_active: true,
+          })
+        ).data.payload;
       }
     },
     messages() {
@@ -1810,25 +1999,31 @@ export default {
       this.initialize();
     },
     selectedSellTeam(val) {
-
-      this.selectedSellTeamObject= this.sellTeams.find(o=>o._id===val)
-        // set to store
-      this.$store.commit("chatsModule/updateFilter", {key:'selectedSellTeamObject',value:this.selectedSellTeamObject});
+      this.selectedSellTeamObject = this.sellTeams.find((o) => o._id === val);
+      // set to store
+      this.$store.commit("chatsModule/updateFilter", {
+        key: "selectedSellTeamObject",
+        value: this.selectedSellTeamObject,
+      });
 
       this.page = 1;
-      this.initialize()
+      this.initialize();
       if (val) {
-        chatsService.listPermissionsByTeams(val).then(res => this.teamPermissions = res.data.payload)
-        
+        chatsService
+          .listPermissionsByTeams(val)
+          .then((res) => (this.teamPermissions = res.data.payload));
       } else {
-        this.teamPermissions = []
+        this.teamPermissions = [];
       }
     },
     selectedFilterNegotiationStatus(val) {
       this.page = 1;
-      this.initialize()
+      this.initialize();
       // set to store
-      this.$store.commit("chatsModule/updateFilter", {key:'negotiationStatusId',value:val});
+      this.$store.commit("chatsModule/updateFilter", {
+        key: "negotiationStatusId",
+        value: val,
+      });
       // if(val) {
       //   chatsService.listPermissionsByTeams(val).then(res => this.teamPermissions = res.data.payload)
       // }else {
@@ -1845,26 +2040,27 @@ export default {
     filterChats() {
       this.page = 1;
       this.initialize();
-    }, async '$store.state.chatsModule.hasToUpdateSelectedChat'() {
+    },
+    async "$store.state.chatsModule.hasToUpdateSelectedChat"() {
       if (this.selectedChat) {
         try {
-          const updatedChat = (await chatsService.listOne(this.selectedChat._id)).data.payload;
+          const updatedChat = (
+            await chatsService.listOne(this.selectedChat._id)
+          ).data.payload;
           if (updatedChat.leadId) {
             this.userForm.todofullLabels = updatedChat.leadId.todofullLabels;
           }
           if (updatedChat.cleanLeadId) {
-            this.userForm.todofullLabels = updatedChat.cleanLeadId.todofullLabels;
+            this.userForm.todofullLabels =
+              updatedChat.cleanLeadId.todofullLabels;
           }
           this.updateLabels += 1;
         } catch (error) {
-          console.log(error)
+          console.log(error);
         }
       }
     },
-    
   },
-
-    
 };
 </script>
 <style lang="scss">

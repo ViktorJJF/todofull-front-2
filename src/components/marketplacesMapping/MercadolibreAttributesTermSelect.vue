@@ -13,7 +13,7 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits<{
-  (e: "update:model-value", paload: String): void
+  (e: "update:model-value", paload: String): void;
 }>();
 
 const terms = ref([]);
@@ -35,8 +35,8 @@ const fethTerms = async () => {
 fethTerms();
 
 const handleChange = (id: String) => {
-  emits("update:model-value", id)
-}
+  emits("update:model-value", id);
+};
 </script>
 
 <template>

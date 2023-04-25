@@ -9,4 +9,15 @@ export default {
       },
     });
   },
+  createAudio(formData) {
+    return axios.post(
+      config.DASHBOARD_BASE_URL + "/api/files/audio",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+  },
 };
