@@ -69,13 +69,17 @@ if (dynamicParameters) {
     const header = message.value.payload.template.find(
       (item) => item.type === "HEADER"
     );
-    headerReplaced.value = replaceValues(header.text, dynamicHeader);
+    if (header) {
+      headerReplaced.value = replaceValues(header.text, dynamicHeader);
+    }
   }
   if (dynamicBody) {
     const body = message.value.payload.template.find(
       (item) => item.type === "BODY"
     );
-    bodyReplaced.value = replaceValues(body.text, dynamicBody);
+    if (body) {
+      bodyReplaced.value = replaceValues(body.text, dynamicBody);
+    }
   }
 }
 
