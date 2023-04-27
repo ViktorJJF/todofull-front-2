@@ -46,8 +46,6 @@
 import { defineProps, toRefs, onMounted, ref, defineEmits } from "vue";
 import { getFileNameFromUrl, parseMarkdown } from "@/utils/utils";
 
-import TextMessageChat from "@/components/chat/TextMessageChat.vue";
-
 // Referral,AudioChat,FileChat,ImageChat,TextMessageChat
 
 const props = defineProps({
@@ -83,7 +81,7 @@ if (dynamicParameters) {
   }
 }
 
-function replaceValues(text, values) {
+function replaceValues(text = "", values) {
   let replacedText = text;
   // regex to find all {{1}}, {{2}}, {{3}} etc
   const regex = /{{\d+}}/;

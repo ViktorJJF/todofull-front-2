@@ -778,7 +778,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
             ref="image"
             @change="handleImages"
             @drop="handleImages"
-            :max="1"
+            :max="15"
             uploadMsg="Click para insertar o arrastrar una imagen"
             fileError="Solo se aceptan archivos imágenes"
             clearAll="Borrar todo"
@@ -1645,13 +1645,21 @@ export default {
     getSelectedText() {
       return window.getSelection().toString();
     },
-    handleImages() {
+    async handleImages() {
       console.log("aaa");
       // this.editedItem.img = files;
       console.log("🚀 Aqui *** ->  this.$refs.image", this.$refs.image);
       // console.log('🚀 Aqui *** -> this.$refs.image.files', this.$refs.image.files);
-      [this.image] = this.$refs.image.files;
-      this.sendImageMessage();
+      let filesToTransfer = this.$refs.image.files;
+      for (const file of filesToTransfer) {
+        if (file.type.includes("image")) {
+          this.image = file;
+          await this.sendImageMessage();
+        } else {
+          this.file = file;
+          await this.sendFileMessage();
+        }
+      }
     },
     clear() {
       this.image = null;
@@ -1862,19 +1870,23 @@ export default {
       this.isDragOver = false;
       this.uploadDialog = false;
     },
-    onDrop(e) {
+    async onDrop(e) {
       e.stopPropagation();
       e.preventDefault();
       console.log("dropped");
       this.isDragOver = false;
       // check if is image or file
-      if (e.dataTransfer.files[0].type.includes("image")) {
-        this.image = e.dataTransfer.files[0];
-        this.sendImageMessage();
-      } else {
-        this.file = e.dataTransfer.files[0];
-        this.sendFileMessage();
+      let filesToTransfer = e.dataTransfer.files;
+      for (const file of filesToTransfer) {
+        if (file.type.includes("image")) {
+          this.image = file;
+          await this.sendImageMessage();
+        } else {
+          this.file = file;
+          await this.sendFileMessage();
+        }
       }
+
       // Handle the dropped element here
     },
     handleEmojis() {
