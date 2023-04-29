@@ -87,17 +87,27 @@
             </v-col>
           </v-row>
           <v-row class="mb-3">
-            <v-col>
+            <v-col :cols="3">
               <v-btn @click="handleCopyAnswer('url')">Url</v-btn>
             </v-col>
-            <v-col>
+            <v-col :cols="3">
               <v-btn @click="handleCopyAnswer('price')">Precio</v-btn>
             </v-col>
-            <v-col>
+            <v-col :cols="3">
               <v-btn
                 @click="handleCopyAnswer('image')"
                 :disabled="!selected.customImages[0]"
                 >Imagen</v-btn
+              >
+            </v-col>
+            <v-col :cols="3">
+              <v-btn
+                v-if="
+                  selected.customImages.find((el) => el.includes('youtube'))
+                "
+                @click="handleCopyAnswer('youtube')"
+                :disabled="!selected.customImages[0]"
+                >Youtube</v-btn
               >
             </v-col>
           </v-row>
@@ -141,7 +151,11 @@ import ecommercesApi from "@/services/api/ecommerces";
 import { useChatSidebarStore } from "@/stores/chatSidebar";
 import { ref, watch, computed } from "vue";
 import { useStore } from "vuex";
-import { sendMessage, addTodofullLabelsByChildren, getExpiryDateTime } from "@/utils/utils";
+import {
+  sendMessage,
+  addTodofullLabelsByChildren,
+  getExpiryDateTime,
+} from "@/utils/utils";
 
 const isLoading = ref(false);
 const search = ref("");
@@ -170,7 +184,7 @@ const handleClearVariations = () => {
 
 const handleCopyAnswer = (type: string = "all") => {
   getMessage(type).then((message) => {
-    console.log(message)
+    console.log(message);
     navigator.clipboard.writeText(message).then(() => {
       clipboardNotification.value = true;
       store.state.chatsModule.hasPendingNegotiationStatus = true;
@@ -198,13 +212,15 @@ const buildUrl = async () => {
   const baseUrl = selected.value.permalink;
   const fullUrl = `${baseUrl}${baseUrl.endsWith("/") ? "" : "/"}?${utmParams}`;
   const expiry = new Date();
-  expiry.setMonth(expiry.getMonth() + 2) // expires in 2 months
+  expiry.setMonth(expiry.getMonth() + 2); // expires in 2 months
   const dto = {
     url: fullUrl,
     expiry: getExpiryDateTime(expiry),
     metatitle: selected.value.name,
-    metadescription: selected.value.categories[0] ? selected.value.categories[0].name : null,
-  }
+    metadescription: selected.value.categories[0]
+      ? selected.value.categories[0].name
+      : null,
+  };
   const res = await chatsApi.shortenLink(dto);
   return res.data.payload.shorturl;
 };
@@ -220,12 +236,21 @@ const getMessage = async (type: string) => {
 
   const args = [ref];
 
+  const featuredImagesIndexes = selected.value.featured_images;
+  const featuredImages = selected.value.customImages.filter((el, index) =>
+    featuredImagesIndexes.map((el) => el.index).includes(index)
+  );
+  const featuredYoutube = featuredImages.find((el) => el.includes("youtube"));
+
   if (type === "size") args.push(size);
   if (type === "url") args.push(url);
   if (type === "price") args.push(price);
   if (type === "all") args.push(size, price, url);
   if (type === "image") {
     return selected.value.customImages[0];
+  }
+  if (type === "youtube") {
+    return featuredYoutube;
   }
 
   return messages[`answers.${type}`](...args);
