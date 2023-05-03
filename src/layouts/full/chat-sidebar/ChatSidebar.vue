@@ -238,7 +238,7 @@ const getMessage = async (type: string) => {
 
   const featuredImagesIndexes = selected.value.featured_images;
   const featuredImages = selected.value.customImages.filter((el, index) =>
-    featuredImagesIndexes.map((el) => el.index).includes(index)
+    featuredImagesIndexes?.map((el) => el.index).includes(index)
   );
   const featuredYoutube = featuredImages.find((el) => el.includes("youtube"));
 
