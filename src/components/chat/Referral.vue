@@ -6,8 +6,9 @@
     <v-col cols="12" sm="9">
       <b>{{ message.payload.headline }}</b>
       <div
+        v-if="message.payload.body"
         style="overflow: hidden"
-        v-html="parseMarkdown(message.payload.body.substring(0, 90) + '...')"
+        v-html="parseMarkdown(message.payload.body?.substring(0, 90) + '...')"
         ref="target"
       ></div>
     </v-col>
