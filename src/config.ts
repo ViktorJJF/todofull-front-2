@@ -3,6 +3,6 @@ const isDev: boolean =
 
 const DASHBOARD_BASE_URL: string = isDev
   ? "http://localhost:5000"
-  : "https://todofull.club";
+  : "https://todofull-demo.herokuapp.com";
 
 export default { DASHBOARD_BASE_URL };
