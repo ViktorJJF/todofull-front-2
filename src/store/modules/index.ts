@@ -1,5 +1,5 @@
 import camelCase from "lodash/camelCase";
-const files = import.meta.globEager("./*.ts");
+const files: any = import.meta.globEager("./*.ts");
 
 const modules = {};
 for (const key in files) {
