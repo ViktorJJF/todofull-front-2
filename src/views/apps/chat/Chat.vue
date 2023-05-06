@@ -312,7 +312,10 @@
                         @mouseover="selectedMessage = message"
                       >
                         <!-- <span class="tooltiptext">Tooltip text</span> -->
-                        <div class="tooltiptext">
+                        <div
+                          class="tooltiptext"
+                          v-if="message.type !== 'agent_comment'"
+                        >
                           <v-menu>
                             <template v-slot:activator="{ props }">
                               <v-btn
@@ -390,6 +393,8 @@
                           :message="message"
                           :messages="messages"
                           @goToMessage="goToMessage"
+                          @editAgentCommentMessage="editAgentCommentMessage"
+                          @deleteAgentCommentMessage="deleteAgentCommentMessage"
                         >
                         </SelectorMessage>
 
@@ -745,16 +750,32 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
             :key="updateNegotiationStatus"
           >
           </NegotiationStatusesSelector>
-          <v-textarea
-            density="compact"
-            hide-details
-            variant="outlined"
-            clearable
-            clear-icon="mdi-close-circle"
-            label="Notas"
-            v-model="userForm.notes"
-            class="mb-2"
-          ></v-textarea>
+          <div>
+            <v-textarea
+              density="compact"
+              hide-details
+              variant="outlined"
+              clearable
+              clear-icon="mdi-close-circle"
+              label="Notas"
+              v-model="notes"
+              class="mb-2"
+              @keyup.enter.exact.prevent="sendAgentCommentMessage(notes)"
+              @keydown.enter.shift.exact.prevent="notes += '\n'"
+            ></v-textarea>
+            <v-btn
+              fab
+              bottom
+              right
+              color="primary"
+              dark
+              v-show="notes.length > 0"
+              @click="sendAgentCommentMessage(notes)"
+            >
+              <v-icon>mdi-send</v-icon>
+              <span class="mx-2">Comentar</span>
+            </v-btn>
+          </div>
 
           <div class="mt-4">
             <v-btn
@@ -956,6 +977,7 @@ export default {
         header: [],
         body: [],
       },
+      notes: "",
       dynamicTemplateDialog: false,
       qtyHeaderDynamics: 0,
       qtyBodyDynamics: 0,
@@ -1099,6 +1121,46 @@ export default {
     });
   },
   methods: {
+    editAgentCommentMessage(message) {
+      // change to edit
+      if (!message.isEditing) {
+        message.isEditing = true;
+      } else {
+        message.isEditing = false;
+        // save in db
+        messagesService.update(message._id, { text: message.text }).then(() => {
+          console.log("Mensaje editado");
+        });
+      }
+    },
+    deleteAgentCommentMessage(message) {
+      console.log("delete: ", message);
+      messagesService.delete(message._id).then((el) => {
+        console.log("Mensaje eliminado");
+        this.$store.commit("chatsModule/deleteMessage", message._id);
+      });
+    },
+    async sendAgentCommentMessage(notes) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const TYPE = "agent_comment";
+      messagesService
+        .create({
+          text: notes,
+          from: "Agente",
+          chatId: this.selectedChat._id,
+          type: TYPE,
+          isRead: true,
+          userId: user._id,
+          isActive: true,
+        })
+        .then((el) => {
+          this.$store.commit("chatsModule/addMessage", el.data.payload);
+          this.$nextTick(() => {
+            scrollBottom();
+          });
+        });
+      this.notes = "";
+    },
     async verifyTemplateMessage(template) {
       // check if has header
       const header = template.components.find(
@@ -2290,5 +2352,14 @@ export default {
 
 .send-button:hover {
   background-color: #4682b4;
+}
+
+.v-btn-bottom.right {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #2196f3; /* change the background color */
+  font-size: 16px; /* change the font size */
+  padding: 10px 20px; /* change the padding */
 }
 </style>
