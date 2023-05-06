@@ -1,5 +1,13 @@
 <template>
-  <div class="chat-msg-text">
+  <div
+    :class="[
+      'chat-msg-text',
+      message.type == 'agent_comment' ? 'chat-agent-msg-text' : '',
+    ]"
+    class="message-box"
+    @mouseover="hover = true"
+    @mouseleave="hover = false"
+  >
     <div
       v-if="
         message.context &&
@@ -40,6 +48,33 @@
         :message="message"
         :messages="messages"
       ></TextMessageChat>
+    </div>
+    <div v-if="message.type === 'agent_comment'" :id="message._id">
+      <AgentComment :message="message" :messages="messages"></AgentComment>
+      <!-- <div class="buttons-container left-buttons" v-show="hover">
+        <button class="message-options">
+          <i class="mdi mdi-chevron-up"></i>
+        </button>
+        <button class="message-options">
+          <i class="mdi mdi-chevron-down"></i>
+        </button>
+      </div> -->
+
+      <div class="buttons-container right-buttons" v-show="hover">
+        <button
+          class="message-options"
+          @click="emit('editAgentCommentMessage', message)"
+        >
+          <i v-if="!message.isEditing" class="mdi mdi-pencil"></i>
+          <i v-if="message.isEditing" class="mdi mdi-check"></i>
+        </button>
+        <button
+          class="message-options"
+          @click="emit('deleteAgentCommentMessage', message)"
+        >
+          <i class="mdi mdi-delete"></i>
+        </button>
+      </div>
     </div>
 
     <div v-if="message.type === 'comment'">
@@ -92,6 +127,7 @@ import FileChat from "@/components/chat/FileChat.vue";
 import ImageChat from "@/components/chat/ImageChat.vue";
 import VideoChat from "@/components/chat/VideoChat.vue";
 import TextMessageChat from "@/components/chat/TextMessageChat.vue";
+import AgentComment from "@/components/chat/AgentComment.vue";
 import TemplateWtspChat from "@/components/chat/TemplateWtspChat.vue";
 
 import { getFileNameFromUrl, parseMarkdown } from "@/utils/utils";
@@ -104,8 +140,13 @@ const props = defineProps({
 
 const { message, messages } = toRefs(props);
 
+const hover = ref<boolean>(false);
 const messageContext = ref<any>({});
-const emit = defineEmits(["goToMessage"]);
+const emit = defineEmits([
+  "goToMessage",
+  "editAgentCommentMessage",
+  "deleteAgentCommentMessage",
+]);
 
 onMounted(() => {
   const context = message.value.context;
@@ -146,6 +187,9 @@ function getDynamicComponent(messageContext) {
       case "template_wtsp":
         selectedComponent = TemplateWtspChat;
         break;
+      case "agent_comment":
+        selectedComponent = AgentComment;
+        break;
       default:
         break;
     }
@@ -161,5 +205,60 @@ function openUrl(url) {
 <style scoped>
 .reply-message {
   width: 50px;
+}
+
+.chat-agent-msg-text {
+  background-color: #fffbb5 !important;
+  color: black !important;
+}
+
+.message-box {
+  position: relative;
+}
+
+.buttons-container {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.left-buttons {
+  left: -30px; /* Adjust this value according to your design */
+}
+
+.left-buttons button {
+  display: block;
+}
+
+.right-buttons {
+  right: -30px; /* Adjust this value according to your design */
+}
+
+.right-buttons button {
+  display: block;
+}
+
+.message-box:hover .buttons-container {
+  display: block;
+}
+
+.buttons-container button {
+  background-color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  color: #000000;
+  cursor: pointer;
+  font-size: 24px;
+  height: 40px;
+  width: 40px;
+}
+
+.buttons-container button:hover {
+  background-color: #f2f2f2;
+}
+
+.message-options i {
+  font-size: 18px;
 }
 </style>

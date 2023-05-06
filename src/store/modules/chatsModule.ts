@@ -154,6 +154,10 @@ const module = {
     addMessage(state, data) {
       state.messages.push(data);
     },
+    deleteMessage(state, data) {
+      let index = state.messages.findIndex((el) => el._id === data);
+      state.messages.splice(index, 1);
+    },
     updateFilter(state, { key, value }: { key: string; value: string }) {
       state.filters[key] = value;
     },
