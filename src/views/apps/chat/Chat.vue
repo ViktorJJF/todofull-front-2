@@ -395,6 +395,10 @@
                           @goToMessage="goToMessage"
                           @editAgentCommentMessage="editAgentCommentMessage"
                           @deleteAgentCommentMessage="deleteAgentCommentMessage"
+                          @previousAgentCommentMessage="
+                            previousAgentCommentMessage
+                          "
+                          @nextAgentCommentMessage="nextAgentCommentMessage"
                         >
                         </SelectorMessage>
 
@@ -1139,6 +1143,28 @@ export default {
         console.log("Mensaje eliminado");
         this.$store.commit("chatsModule/deleteMessage", message._id);
       });
+    },
+    previousAgentCommentMessage(message) {
+      let messagesBeforeCurrent = this.messages
+        .slice(0, this.messages.indexOf(message))
+        .reverse();
+      let previousMessage = messagesBeforeCurrent.find(
+        (el) => el.type == "agent_comment"
+      );
+      if (previousMessage) {
+        this.goToMessage(previousMessage);
+      }
+    },
+    nextAgentCommentMessage(message) {
+      let messagesAfterCurrent = this.messages.slice(
+        this.messages.indexOf(message) + 1
+      );
+      let nextMessage = messagesAfterCurrent.find(
+        (el) => el.type == "agent_comment"
+      );
+      if (nextMessage) {
+        this.goToMessage(nextMessage);
+      }
     },
     async sendAgentCommentMessage(notes) {
       const user = JSON.parse(localStorage.getItem("user"));
