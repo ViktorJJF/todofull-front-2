@@ -51,14 +51,20 @@
     </div>
     <div v-if="message.type === 'agent_comment'" :id="message._id">
       <AgentComment :message="message" :messages="messages"></AgentComment>
-      <!-- <div class="buttons-container left-buttons" v-show="hover">
-        <button class="message-options">
+      <div class="buttons-container left-buttons" v-show="hover">
+        <button
+          @click="emit('previousAgentCommentMessage', message)"
+          class="message-options"
+        >
           <i class="mdi mdi-chevron-up"></i>
         </button>
-        <button class="message-options">
+        <button
+          @click="emit('nextAgentCommentMessage', message)"
+          class="message-options"
+        >
           <i class="mdi mdi-chevron-down"></i>
         </button>
-      </div> -->
+      </div>
 
       <div class="buttons-container right-buttons" v-show="hover">
         <button
@@ -146,6 +152,8 @@ const emit = defineEmits([
   "goToMessage",
   "editAgentCommentMessage",
   "deleteAgentCommentMessage",
+  "previousAgentCommentMessage",
+  "nextAgentCommentMessage",
 ]);
 
 onMounted(() => {
