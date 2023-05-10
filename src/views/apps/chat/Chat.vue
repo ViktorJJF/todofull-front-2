@@ -181,7 +181,7 @@
                   ><img
                     :src="
                       getProfilePic(selectedChat) ||
-                      `/assets/images/users/3.jpg`
+                      `/assets/images/users/1.jpg`
                     "
                     width="45"
                 /></v-avatar>
@@ -298,10 +298,6 @@
                         "
                         alt=""
                       />
-                      <div class="chat-msg-date">
-                        {{ formatDate(formattedMessage.date) }} -
-                        {{ formattedMessage.user?.alias }}
-                      </div>
                     </div>
                     <div class="chat-msg-content">
                       <div
@@ -500,6 +496,10 @@
                             </div>
                           </v-row>
                         </div>
+                      </div>
+                      <div class="chat-msg-date">
+                        {{ formatDate(formattedMessage.date) }} -
+                        {{ formattedMessage.user?.alias }}
                       </div>
                     </div>
                   </div>
@@ -2048,7 +2048,9 @@ export default {
       return this.messages.reduce((acc, el) => {
         // group messages
         let group =
-          acc.length > 0 && acc[acc.length - 1].from === el.from
+          acc.length > 0 &&
+          acc[acc.length - 1].from === el.from &&
+          acc[acc.length - 1].userId === el.userId
             ? acc[acc.length - 1]
             : null;
         if (group) {
@@ -2060,6 +2062,7 @@ export default {
             date: el.createdAt,
             _id: el._id,
             user: el.user,
+            userId: el.userId,
           });
         }
         return acc;

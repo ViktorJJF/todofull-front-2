@@ -412,13 +412,13 @@ html {
 }
 
 .chat-msg-date {
-  position: absolute;
   left: calc(100% + 12px);
   bottom: 0;
   font-size: 12px;
   font-weight: 600;
   color: var(--msg-date);
   white-space: nowrap;
+  margin-bottom: 12px;
 }
 
 .chat-msg {
