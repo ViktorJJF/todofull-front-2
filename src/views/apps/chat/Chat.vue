@@ -1635,12 +1635,34 @@ export default {
           },
         });
       }
-      // if(this.selectedNegotiationStatus){
-      //     this.$store.dispatch("negotiationStatusesLogsModule/create",{
-      //       "negotiationStatusId": this.selectedNegotiationStatus,
-      //       "isCompleted": false,
-      //       "chatId": this.selectedChat._id,
-      //       "cleanLeadId": createdItem?._id,"leadId":this.selectedChat.leadId._id,"hasCronJob": true});
+      console.log(
+        "CONDICIONES: ",
+        this.selectedNegotiationStatus,
+        this.selectedChat.pendingNegotiationStatusLogId,
+        !this.selectedChat.pendingNegotiationStatusLogId,
+        this.selectedNegotiationStatus !==
+          this.selectedChat.negotiationStatusId?._id
+      );
+      if (
+        this.selectedNegotiationStatus &&
+        !this.selectedChat.pendingNegotiationStatusLogId &&
+        this.selectedNegotiationStatus !==
+          this.selectedChat.negotiationStatusId?._id
+      ) {
+        this.selectedChat.pendingNegotiationStatusLogId =
+          await this.$store.dispatch("negotiationStatusesLogsModule/create", {
+            negotiationStatusId: this.selectedNegotiationStatus,
+            isCompleted: false,
+            chatId: this.selectedChat._id,
+            cleanLeadId: createdItem?._id,
+            leadId: this.selectedChat.leadId._id,
+            hasCronJob: true,
+          });
+      }
+      if (!this.selectedNegotiationStatus) {
+        this.selectedChat.pendingNegotiationStatusLogId = null;
+        this.selectedChat.negotiationStatusId = null;
+      }
       this.$store.dispatch("chatsModule/update", {
         id: this.selectedChat._id,
         data: { negotiationStatusId: this.selectedNegotiationStatus },

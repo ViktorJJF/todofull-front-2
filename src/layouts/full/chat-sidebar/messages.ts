@@ -13,6 +13,10 @@ export default {
   "answers.url": (ref, url) =>
     `En el siguiente vinculo puedes tener toda la información y comprar la ref: ${ref} ${url}`,
   "answers.price": (ref, price) => `El valor de la ref: ${ref} es de ${price}`,
+  "answers.mayor": (ref: string, size: string[]) =>
+    `En la ref: *${ref}*, tenemos disponibles las tallas: ${size.join(
+      ", "
+    )}.\n\nSu valor al por mayor es de: $XXXX`,
   "answers.all": (ref, size: string[], price, url) => {
     if (size.length) {
       return `En la ref: *${ref}*,\ntenemos disponibles las tallas: ${size.join(

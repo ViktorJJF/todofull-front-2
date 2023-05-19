@@ -112,7 +112,7 @@
             </v-col>
           </v-row>
           <v-row class="mb-3">
-            <v-col>
+            <v-col :cols="12">
               <v-btn
                 class="mb-2"
                 block
@@ -121,6 +121,8 @@
               >
                 Copiar y Enviar
               </v-btn>
+            </v-col>
+            <v-col :cols="6">
               <v-btn
                 block
                 @click="handleCopyAnswer('all')"
@@ -128,10 +130,19 @@
               >
                 Copiar Todo
               </v-btn>
-              <v-snackbar v-model="clipboardNotification" color="success">
-                Se ha copiado mensaje al portapapeles!
-              </v-snackbar>
             </v-col>
+            <v-col :cols="6">
+              <v-btn
+                block
+                @click="handleCopyAnswer('mayor')"
+                :disabled="!selectedVariations.length"
+              >
+                X MAYOR
+              </v-btn>
+            </v-col>
+            <v-snackbar v-model="clipboardNotification" color="success">
+              Se ha copiado mensaje al portapapeles!
+            </v-snackbar>
           </v-row>
           <v-row>
             <v-col>
@@ -232,7 +243,7 @@ const getMessage = async (type: string) => {
     selected.value.variations[0].regular_price
   );
 
-  const url = ["url", "all"].includes(type) ? await buildUrl() : "";
+  const url = ["url", "all", "mayor"].includes(type) ? await buildUrl() : "";
 
   const args = [ref];
 
@@ -246,6 +257,7 @@ const getMessage = async (type: string) => {
   if (type === "url") args.push(url);
   if (type === "price") args.push(price);
   if (type === "all") args.push(size, price, url);
+  if (type === "mayor") args.push(size);
   if (type === "image") {
     return selected.value.customImages[0];
   }
