@@ -199,6 +199,14 @@
                     :millis="remainingMillis"
                     :key="updateCountdown"
                   ></Countdown>
+                  <Countdown
+                    v-if="
+                      selectedChat.platform === 'facebook' ||
+                      selectedChat.platform === 'instagram'
+                    "
+                    :millis="remainingMillisFacebook"
+                    :key="updateCountdown"
+                  ></Countdown>
 
                   <span
                     class="h6"
@@ -603,7 +611,11 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                       ? 'No se pueden enviar mensaje pasadas las 24h en WhatsApp'
                       : 'Escribe y presiona Enter'
                   "
-                  :disabled="selectedChat.isBotActive || remainingMillis <= 0"
+                  :disabled="
+                    selectedChat.isBotActive ||
+                    remainingMillis <= 0 ||
+                    remainingMillisFacebook <= 0
+                  "
                 ></v-textarea>
 
                 <svg
@@ -993,6 +1005,7 @@ export default {
       messageToReply: null,
       updateCountdown: 0,
       remainingMillis: 24 * 60 * 60 * 1000,
+      remainingMillisFacebook: 24 * 60 * 60 * 1000,
       selectedFilterNegotiationStatus: null,
       alertDialog: false,
       uploadingImage: false,
@@ -1301,6 +1314,7 @@ export default {
         }
       }
       this.remainingMillis = 24 * 60 * 60 * 1000;
+      this.remainingMillisFacebook = 24 * 60 * 60 * 1000;
       this.clearForm();
       // salvar cantidad de mensajes pendientes, por si se quiere marcar no leido
       this.selectedPendingMessagesCount = chat.pending_messages_count;
@@ -1341,6 +1355,14 @@ export default {
       if (chat.platform === "whatsapp") {
         this.remainingMillis = this.selectedChat.last_message
           ? 24 * 60 * 60 * 1000 -
+            (Date.now() -
+              new Date(this.selectedChat.last_message.createdAt).getTime())
+          : 0;
+        this.updateCountdown += 1;
+      }
+      if (chat.platform === "facebook" || chat.platform === "instagram") {
+        this.remainingMillisFacebook = this.selectedChat.last_message
+          ? 7 * 24 * 60 * 60 * 1000 -
             (Date.now() -
               new Date(this.selectedChat.last_message.createdAt).getTime())
           : 0;
