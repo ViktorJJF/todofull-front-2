@@ -1362,7 +1362,7 @@ export default {
       }
       if (chat.platform === "facebook" || chat.platform === "instagram") {
         this.remainingMillisFacebook = this.selectedChat.last_message
-          ? 7 * 24 * 60 * 60 * 1000 -
+          ? 24 * 60 * 60 * 1000 -
             (Date.now() -
               new Date(this.selectedChat.last_message.createdAt).getTime())
           : 0;
