@@ -338,6 +338,13 @@ html {
   }
 }
 
+.msg-programmed-message {
+  font-size: 14px;
+  color: var(--msg-date);
+  margin-left: 3px;
+  margin-bottom: 3px;
+}
+
 .add {
   position: sticky;
   bottom: 25px;

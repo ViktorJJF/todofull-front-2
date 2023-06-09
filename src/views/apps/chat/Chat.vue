@@ -145,6 +145,7 @@
                       </div>
                       <div class="msg-content">
                         <span
+                          class="ml-2"
                           :class="{
                             'msg-message': true,
                             'bold-text': chat.pending_messages_count > 0,
@@ -163,6 +164,19 @@
                           }"
                         >
                           {{ chat.pending_messages_count }}
+                        </div>
+                        <div
+                          v-if="
+                            chat.programmedMessages &&
+                            chat.programmedMessages.length > 0
+                          "
+                          @click="dialogProgrammedMessage = true"
+                          :class="{
+                            'ml-3': true,
+                            'msg-programmed-messag': true,
+                          }"
+                        >
+                          ⏳
                         </div>
                       </div>
                     </div>
@@ -669,6 +683,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                 >
                   <v-icon>mdi-play-circle</v-icon>
                 </button>
+
                 <button
                   v-if="isRecording || isPaused"
                   @click="deleteRecording"
@@ -677,6 +692,38 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                 >
                   <v-icon>mdi-delete-circle</v-icon>
                 </button>
+                <v-btn
+                  color="bot"
+                  class="send-message-button"
+                  @click="sendMessage(text, 'Agente', 'text')"
+                >
+                  <v-icon class="wechat-color">mdi-send</v-icon>
+                  <v-tooltip activator="parent" anchor="bottom"
+                    >Enviar ahora</v-tooltip
+                  >
+                </v-btn>
+                <v-menu>
+                  <template v-slot:activator="{ props }">
+                    <v-btn
+                      v-bind="props"
+                      color="bot"
+                      class="send-message-button-options"
+                    >
+                      <v-icon class="wechat-color">mdi-chevron-down</v-icon>
+                      <v-tooltip activator="parent" anchor="bottom"
+                        >Programar para más tarde</v-tooltip
+                      >
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <v-list-item>
+                      <v-list-item-title
+                        @click.stop="isProgrammingMessage = true"
+                        >Hora Personalizada</v-list-item-title
+                      >
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
               </div>
             </template>
             <template v-else>
@@ -846,7 +893,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
               <ul class="template-list">
                 <li
                   v-for="(template, templateIndex) in templateMessages"
-                  :key="template._idid"
+                  :key="template._id"
                 >
                   <v-tooltip top>
                     <template v-slot:activator="{ on, attrs }">
@@ -935,6 +982,166 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
         </div>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="isProgrammingMessage" max-width="500" class="modal">
+      <v-container fluid>
+        <v-card>
+          <v-card-text>
+            <div class="header">
+              <h2>Programar envío</h2>
+            </div>
+            <v-row>
+              <v-col cols="12" sm="12">
+                <div>
+                  <b>Escoge dentro de cuánto tiempo se enviará el mensaje</b>
+                </div>
+                <div class="container-schedule">
+                  <label for="hours">Horas</label>
+                  <input
+                    class="input-field"
+                    type="number"
+                    id="hours"
+                    min="0"
+                    v-model="afterTime.hours"
+                  />
+                  <label for="minutes">Minutos:</label>
+                  <input
+                    class="input-field"
+                    type="number"
+                    id="minutes"
+                    min="0"
+                    v-model="afterTime.minutes"
+                  />
+                  <label for="seconds">Segundos:</label>
+                  <input
+                    class="input-field"
+                    type="number"
+                    id="seconds"
+                    min="0"
+                    v-model="afterTime.seconds"
+                  />
+                </div>
+              </v-col>
+            </v-row>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              small
+              dark
+              color="alert"
+              @click="isProgrammingMessage = false"
+            >
+              Cancelar
+            </v-btn>
+            <v-btn
+              small
+              outlined
+              dark
+              color="green"
+              @click="
+                isProgrammingMessage = false;
+                sendProgrammedMessage(text, 'Agente', 'text');
+              "
+            >
+              Programar envío
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-container>
+    </v-dialog>
+    <v-dialog v-model="dialogProgrammedMessage" max-width="700" class="modal">
+      <v-container fluid>
+        <v-card>
+          <v-card-text>
+            <div class="header">
+              <h2>Mensajes programados</h2>
+            </div>
+            <v-table>
+              <thead>
+                <tr>
+                  <th class="text-left">Tiempo programado</th>
+                  <th class="text-left">Tiempo restante</th>
+                  <th class="text-left">Contenido</th>
+                  <th class="text-left"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(programmedMessage, pgidx) in chats[
+                    chats.findIndex((el) => el._id == selectedChat._id)
+                  ].programmedMessages"
+                  :key="pgidx"
+                >
+                  <td>
+                    {{ convertMillisToTime(programmedMessage.afterTimeMillis) }}
+                  </td>
+                  <td>
+                    {{
+                      programmedMessage.startTimeMillis +
+                        programmedMessage.afterTimeMillis -
+                        new Date().getTime() >
+                      0
+                        ? convertMillisToTime(
+                            programmedMessage.startTimeMillis +
+                              programmedMessage.afterTimeMillis -
+                              new Date().getTime()
+                          )
+                        : "Enviado"
+                    }}
+                  </td>
+                  <td>
+                    {{ programmedMessage.payload.text }}
+                  </td>
+                  <td>
+                    <v-btn
+                      color="bot"
+                      class="send-message-button"
+                      @click="
+                        sendMessage(
+                          programmedMessage.payload.text,
+                          'Agente',
+                          programmedMessage.payload.type
+                        ),
+                          deleteProgrammedMessage(
+                            selectedChat,
+                            programmedMessage
+                          )
+                      "
+                    >
+                      <v-icon class="wechat-color">mdi-send</v-icon>
+                      <v-tooltip activator="parent" anchor="bottom"
+                        >Enviar ahora</v-tooltip
+                      >
+                    </v-btn>
+                    <button
+                      @click="
+                        deleteProgrammedMessage(selectedChat, programmedMessage)
+                      "
+                      color="red"
+                      small
+                    >
+                      <v-icon>mdi-delete-circle</v-icon>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </v-table>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              small
+              outlined
+              dark
+              color="primary"
+              @click="dialogProgrammedMessage = false"
+            >
+              Listo
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-container>
+    </v-dialog>
   </v-row>
 </template>
 
@@ -955,6 +1162,7 @@ import {
   getFileNameFromUrl,
   parseMarkdown,
   getFormat,
+  convertMsToTime,
 } from "@/utils/utils";
 import socket from "@/plugins/sockets";
 import { es } from "date-fns/locale";
@@ -989,6 +1197,9 @@ export default {
   },
   data() {
     return {
+      afterTime: { hours: 0, minutes: 0, seconds: 0 },
+      dialogProgrammedMessage: false,
+      isProgrammingMessage: false,
       dynamic_parameters: {
         header: [],
         body: [],
@@ -1138,6 +1349,9 @@ export default {
     });
   },
   methods: {
+    convertMillisToTime(millis) {
+      return convertMsToTime(millis);
+    },
     editAgentCommentMessage(message) {
       // change to edit
       if (!message.isEditing) {
@@ -1334,6 +1548,21 @@ export default {
           restart_pending_messages: true, // esto es para que se reinicien los mensajes pendientes
         })
       ).data.payload;
+      // adding programmed messages
+      if (
+        this.selectedChat.programmedMessages &&
+        this.selectedChat.programmedMessages.length > 0
+      ) {
+        this.messages = this.messages.concat([
+          ...this.selectedChat.programmedMessages.map((el) => ({
+            ...el.payload,
+            isProgrammed: true,
+            createdAt: el.createdAt,
+            updatedAt: el.updatedAt,
+          })),
+        ]);
+      }
+
       chat = (await chatsService.listOne(chat._id)).data.payload;
       // get last client message
 
@@ -2042,6 +2271,84 @@ export default {
         this.$refs["chat-input"].focus();
       });
     },
+    async sendProgrammedMessage(
+      text,
+      from = "Agente",
+      type = "text",
+      { url } = {}
+    ) {
+      let chatIndex = this.chats.findIndex(
+        (chat) => chat._id === this.selectedChat._id
+      );
+      const user = JSON.parse(localStorage.getItem("user"));
+      // update chat
+      const afterMillis =
+        (this.afterTime.hours * 60 * 60 +
+          this.afterTime.minutes * 60 +
+          this.afterTime.seconds) *
+        1000; // in millis
+      if (text.length > 0) {
+        let updatedChat = await this.$store.dispatch(
+          "chatsModule/addProgrammedMessage",
+          {
+            id: this.selectedChat._id,
+            data: {
+              programmedMessage: {
+                startTimeMillis: new Date().getTime(),
+                afterTimeMillis: afterMillis,
+                payload: {
+                  text,
+                  payload: {},
+                  type,
+                  from: "Agente",
+                  chatId: this.selectedChat._id,
+                  isRead: false,
+                  userId: user._id,
+                },
+              },
+            },
+          }
+        );
+        // this.messages.push({
+        //   ...updatedChat.programmedMessages[
+        //     updatedChat.programmedMessages.length - 1
+        //   ],
+        //   createdAt: new Date(),
+        //   updatedAt: new Date(),
+        //   isProgrammed: true,
+        // });
+        if (!this.chats[chatIndex].programmedMessages) {
+          this.chats[chatIndex].programmedMessages = [];
+        }
+        this.chats[chatIndex].programmedMessages.push(
+          updatedChat.programmedMessages[
+            updatedChat.programmedMessages.length - 1
+          ]
+        );
+        this.text = "";
+        this.afterTime = {
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+        };
+      }
+    },
+    deleteProgrammedMessage(selectedChat, programmedMessage) {
+      let chatIndex = this.chats.findIndex(
+        (chat) => chat._id === selectedChat._id
+      );
+      let programmedMessageIndex = selectedChat.programmedMessages.findIndex(
+        (p) => p._id === programmedMessage._id
+      );
+      this.$store.dispatch("chatsModule/deleteProgrammedMessage", {
+        chatId: selectedChat._id,
+        programmedMessageId: programmedMessage._id,
+      });
+      this.chats[chatIndex].programmedMessages.splice(
+        programmedMessageIndex,
+        1
+      );
+    },
   },
   computed: {
     permissions() {
@@ -2434,5 +2741,35 @@ export default {
   background-color: #2196f3; /* change the background color */
   font-size: 16px; /* change the font size */
   padding: 10px 20px; /* change the padding */
+}
+
+.send-message-button {
+  min-width: 0;
+  width: 40px; /* Adjust the width as desired */
+  border: none; /* Remove the default button border */
+  border-radius: 0; /* Remove any border radius */
+}
+.send-message-button-options {
+  min-width: 0;
+  width: 10px !important; /* Adjust the width as desired */
+  border: none; /* Remove the default button border */
+  border-radius: 0; /* Remove any border radius */
+  border-left: 1px solid #fff; /* Set the left border to white */
+}
+
+// schedule style
+.container-schedule {
+  display: flex;
+  flex-direction: column;
+  max-width: 300px;
+  margin: auto;
+  padding: 20px;
+}
+
+.input-field {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 </style>
