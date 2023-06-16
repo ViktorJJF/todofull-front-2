@@ -813,6 +813,40 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
             :key="updateNegotiationStatus"
           >
           </NegotiationStatusesSelector>
+          <v-row
+            class="my-2"
+            v-if="selectedChat._id && selectedChat.cleanLeadId?.odoo_id"
+          >
+            <v-col cols="12" sm="12">
+              <b>Id odoo: </b>
+              <a
+                target="_blank"
+                :href="`https://mujeron.odoo.com/web#id=${selectedChat.cleanLeadId?.odoo_id}&action=114&model=res.partner&view_type=form&cids=1&menu_id=89`"
+                >{{ selectedChat.cleanLeadId?.odoo_id }}</a
+              >
+            </v-col>
+            <v-table>
+              <thead>
+                <tr>
+                  <th class="">RFM</th>
+                  <th class="">Ventas</th>
+                  <th class="">Tickets</th>
+                  <th class="">TPV</th>
+                </tr>
+              </thead>
+              <tbody v-if="odoo_partner_info">
+                <tr>
+                  <td></td>
+                  <td>{{ odoo_partner_info.sale_order_count }}</td>
+                  <td>{{ odoo_partner_info.helpdesk_ticket_count }}</td>
+                  <td>{{ odoo_partner_info.pos_order_count }}</td>
+                </tr>
+              </tbody>
+            </v-table>
+            <div v-show="!odoo_partner_info">
+              Este lead no tiene información en ODOO
+            </div>
+          </v-row>
           <div>
             <v-textarea
               density="compact"
@@ -1146,6 +1180,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
 </template>
 
 <script>
+import axios from "axios";
 import UploadImages from "vue-upload-drop-images";
 import EmojiPicker from "vue3-emoji-picker";
 import "vue3-emoji-picker/css";
@@ -1164,6 +1199,7 @@ import {
   getFormat,
   convertMsToTime,
 } from "@/utils/utils";
+import config from "@/config";
 import socket from "@/plugins/sockets";
 import { es } from "date-fns/locale";
 import InfiniteScroll from "@/components/InfiniteScroll.vue";
@@ -1314,6 +1350,7 @@ export default {
       chunks: [],
       stream: null,
       isPaused: false,
+      odoo_partner_info: null,
     };
   },
   created() {
@@ -1540,6 +1577,8 @@ export default {
       this.isChatMessageReady = false;
       this.selectedChat = chat;
       this.$store.commit("chatsModule/setSelectedChat", chat);
+      // get info from odoo
+      this.getOdooInfo();
       this.messages = (
         await messagesService.listByChat({
           chatId: chat._id,
@@ -2348,6 +2387,28 @@ export default {
         programmedMessageIndex,
         1
       );
+    },
+    getOdooInfo() {
+      let data = JSON.stringify({
+        id_partner: this.selectedChat.cleanLeadId?.odoo_id,
+      });
+
+      axios
+        .request({
+          method: "post",
+          url: `${config.DASHBOARD_BASE_URL}/api/odoo/get_partner_info`,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: data,
+        })
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+          this.odoo_partner_info = response.data.payload.result;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
   },
   computed: {
