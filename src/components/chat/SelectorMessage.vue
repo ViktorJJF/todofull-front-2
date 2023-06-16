@@ -2,12 +2,17 @@
   <div
     :class="[
       'chat-msg-text',
-      message.type == 'agent_comment' ? 'chat-agent-msg-text' : '',
+      message.type == 'agent_comment'
+        ? 'chat-agent-msg-text'
+        : message.isProgrammed
+        ? 'chat-programmed-msg-text'
+        : '',
     ]"
     class="message-box"
     @mouseover="hover = true"
     @mouseleave="hover = false"
   >
+    <v-icon v-if="message.isProgrammed">mdi mdi-clock</v-icon>
     <div
       v-if="
         message.context &&
@@ -49,7 +54,10 @@
         :messages="messages"
       ></TextMessageChat>
     </div>
-    <div v-if="message.type === 'agent_comment'" :id="message._id">
+    <div
+      v-if="message.type === 'agent_comment' || message.type === 'programmed'"
+      :id="message._id"
+    >
       <AgentComment :message="message" :messages="messages"></AgentComment>
       <div class="buttons-container left-buttons" v-show="hover">
         <button
@@ -218,6 +226,10 @@ function openUrl(url) {
 .chat-agent-msg-text {
   background-color: #fffbb5 !important;
   color: black !important;
+}
+.chat-programmed-msg-text {
+  background-color: #3e8ede !important;
+  color: white !important;
 }
 
 .message-box {

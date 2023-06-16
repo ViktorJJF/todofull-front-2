@@ -145,6 +145,7 @@
                       </div>
                       <div class="msg-content">
                         <span
+                          class="ml-2"
                           :class="{
                             'msg-message': true,
                             'bold-text': chat.pending_messages_count > 0,
@@ -163,6 +164,19 @@
                           }"
                         >
                           {{ chat.pending_messages_count }}
+                        </div>
+                        <div
+                          v-if="
+                            chat.programmedMessages &&
+                            chat.programmedMessages.length > 0
+                          "
+                          @click="dialogProgrammedMessage = true"
+                          :class="{
+                            'ml-3': true,
+                            'msg-programmed-messag': true,
+                          }"
+                        >
+                          ⏳
                         </div>
                       </div>
                     </div>
@@ -197,6 +211,14 @@
                   <Countdown
                     v-if="selectedChat.platform === 'whatsapp'"
                     :millis="remainingMillis"
+                    :key="updateCountdown"
+                  ></Countdown>
+                  <Countdown
+                    v-if="
+                      selectedChat.platform === 'facebook' ||
+                      selectedChat.platform === 'instagram'
+                    "
+                    :millis="remainingMillisFacebook"
                     :key="updateCountdown"
                   ></Countdown>
 
@@ -603,7 +625,11 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                       ? 'No se pueden enviar mensaje pasadas las 24h en WhatsApp'
                       : 'Escribe y presiona Enter'
                   "
-                  :disabled="selectedChat.isBotActive || remainingMillis <= 0"
+                  :disabled="
+                    selectedChat.isBotActive ||
+                    remainingMillis <= 0 ||
+                    remainingMillisFacebook <= 0
+                  "
                 ></v-textarea>
 
                 <svg
@@ -657,6 +683,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                 >
                   <v-icon>mdi-play-circle</v-icon>
                 </button>
+
                 <button
                   v-if="isRecording || isPaused"
                   @click="deleteRecording"
@@ -665,6 +692,38 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                 >
                   <v-icon>mdi-delete-circle</v-icon>
                 </button>
+                <v-btn
+                  color="bot"
+                  class="send-message-button"
+                  @click="sendMessage(text, 'Agente', 'text')"
+                >
+                  <v-icon class="wechat-color">mdi-send</v-icon>
+                  <v-tooltip activator="parent" anchor="bottom"
+                    >Enviar ahora</v-tooltip
+                  >
+                </v-btn>
+                <v-menu>
+                  <template v-slot:activator="{ props }">
+                    <v-btn
+                      v-bind="props"
+                      color="bot"
+                      class="send-message-button-options"
+                    >
+                      <v-icon class="wechat-color">mdi-chevron-down</v-icon>
+                      <v-tooltip activator="parent" anchor="bottom"
+                        >Programar para más tarde</v-tooltip
+                      >
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <v-list-item>
+                      <v-list-item-title
+                        @click.stop="isProgrammingMessage = true"
+                        >Hora Personalizada</v-list-item-title
+                      >
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
               </div>
             </template>
             <template v-else>
@@ -754,6 +813,40 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
             :key="updateNegotiationStatus"
           >
           </NegotiationStatusesSelector>
+          <v-row
+            class="my-2"
+            v-if="selectedChat._id && selectedChat.cleanLeadId?.odoo_id"
+          >
+            <v-col cols="12" sm="12">
+              <b>Id odoo: </b>
+              <a
+                target="_blank"
+                :href="`https://mujeron.odoo.com/web#id=${selectedChat.cleanLeadId?.odoo_id}&action=114&model=res.partner&view_type=form&cids=1&menu_id=89`"
+                >{{ selectedChat.cleanLeadId?.odoo_id }}</a
+              >
+            </v-col>
+            <v-table>
+              <thead>
+                <tr>
+                  <th class="">RFM</th>
+                  <th class="">Ventas</th>
+                  <th class="">Tickets</th>
+                  <th class="">TPV</th>
+                </tr>
+              </thead>
+              <tbody v-if="odoo_partner_info">
+                <tr>
+                  <td></td>
+                  <td>{{ odoo_partner_info.sale_order_count }}</td>
+                  <td>{{ odoo_partner_info.helpdesk_ticket_count }}</td>
+                  <td>{{ odoo_partner_info.pos_order_count }}</td>
+                </tr>
+              </tbody>
+            </v-table>
+            <div v-show="!odoo_partner_info">
+              Este lead no tiene información en ODOO
+            </div>
+          </v-row>
           <div>
             <v-textarea
               density="compact"
@@ -834,7 +927,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
               <ul class="template-list">
                 <li
                   v-for="(template, templateIndex) in templateMessages"
-                  :key="template._idid"
+                  :key="template._id"
                 >
                   <v-tooltip top>
                     <template v-slot:activator="{ on, attrs }">
@@ -923,10 +1016,171 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
         </div>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="isProgrammingMessage" max-width="500" class="modal">
+      <v-container fluid>
+        <v-card>
+          <v-card-text>
+            <div class="header">
+              <h2>Programar envío</h2>
+            </div>
+            <v-row>
+              <v-col cols="12" sm="12">
+                <div>
+                  <b>Escoge dentro de cuánto tiempo se enviará el mensaje</b>
+                </div>
+                <div class="container-schedule">
+                  <label for="hours">Horas</label>
+                  <input
+                    class="input-field"
+                    type="number"
+                    id="hours"
+                    min="0"
+                    v-model="afterTime.hours"
+                  />
+                  <label for="minutes">Minutos:</label>
+                  <input
+                    class="input-field"
+                    type="number"
+                    id="minutes"
+                    min="0"
+                    v-model="afterTime.minutes"
+                  />
+                  <label for="seconds">Segundos:</label>
+                  <input
+                    class="input-field"
+                    type="number"
+                    id="seconds"
+                    min="0"
+                    v-model="afterTime.seconds"
+                  />
+                </div>
+              </v-col>
+            </v-row>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              small
+              dark
+              color="alert"
+              @click="isProgrammingMessage = false"
+            >
+              Cancelar
+            </v-btn>
+            <v-btn
+              small
+              outlined
+              dark
+              color="green"
+              @click="
+                isProgrammingMessage = false;
+                sendProgrammedMessage(text, 'Agente', 'text');
+              "
+            >
+              Programar envío
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-container>
+    </v-dialog>
+    <v-dialog v-model="dialogProgrammedMessage" max-width="700" class="modal">
+      <v-container fluid>
+        <v-card>
+          <v-card-text>
+            <div class="header">
+              <h2>Mensajes programados</h2>
+            </div>
+            <v-table>
+              <thead>
+                <tr>
+                  <th class="text-left">Tiempo programado</th>
+                  <th class="text-left">Tiempo restante</th>
+                  <th class="text-left">Contenido</th>
+                  <th class="text-left"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(programmedMessage, pgidx) in chats[
+                    chats.findIndex((el) => el._id == selectedChat._id)
+                  ].programmedMessages"
+                  :key="pgidx"
+                >
+                  <td>
+                    {{ convertMillisToTime(programmedMessage.afterTimeMillis) }}
+                  </td>
+                  <td>
+                    {{
+                      programmedMessage.startTimeMillis +
+                        programmedMessage.afterTimeMillis -
+                        new Date().getTime() >
+                      0
+                        ? convertMillisToTime(
+                            programmedMessage.startTimeMillis +
+                              programmedMessage.afterTimeMillis -
+                              new Date().getTime()
+                          )
+                        : "Enviado"
+                    }}
+                  </td>
+                  <td>
+                    {{ programmedMessage.payload.text }}
+                  </td>
+                  <td>
+                    <v-btn
+                      color="bot"
+                      class="send-message-button"
+                      @click="
+                        sendMessage(
+                          programmedMessage.payload.text,
+                          'Agente',
+                          programmedMessage.payload.type
+                        ),
+                          deleteProgrammedMessage(
+                            selectedChat,
+                            programmedMessage
+                          )
+                      "
+                    >
+                      <v-icon class="wechat-color">mdi-send</v-icon>
+                      <v-tooltip activator="parent" anchor="bottom"
+                        >Enviar ahora</v-tooltip
+                      >
+                    </v-btn>
+                    <button
+                      @click="
+                        deleteProgrammedMessage(selectedChat, programmedMessage)
+                      "
+                      color="red"
+                      small
+                    >
+                      <v-icon>mdi-delete-circle</v-icon>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </v-table>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              small
+              outlined
+              dark
+              color="primary"
+              @click="dialogProgrammedMessage = false"
+            >
+              Listo
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-container>
+    </v-dialog>
   </v-row>
 </template>
 
 <script>
+import axios from "axios";
 import UploadImages from "vue-upload-drop-images";
 import EmojiPicker from "vue3-emoji-picker";
 import "vue3-emoji-picker/css";
@@ -943,7 +1197,9 @@ import {
   getFileNameFromUrl,
   parseMarkdown,
   getFormat,
+  convertMsToTime,
 } from "@/utils/utils";
+import config from "@/config";
 import socket from "@/plugins/sockets";
 import { es } from "date-fns/locale";
 import InfiniteScroll from "@/components/InfiniteScroll.vue";
@@ -977,6 +1233,9 @@ export default {
   },
   data() {
     return {
+      afterTime: { hours: 0, minutes: 0, seconds: 0 },
+      dialogProgrammedMessage: false,
+      isProgrammingMessage: false,
       dynamic_parameters: {
         header: [],
         body: [],
@@ -993,6 +1252,7 @@ export default {
       messageToReply: null,
       updateCountdown: 0,
       remainingMillis: 24 * 60 * 60 * 1000,
+      remainingMillisFacebook: 24 * 60 * 60 * 1000,
       selectedFilterNegotiationStatus: null,
       alertDialog: false,
       uploadingImage: false,
@@ -1090,6 +1350,7 @@ export default {
       chunks: [],
       stream: null,
       isPaused: false,
+      odoo_partner_info: null,
     };
   },
   created() {
@@ -1125,6 +1386,9 @@ export default {
     });
   },
   methods: {
+    convertMillisToTime(millis) {
+      return convertMsToTime(millis);
+    },
     editAgentCommentMessage(message) {
       // change to edit
       if (!message.isEditing) {
@@ -1301,6 +1565,7 @@ export default {
         }
       }
       this.remainingMillis = 24 * 60 * 60 * 1000;
+      this.remainingMillisFacebook = 24 * 60 * 60 * 1000;
       this.clearForm();
       // salvar cantidad de mensajes pendientes, por si se quiere marcar no leido
       this.selectedPendingMessagesCount = chat.pending_messages_count;
@@ -1312,6 +1577,8 @@ export default {
       this.isChatMessageReady = false;
       this.selectedChat = chat;
       this.$store.commit("chatsModule/setSelectedChat", chat);
+      // get info from odoo
+      this.getOdooInfo();
       this.messages = (
         await messagesService.listByChat({
           chatId: chat._id,
@@ -1320,6 +1587,21 @@ export default {
           restart_pending_messages: true, // esto es para que se reinicien los mensajes pendientes
         })
       ).data.payload;
+      // adding programmed messages
+      if (
+        this.selectedChat.programmedMessages &&
+        this.selectedChat.programmedMessages.length > 0
+      ) {
+        this.messages = this.messages.concat([
+          ...this.selectedChat.programmedMessages.map((el) => ({
+            ...el.payload,
+            isProgrammed: true,
+            createdAt: el.createdAt,
+            updatedAt: el.updatedAt,
+          })),
+        ]);
+      }
+
       chat = (await chatsService.listOne(chat._id)).data.payload;
       // get last client message
 
@@ -1340,6 +1622,14 @@ export default {
       // get millis if whatsapp
       if (chat.platform === "whatsapp") {
         this.remainingMillis = this.selectedChat.last_message
+          ? 24 * 60 * 60 * 1000 -
+            (Date.now() -
+              new Date(this.selectedChat.last_message.createdAt).getTime())
+          : 0;
+        this.updateCountdown += 1;
+      }
+      if (chat.platform === "facebook" || chat.platform === "instagram") {
+        this.remainingMillisFacebook = this.selectedChat.last_message
           ? 24 * 60 * 60 * 1000 -
             (Date.now() -
               new Date(this.selectedChat.last_message.createdAt).getTime())
@@ -1635,12 +1925,34 @@ export default {
           },
         });
       }
-      // if(this.selectedNegotiationStatus){
-      //     this.$store.dispatch("negotiationStatusesLogsModule/create",{
-      //       "negotiationStatusId": this.selectedNegotiationStatus,
-      //       "isCompleted": false,
-      //       "chatId": this.selectedChat._id,
-      //       "cleanLeadId": createdItem?._id,"leadId":this.selectedChat.leadId._id,"hasCronJob": true});
+      console.log(
+        "CONDICIONES: ",
+        this.selectedNegotiationStatus,
+        this.selectedChat.pendingNegotiationStatusLogId,
+        !this.selectedChat.pendingNegotiationStatusLogId,
+        this.selectedNegotiationStatus !==
+          this.selectedChat.negotiationStatusId?._id
+      );
+      if (
+        this.selectedNegotiationStatus &&
+        !this.selectedChat.pendingNegotiationStatusLogId &&
+        this.selectedNegotiationStatus !==
+          this.selectedChat.negotiationStatusId?._id
+      ) {
+        this.selectedChat.pendingNegotiationStatusLogId =
+          await this.$store.dispatch("negotiationStatusesLogsModule/create", {
+            negotiationStatusId: this.selectedNegotiationStatus,
+            isCompleted: false,
+            chatId: this.selectedChat._id,
+            cleanLeadId: createdItem?._id,
+            leadId: this.selectedChat.leadId._id,
+            hasCronJob: true,
+          });
+      }
+      if (!this.selectedNegotiationStatus) {
+        this.selectedChat.pendingNegotiationStatusLogId = null;
+        this.selectedChat.negotiationStatusId = null;
+      }
       this.$store.dispatch("chatsModule/update", {
         id: this.selectedChat._id,
         data: { negotiationStatusId: this.selectedNegotiationStatus },
@@ -1997,6 +2309,106 @@ export default {
         console.log("🚀 Aqui *** -> t:", this.$refs["chat-input"]);
         this.$refs["chat-input"].focus();
       });
+    },
+    async sendProgrammedMessage(
+      text,
+      from = "Agente",
+      type = "text",
+      { url } = {}
+    ) {
+      let chatIndex = this.chats.findIndex(
+        (chat) => chat._id === this.selectedChat._id
+      );
+      const user = JSON.parse(localStorage.getItem("user"));
+      // update chat
+      const afterMillis =
+        (this.afterTime.hours * 60 * 60 +
+          this.afterTime.minutes * 60 +
+          this.afterTime.seconds) *
+        1000; // in millis
+      if (text.length > 0) {
+        let updatedChat = await this.$store.dispatch(
+          "chatsModule/addProgrammedMessage",
+          {
+            id: this.selectedChat._id,
+            data: {
+              programmedMessage: {
+                startTimeMillis: new Date().getTime(),
+                afterTimeMillis: afterMillis,
+                payload: {
+                  text,
+                  payload: {},
+                  type,
+                  from: "Agente",
+                  chatId: this.selectedChat._id,
+                  isRead: false,
+                  userId: user._id,
+                },
+              },
+            },
+          }
+        );
+        // this.messages.push({
+        //   ...updatedChat.programmedMessages[
+        //     updatedChat.programmedMessages.length - 1
+        //   ],
+        //   createdAt: new Date(),
+        //   updatedAt: new Date(),
+        //   isProgrammed: true,
+        // });
+        if (!this.chats[chatIndex].programmedMessages) {
+          this.chats[chatIndex].programmedMessages = [];
+        }
+        this.chats[chatIndex].programmedMessages.push(
+          updatedChat.programmedMessages[
+            updatedChat.programmedMessages.length - 1
+          ]
+        );
+        this.text = "";
+        this.afterTime = {
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+        };
+      }
+    },
+    deleteProgrammedMessage(selectedChat, programmedMessage) {
+      let chatIndex = this.chats.findIndex(
+        (chat) => chat._id === selectedChat._id
+      );
+      let programmedMessageIndex = selectedChat.programmedMessages.findIndex(
+        (p) => p._id === programmedMessage._id
+      );
+      this.$store.dispatch("chatsModule/deleteProgrammedMessage", {
+        chatId: selectedChat._id,
+        programmedMessageId: programmedMessage._id,
+      });
+      this.chats[chatIndex].programmedMessages.splice(
+        programmedMessageIndex,
+        1
+      );
+    },
+    getOdooInfo() {
+      let data = JSON.stringify({
+        id_partner: this.selectedChat.cleanLeadId?.odoo_id,
+      });
+
+      axios
+        .request({
+          method: "post",
+          url: `${config.DASHBOARD_BASE_URL}/api/odoo/get_partner_info`,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: data,
+        })
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+          this.odoo_partner_info = response.data.payload.result;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
   },
   computed: {
@@ -2390,5 +2802,35 @@ export default {
   background-color: #2196f3; /* change the background color */
   font-size: 16px; /* change the font size */
   padding: 10px 20px; /* change the padding */
+}
+
+.send-message-button {
+  min-width: 0;
+  width: 40px; /* Adjust the width as desired */
+  border: none; /* Remove the default button border */
+  border-radius: 0; /* Remove any border radius */
+}
+.send-message-button-options {
+  min-width: 0;
+  width: 10px !important; /* Adjust the width as desired */
+  border: none; /* Remove the default button border */
+  border-radius: 0; /* Remove any border radius */
+  border-left: 1px solid #fff; /* Set the left border to white */
+}
+
+// schedule style
+.container-schedule {
+  display: flex;
+  flex-direction: column;
+  max-width: 300px;
+  margin: auto;
+  padding: 20px;
+}
+
+.input-field {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 </style>

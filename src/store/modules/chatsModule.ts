@@ -95,6 +95,32 @@ const module = {
           });
       });
     },
+    addProgrammedMessage({ commit }, { id, data }) {
+      return new Promise((resolve, reject) => {
+        api
+          .addProgrammedMessage(id, data.programmedMessage)
+          .then((res) => {
+            buildSuccess("Mensaje programado creado");
+            resolve(res.data.payload);
+          })
+          .catch((error) => {
+            handleError(error, commit, reject);
+          });
+      });
+    },
+    deleteProgrammedMessage({ commit }, { chatId, programmedMessageId }) {
+      return new Promise((resolve, reject) => {
+        api
+          .deleteProgrammedMessage(chatId, programmedMessageId)
+          .then((res) => {
+            buildSuccess("Mensaje programado borrado");
+            resolve(res.data);
+          })
+          .catch((error) => {
+            handleError(error, commit, reject);
+          });
+      });
+    },
   },
   mutations: {
     list(state, data) {

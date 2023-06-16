@@ -14,6 +14,7 @@ socket.on("CONNECTED", () => {
 });
 
 socket.on("NEW_MESSAGE", (data) => {
+  console.log("🚀 Aqui *** -> data:", data);
   //   console.log("los mensajes: ", store.default);
   let chatId = store.getters["chatsModule/getChatById"](data.chatId);
   // @ts-ignore

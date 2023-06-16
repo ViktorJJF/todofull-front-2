@@ -49,4 +49,18 @@ export default {
       userId,
     });
   },
+  addProgrammedMessage(id, programmedMessage) {
+    return axios.post(
+      config.DASHBOARD_BASE_URL + `/api/chats/${id}/add_programmed_message`,
+      {
+        programmedMessage,
+      }
+    );
+  },
+  deleteProgrammedMessage(chatId, programmedMessageId) {
+    return axios.delete(
+      config.DASHBOARD_BASE_URL +
+        `/api/chats/${chatId}/delete_programmed_message/${programmedMessageId}`
+    );
+  },
 };
