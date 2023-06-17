@@ -837,9 +837,48 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
               <tbody v-if="odoo_partner_info">
                 <tr>
                   <td></td>
-                  <td>{{ odoo_partner_info.sale_order_count }}</td>
-                  <td>{{ odoo_partner_info.helpdesk_ticket_count }}</td>
-                  <td>{{ odoo_partner_info.pos_order_count }}</td>
+                  <td>
+                    <span
+                      :class="`v-chip v-chip--label v-theme--light ${
+                        odoo_partner_info.sale_order_count > 5
+                          ? 'text-error'
+                          : 'text-success'
+                      } v-chip--density-default v-chip--size-default v-chip--variant-tonal`"
+                      draggable="false"
+                      close=""
+                      text-color="white"
+                      ><span class="v-chip__underlay"></span
+                      >{{ odoo_partner_info.sale_order_count }}</span
+                    >
+                  </td>
+                  <td>
+                    <span
+                      :class="`v-chip v-chip--label v-theme--light ${
+                        odoo_partner_info.helpdesk_ticket_count > 5
+                          ? 'text-error'
+                          : 'text-success'
+                      } v-chip--density-default v-chip--size-default v-chip--variant-tonal`"
+                      draggable="false"
+                      close=""
+                      text-color="white"
+                      ><span class="v-chip__underlay"></span
+                      >{{ odoo_partner_info.helpdesk_ticket_count }}</span
+                    >
+                  </td>
+                  <td>
+                    <span
+                      :class="`v-chip v-chip--label v-theme--light ${
+                        odoo_partner_info.pos_order_count > 5
+                          ? 'text-error'
+                          : 'text-success'
+                      } v-chip--density-default v-chip--size-default v-chip--variant-tonal`"
+                      draggable="false"
+                      close=""
+                      text-color="white"
+                      ><span class="v-chip__underlay"></span
+                      >{{ odoo_partner_info.pos_order_count }}</span
+                    >
+                  </td>
                 </tr>
               </tbody>
             </v-table>
