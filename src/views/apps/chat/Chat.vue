@@ -1565,7 +1565,7 @@ export default {
         fieldsToSearch: this.fieldsToSearch,
         sort: "updatedAt",
         order: "desc",
-        limit: 50,
+        limit: 25,
       };
       if (this.activePlatforms.length > 0) {
         payload.platforms = this.activePlatforms;
@@ -2034,7 +2034,7 @@ export default {
         this.page += 1;
         let payload = {
           page: this.page,
-          limit: 50,
+          limit: 25,
           sort: "updatedAt",
           order: "desc",
         };
