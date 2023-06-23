@@ -6,7 +6,7 @@
       </div>
     </transition>
     <slot name="loading" />
-    <ul class="list-group" id="infinite-list">
+    <ul class="list-group" :id="id">
       <div><slot /></div>
     </ul>
   </div>
@@ -14,6 +14,16 @@
 
 <script>
 export default {
+  props: {
+    direction: {
+      type: String,
+      default: "down",
+    },
+    id: {
+      type: String,
+      default: "infinite-list",
+    },
+  },
   data() {
     return {
       loading: false,
@@ -22,20 +32,41 @@ export default {
     };
   },
   mounted() {
-    // Detect when scrolled to bottom.
-    const listElm = document.querySelector("#infinite-list");
-    listElm.addEventListener("scroll", () => {
-      if (
-        listElm.scrollTop + listElm.clientHeight >=
-        listElm.scrollHeight * 0.7
-      ) {
-        this.loadMore();
-        this.$emit("loadMore");
-      }
-    });
+    console.log('🚀 Aqui *** -> this["direction":', this.id);
+    if (this.direction === "down") {
+      console.log("verificar hacia abajo...");
+      // Detect when scrolled to bottom.
+      const listElm = document.querySelector("#infinite-list");
+      listElm.addEventListener("scroll", () => {
+        if (
+          listElm.scrollTop + listElm.clientHeight >=
+          listElm.scrollHeight * 0.7
+        ) {
+          this.loadMore();
+          this.$emit("loadMore");
+        }
+      });
 
-    // Initially load some items.
-    this.$emit("loadMore");
+      // Initially load some items.
+      this.$emit("loadMore");
+    } else {
+      console.log("Verificar hacia arriba...");
+      const listElm = document.querySelector("#infinite-list-chat");
+      listElm.addEventListener("scroll", () => {
+        console.log("🚀 Aqui *** -> listElm.scrollTop:", listElm.scrollTop);
+        console.log(
+          "🚀 Aqui *** -> listElm.scrollHeight:",
+          listElm.scrollHeight
+        );
+        if (listElm.scrollTop <= listElm.scrollHeight) {
+          this.loadMore();
+          this.$emit("loadMore");
+        }
+      });
+
+      // Initially load some items.
+      this.$emit("loadMore");
+    }
   },
   methods: {
     loadMore() {
