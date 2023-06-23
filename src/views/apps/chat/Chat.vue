@@ -2030,7 +2030,7 @@ export default {
             order: "desc",
             restart_pending_messages: true, // esto es para que se reinicien los mensajes pendientes
             page,
-            limit: 3,
+            limit: 30,
           })
         ).data;
         this.totalMessages = response.totalDocs;
