@@ -650,6 +650,11 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                       ? 'No se pueden enviar mensaje pasadas las 24h en WhatsApp'
                       : 'Escribe y presiona Enter'
                   "
+                  :disabled="
+                    selectedChat.isBotActive ||
+                    remainingMillis <= 0 ||
+                    remainingMillisFacebook <= 0
+                  "
                 ></v-textarea>
 
                 <svg
