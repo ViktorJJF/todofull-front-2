@@ -48,6 +48,12 @@ const items: SidebarItem[] = [
     to: { name: "NegotiationStatuses" },
   },
   {
+    title: "IA",
+    icon: "code",
+    to: { name: "GptView" },
+  },
+
+  {
     title: "Cerrar sesión",
     icon: "log-in",
   },

@@ -46,6 +46,11 @@ const router = createRouter({
           component: () => import("@/views/NegotiationStatuses.vue"),
         },
         {
+          name: "GptView",
+          path: "apps/GptView",
+          component: () => import("@/views/GptView.vue"),
+        },
+        {
           name: "Categories",
           path: "apps/categorias",
           component: () => import("@/views/categories/Categories.vue"),

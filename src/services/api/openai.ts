@@ -8,4 +8,7 @@ export default {
       { conversationId }
     );
   },
+  train() {
+    return axios.post(config.DASHBOARD_BASE_URL + "/api/openai/train");
+  },
 };
