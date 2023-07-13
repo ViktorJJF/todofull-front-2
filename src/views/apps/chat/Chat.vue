@@ -1961,20 +1961,22 @@ export default {
           ],
         });
         // actualizando referencia a lead y chat
-        let promises = [
-          this.$store.dispatch("leadsModule/update", {
-            id: this.selectedChat.leadId._id,
-            data: { cleanLeadId: createdItem._id },
-            notifyUser: false,
-          }),
-          this.$store.dispatch("chatsModule/update", {
-            id: this.selectedChat._id,
-            data: { cleanLeadId: createdItem._id },
-            notifyUser: false,
-          }),
-        ];
-
-        await Promise.all(promises);
+        console.log("🚀 Aqui *** -> createdItem:", createdItem);
+        if (this.selectedChat.platform !== "whatsapp") {
+          let promises = [
+            this.$store.dispatch("leadsModule/update", {
+              id: this.selectedChat.leadId._id,
+              data: { cleanLeadId: createdItem._id },
+              notifyUser: false,
+            }),
+            this.$store.dispatch("chatsModule/update", {
+              id: this.selectedChat._id,
+              data: { cleanLeadId: createdItem._id },
+              notifyUser: false,
+            }),
+          ];
+          await Promise.all(promises);
+        }
       } else {
         await this.$store.dispatch("leadsModule/update", {
           id: this.selectedChat.leadId._id,
