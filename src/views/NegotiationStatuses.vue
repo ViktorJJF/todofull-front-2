@@ -38,6 +38,50 @@
           </v-card-header-text>
           <v-divider></v-divider>
           <v-container fluid>
+            <b>Después de</b>
+            <v-select
+              v-show="negotiationStatus.isEditing"
+              :items="[
+                { value: 1, label: '1 día' },
+                { value: 2, label: '2 días' },
+                { value: 3, label: '3 días' },
+                { value: 4, label: '4 días' },
+              ]"
+              v-model="negotiationStatus.daysToNextStatus"
+              item-title="label"
+              item-value="value"
+              placeholder="x dias"
+              density="compact"
+            ></v-select>
+            <v-card-text v-show="!negotiationStatus.isEditing">
+              {{
+                negotiationStatus.daysToNextStatus
+                  ? `${negotiationStatus.daysToNextStatus} días`
+                  : "Sin selección"
+              }}
+            </v-card-text>
+            <b>Cambiar a estado</b>
+            <v-select
+              v-show="negotiationStatus.isEditing"
+              :items="[...negotiationStatuses]"
+              clearable
+              v-model="negotiationStatus.nextNegotiationStatusId"
+              item-title="name"
+              item-value="_id"
+              placeholder="Sin siguiente estado"
+              density="compact"
+            ></v-select>
+            <v-card-text v-show="!negotiationStatus.isEditing">
+              {{
+                negotiationStatus.nextNegotiationStatusId
+                  ? negotiationStatuses.find(
+                      (el) =>
+                        el._id == negotiationStatus.nextNegotiationStatusId
+                    ).name
+                  : "Sin estado"
+              }}
+            </v-card-text>
+            <v-divider class="mb-3"></v-divider>
             <v-card
               class="mb-2"
               v-for="(automation, idx) in negotiationStatus.automations"
@@ -201,6 +245,9 @@ export default {
         }
       }
     },
+    // onSelectedDaysToNextStatus(negotiationStatus,day){
+
+    // },
     addAutomation(negotiationStatus) {
       negotiationStatus.automations.push({
         name: "Nuevo mensaje",
@@ -236,5 +283,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
