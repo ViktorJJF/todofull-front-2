@@ -63,4 +63,10 @@ export default {
         `/api/chats/${chatId}/delete_programmed_message/${programmedMessageId}`
     );
   },
+  removeNegotiationStatusProgramedMessages(chatId) {
+    return axios.delete(
+      config.DASHBOARD_BASE_URL +
+        `/api/chats/${chatId}/remove_negotiation_status_programmed_messages`
+    );
+  },
 };

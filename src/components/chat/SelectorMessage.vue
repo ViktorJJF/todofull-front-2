@@ -2,7 +2,7 @@
   <div
     :class="[
       'chat-msg-text',
-      message.type == 'agent_comment'
+      message.type == 'agent_comment' || message.type == 'log'
         ? 'chat-agent-msg-text'
         : message.isProgrammed
         ? 'chat-programmed-msg-text'
@@ -55,7 +55,11 @@
       ></TextMessageChat>
     </div>
     <div
-      v-if="message.type === 'agent_comment' || message.type === 'programmed'"
+      v-if="
+        message.type === 'agent_comment' ||
+        message.type === 'programmed' ||
+        message.type === 'log'
+      "
       :id="message._id"
     >
       <AgentComment :message="message" :messages="messages"></AgentComment>
@@ -204,6 +208,8 @@ function getDynamicComponent(messageContext) {
         selectedComponent = TemplateWtspChat;
         break;
       case "agent_comment":
+        selectedComponent = AgentComment;
+      case "log":
         selectedComponent = AgentComment;
         break;
       default:

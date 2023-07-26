@@ -95,12 +95,14 @@ const module = {
           });
       });
     },
-    addProgrammedMessage({ commit }, { id, data }) {
+    addProgrammedMessage({ commit }, { id, data, notifyUser = true }) {
       return new Promise((resolve, reject) => {
         api
           .addProgrammedMessage(id, data.programmedMessage)
           .then((res) => {
-            buildSuccess("Mensaje programado creado");
+            if (notifyUser) {
+              buildSuccess("Mensaje programado creado");
+            }
             resolve(res.data.payload);
           })
           .catch((error) => {
@@ -114,6 +116,18 @@ const module = {
           .deleteProgrammedMessage(chatId, programmedMessageId)
           .then((res) => {
             buildSuccess("Mensaje programado borrado");
+            resolve(res.data);
+          })
+          .catch((error) => {
+            handleError(error, commit, reject);
+          });
+      });
+    },
+    removeNegotiationStatusProgramedMessages({ commit }, { chatId }) {
+      return new Promise((resolve, reject) => {
+        api
+          .removeNegotiationStatusProgramedMessages(chatId)
+          .then((res) => {
             resolve(res.data);
           })
           .catch((error) => {

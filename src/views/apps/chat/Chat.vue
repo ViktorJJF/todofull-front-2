@@ -346,7 +346,10 @@
                         <!-- <span class="tooltiptext">Tooltip text</span> -->
                         <div
                           class="tooltiptext"
-                          v-if="message.type !== 'agent_comment'"
+                          v-if="
+                            message.type !== 'agent_comment' &&
+                            message.type !== 'log'
+                          "
                         >
                           <v-menu>
                             <template v-slot:activator="{ props }">
@@ -1138,7 +1141,15 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
               color="green"
               @click="
                 isProgrammingMessage = false;
-                sendProgrammedMessage(text, 'Agente', 'text');
+                sendProgrammedMessage(
+                  text,
+                  'Agente',
+                  'text',
+                  (afterTime.hours * 60 * 60 +
+                    afterTime.minutes * 60 +
+                    afterTime.seconds) *
+                    1000
+                );
               "
             >
               Programar envío
@@ -1407,6 +1418,7 @@ export default {
       selectedAgent: null,
       userPermissions: null,
       selectedNegotiationStatus: null,
+      selectedNegotiationStatusObject: null,
       isDragOver: false,
       hasDraggedOver: false,
       emojiSet: "google",
@@ -1519,6 +1531,26 @@ export default {
           });
         });
       this.notes = "";
+    },
+    async sendAgentLogMessage(message) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const TYPE = "log";
+      messagesService
+        .create({
+          text: message,
+          from: "Agente",
+          chatId: this.selectedChat._id,
+          type: TYPE,
+          isRead: true,
+          userId: user._id,
+          isActive: true,
+        })
+        .then((el) => {
+          this.$store.commit("chatsModule/addMessage", el.data.payload);
+          this.$nextTick(() => {
+            scrollBottom();
+          });
+        });
     },
     async verifyTemplateMessage(template) {
       // check if has header
@@ -2005,15 +2037,39 @@ export default {
         this.selectedNegotiationStatus !==
           this.selectedChat.negotiationStatusId?._id
       ) {
-        this.selectedChat.pendingNegotiationStatusLogId =
-          await this.$store.dispatch("negotiationStatusesLogsModule/create", {
-            negotiationStatusId: this.selectedNegotiationStatus,
-            isCompleted: false,
-            chatId: this.selectedChat._id,
-            cleanLeadId: createdItem?._id,
-            leadId: this.selectedChat.leadId._id,
-            hasCronJob: true,
-          });
+        // send log
+        await this.sendAgentLogMessage(
+          `Cambio de estado a ${this.selectedNegotiationStatusObject.name}`
+        );
+        // remove previous programmed messages for negotiationStatus
+        await this.$store.dispatch(
+          "chatsModule/removeNegotiationStatusProgramedMessages",
+          { chatId: this.selectedChat._id }
+        );
+        // search for automations
+        const automations = this.selectedNegotiationStatusObject.automations;
+        for (const automation of automations) {
+          const { message, afterTime } = automation;
+          await this.sendProgrammedMessage(
+            message,
+            "Agente",
+            "text",
+            afterTime,
+            {
+              negotiationStatusId: this.selectedNegotiationStatus,
+              notifyUser: false,
+            }
+          );
+        }
+        // this.selectedChat.pendingNegotiationStatusLogId =
+        //   await this.$store.dispatch("negotiationStatusesLogsModule/create", {
+        //     negotiationStatusId: this.selectedNegotiationStatus,
+        //     isCompleted: false,
+        //     chatId: this.selectedChat._id,
+        //     cleanLeadId: createdItem?._id,
+        //     leadId: this.selectedChat.leadId._id,
+        //     hasCronJob: true,
+        //   });
       }
       if (!this.selectedNegotiationStatus) {
         this.selectedChat.pendingNegotiationStatusLogId = null;
@@ -2311,6 +2367,11 @@ export default {
     },
     onSelectNegotiationStatuses(negotiationStatus) {
       this.selectedNegotiationStatus = negotiationStatus;
+      // search full object
+      this.selectedNegotiationStatusObject =
+        this.$store.state.negotiationStatusesModule.negotiationStatuses.find(
+          (el) => el._id == this.selectedNegotiationStatus
+        );
     },
     goToMessage(message) {
       if (message) {
@@ -2408,27 +2469,25 @@ export default {
       text,
       from = "Agente",
       type = "text",
-      { url } = {}
+      afterMillis,
+      { url, negotiationStatusId, notifyUser } = {}
     ) {
       let chatIndex = this.chats.findIndex(
         (chat) => chat._id === this.selectedChat._id
       );
       const user = JSON.parse(localStorage.getItem("user"));
       // update chat
-      const afterMillis =
-        (this.afterTime.hours * 60 * 60 +
-          this.afterTime.minutes * 60 +
-          this.afterTime.seconds) *
-        1000; // in millis
       if (text.length > 0) {
         let updatedChat = await this.$store.dispatch(
           "chatsModule/addProgrammedMessage",
           {
             id: this.selectedChat._id,
+            notifyUser,
             data: {
               programmedMessage: {
                 startTimeMillis: new Date().getTime(),
                 afterTimeMillis: afterMillis,
+                negotiationStatusId,
                 payload: {
                   text,
                   payload: {},
