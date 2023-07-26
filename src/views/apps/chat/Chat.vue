@@ -2025,19 +2025,17 @@ export default {
       }
       console.log(
         "CONDICIONES: ",
-        this.selectedNegotiationStatus,
-        this.selectedChat.pendingNegotiationStatusLogId,
-        !this.selectedChat.pendingNegotiationStatusLogId,
-        this.selectedNegotiationStatus !==
-          this.selectedChat.negotiationStatusId?._id
+        this.selectedNegotiationStatus &&
+          this.selectedNegotiationStatus !==
+            this.selectedChat.negotiationStatusId?._id
       );
       if (
         this.selectedNegotiationStatus &&
-        !this.selectedChat.pendingNegotiationStatusLogId &&
         this.selectedNegotiationStatus !==
           this.selectedChat.negotiationStatusId?._id
       ) {
         // send log
+        console.log("enviando cambio estado...");
         await this.sendAgentLogMessage(
           `Cambio de estado a ${this.selectedNegotiationStatusObject.name}`
         );
