@@ -2070,6 +2070,14 @@ export default {
         //   });
       }
       if (!this.selectedNegotiationStatus) {
+        if (this.selectedChat.negotiationStatusId) {
+          await this.sendAgentLogMessage(`Cambio de estado a SIN ESTADO`);
+          // remove previous programmed messages for negotiationStatus
+          await this.$store.dispatch(
+            "chatsModule/removeNegotiationStatusProgramedMessages",
+            { chatId: this.selectedChat._id }
+          );
+        }
         this.selectedChat.pendingNegotiationStatusLogId = null;
         this.selectedChat.negotiationStatusId = null;
       }
