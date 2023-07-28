@@ -2029,6 +2029,11 @@ export default {
           this.selectedNegotiationStatus !==
             this.selectedChat.negotiationStatusId?._id
       );
+      this.$store.dispatch("chatsModule/update", {
+        id: this.selectedChat._id,
+        data: { negotiationStatusId: this.selectedNegotiationStatus },
+        notifyUser: false,
+      });
       if (
         this.selectedNegotiationStatus &&
         this.selectedNegotiationStatus !==
@@ -2081,12 +2086,6 @@ export default {
         this.selectedChat.pendingNegotiationStatusLogId = null;
         this.selectedChat.negotiationStatusId = null;
       }
-      this.$store.dispatch("chatsModule/update", {
-        id: this.selectedChat._id,
-        data: { negotiationStatusId: this.selectedNegotiationStatus },
-        notifyUser: false,
-      });
-
       // }
     },
     async listMessagesByChat(page) {
