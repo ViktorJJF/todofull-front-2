@@ -1,6 +1,41 @@
 <template>
   <v-container fluid>
     <v-row class="mb-3">
+      <div class="d-flex justify-space-evenly">
+        <v-btn
+          v-for="(country, idx) of countries"
+          small
+          icon
+          color="white"
+          @click="toggleCountry(country)"
+          :class="{ selected: selectedCountry === country.value }"
+          :key="idx"
+        >
+          <img style="width: 25px" :src="country.icon" />
+          <v-tooltip activator="parent" anchor="bottom">
+            {{ country.value }}
+          </v-tooltip>
+        </v-btn>
+      </div>
+      <v-col cols="12" sm="12">
+        <v-card class="mb-3 mr-3 pa-3">
+          <v-card-header-text>
+            <v-card-title> Horario hábil </v-card-title>
+          </v-card-header-text>
+          <v-container fluid>
+            <v-col cols="12" sm="12">
+              <b>Desde</b>
+              <vue-timepicker class="ml-2" format="HH:mm:ss"></vue-timepicker>
+            </v-col>
+            <v-col cols="12" sm="12">
+              <b>Hasta</b>
+              <vue-timepicker class="ml-2" format="HH:mm:ss"></vue-timepicker>
+            </v-col>
+          </v-container>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row class="mb-3">
       <v-col cols="12" sm="12">
         <v-btn
           @click="addNegotiationStatus(negotiationStatuses)"
@@ -181,6 +216,10 @@
 import VueTimepicker from "vue3-timepicker";
 import "vue3-timepicker/dist/VueTimepicker.css";
 import { convertMsToTime } from "@/utils/utils";
+import PeruFlagR from "@/assets/images/flags/peru.png";
+import ChileFlagR from "@/assets/images/flags/chile.png";
+import ColombiaFlagR from "@/assets/images/flags/colombia.png";
+import EspaniaFlag from "@/assets/images/flags/espania.png";
 
 export default {
   components: {
@@ -188,12 +227,23 @@ export default {
   },
   data() {
     return {
+      selectedCountry: "Chile",
       negotiationStatuses: [],
+      countries: [
+        { value: "Peru", icon: PeruFlagR },
+        { value: "Chile", icon: ChileFlagR },
+        { value: "Colombia", icon: ColombiaFlagR },
+        { value: "España", icon: EspaniaFlag },
+      ],
     };
   },
   mounted() {
-    console.log("gaaa");
     this.initialize();
+  },
+  watch: {
+    selectedCountry() {
+      this.initialize();
+    },
   },
   methods: {
     async initialize() {
@@ -201,6 +251,7 @@ export default {
         this.$store.dispatch("negotiationStatusesModule/list", {
           sort: "createdAt",
           order: "asc",
+          country: this.selectedCountry,
         }),
       ]);
       this.negotiationStatuses = JSON.parse(
@@ -260,6 +311,7 @@ export default {
       negotiationStatuses.push({
         isEditing: true,
         name: "Nuevo estado",
+        country: this.selectedCountry,
         automations: [
           {
             name: "Nuevo mensaje",
@@ -278,6 +330,13 @@ export default {
         );
       }
       negotiationStatuses.splice(index, 1);
+    },
+    toggleCountry(country) {
+      if (this.selectedCountry === country.value) {
+        return (this.selectedCountry = null);
+      }
+
+      this.selectedCountry = country.value;
     },
   },
 };

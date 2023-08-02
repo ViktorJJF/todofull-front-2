@@ -21,6 +21,10 @@ export default {
       type: Object,
       default: {},
     },
+    country: {
+      type: String,
+      default: "Chile",
+    },
     // disabled: {
     //   type: Boolean,
     //   default: false,
@@ -57,18 +61,20 @@ export default {
     },
   },
   async mounted() {
+    console.log("MONTANDO NEGOTIATION");
     if (this.initialData) {
       this.selectedNegotiationStatuses = this.initialData._id;
     }
-    if (
-      this.$store.state.negotiationStatusesModule.negotiationStatuses.length ===
-      0
-    ) {
-      await this.$store.dispatch("negotiationStatusesModule/list", {
-        sort: "name",
-        order: "asc",
-      });
-    }
+    // if (
+    //   this.$store.state.negotiationStatusesModule.negotiationStatuses.length ===
+    //   0
+    // ) {
+    await this.$store.dispatch("negotiationStatusesModule/list", {
+      sort: "name",
+      order: "asc",
+      country: this.country,
+    });
+    // }
     this.negotiationStatuses =
       this.$store.state.negotiationStatusesModule.negotiationStatuses.map(
         (el) => ({
@@ -100,5 +106,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
