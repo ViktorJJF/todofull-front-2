@@ -23,14 +23,16 @@
             <v-card-title> Horario hábil </v-card-title>
           </v-card-header-text>
           <v-container fluid>
-            <v-col cols="12" sm="12">
-              <b>Desde</b>
-              <vue-timepicker class="ml-2" format="HH:mm:ss"></vue-timepicker>
-            </v-col>
-            <v-col cols="12" sm="12">
-              <b>Hasta</b>
-              <vue-timepicker class="ml-2" format="HH:mm:ss"></vue-timepicker>
-            </v-col>
+            <div class="d-flex align-items-center mb-4">
+              <div class="col-md-6 pl-0">
+                <p class="etiqueta">Desde:</p>
+                <input type="time" value="" class="mb-0" />
+              </div>
+              <div class="col-md-6 pr-0">
+                <p class="etiqueta">Hasta:</p>
+                <input type="time" value="" class="mb-0" />
+              </div>
+            </div>
           </v-container>
         </v-card>
       </v-col>
@@ -41,7 +43,7 @@
           @click="addNegotiationStatus(negotiationStatuses)"
           color="success"
         >
-          Nuevo
+          Estados de Negociación
           <v-tooltip activator="parent" anchor="bottom">
             Nuevo estado de negociación
           </v-tooltip>
@@ -342,4 +344,8 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.etiqueta {
+  margin-bottom: 0;
+}
+</style>

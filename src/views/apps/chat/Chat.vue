@@ -842,6 +842,15 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
             :key="updateNegotiationStatus"
           >
           </NegotiationStatusesSelector>
+          <v-btn
+            @click="reprogramNegotiationStatusMessages"
+            fab
+            small
+            color="primary"
+            class="undo-pending-message mb-2"
+          >
+            Renovar mensajes
+          </v-btn>
           <v-row
             class="my-2"
             v-if="selectedChat._id && selectedChat.cleanLeadId?.odoo_id"
@@ -1294,6 +1303,7 @@ import EspaniaFlag from "@/assets/images/flags/espania.png";
 import SelectorMessage from "@/components/chat/SelectorMessage.vue";
 import graphApiService from "@/services/api/graphApi";
 import templateMessagesService from "@/services/api/templateMessages";
+import { createToast } from "mosha-vue-toastify";
 
 import openaiService from "@/services/api/openai";
 
@@ -2519,11 +2529,18 @@ export default {
         if (!this.chats[chatIndex].programmedMessages) {
           this.chats[chatIndex].programmedMessages = [];
         }
-        this.chats[chatIndex].programmedMessages.push(
-          updatedChat.programmedMessages[
-            updatedChat.programmedMessages.length - 1
-          ]
+        // prevent duplicated
+        const doesExistMessage = this.chats[chatIndex].programmedMessages.find(
+          (el) => el.payload.text === text
         );
+        if (!doesExistMessage) {
+          this.chats[chatIndex].programmedMessages.push(
+            updatedChat.programmedMessages[
+              updatedChat.programmedMessages.length - 1
+            ]
+          );
+        }
+
         this.text = "";
         this.afterTime = {
           hours: 0,
@@ -2580,6 +2597,21 @@ export default {
         .catch((error) => {
           console.log(error);
         });
+    },
+    async reprogramNegotiationStatusMessages() {
+      createToast("Renovando mensajes programados", {
+        timeout: 3000,
+        type: "success",
+      });
+      // search for automations
+      const automations = this.selectedNegotiationStatusObject.automations;
+      for (const automation of automations) {
+        const { message, afterTime } = automation;
+        await this.sendProgrammedMessage(message, "Agente", "text", afterTime, {
+          negotiationStatusId: this.selectedNegotiationStatus,
+          notifyUser: false,
+        });
+      }
     },
   },
   computed: {
