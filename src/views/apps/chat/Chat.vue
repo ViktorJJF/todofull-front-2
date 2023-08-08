@@ -390,7 +390,7 @@
                               v-show="getFieldTextSelection == 'text'"
                               @click="
                                 userForm.name = selectedText;
-                                saveUserForm();
+                                saveUserForm(selectedChat);
                                 showMessageOptions = false;
                               "
                               icon="mdi-account"
@@ -399,7 +399,7 @@
                               v-show="getFieldTextSelection == 'phone'"
                               @click="
                                 userForm.phone = selectedText;
-                                saveUserForm();
+                                saveUserForm(selectedChat);
                                 showMessageOptions = false;
                               "
                               icon="mdi-cellphone"
@@ -408,7 +408,7 @@
                               v-show="getFieldTextSelection == 'email'"
                               @click="
                                 userForm.email = selectedText;
-                                saveUserForm();
+                                saveUserForm(selectedChat);
                                 showMessageOptions = false;
                               "
                               icon="mdi-email"
@@ -417,7 +417,7 @@
                               v-show="getFieldTextSelection == 'text'"
                               @click="
                                 userForm.city = selectedText;
-                                saveUserForm();
+                                saveUserForm(selectedChat);
                                 showMessageOptions = false;
                               "
                               icon="mdi-city"
@@ -653,11 +653,6 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                       ? 'No se pueden enviar mensaje pasadas las 24h en WhatsApp'
                       : 'Escribe y presiona Enter'
                   "
-                  :disabled="
-                    selectedChat.isBotActive ||
-                    remainingMillis <= 0 ||
-                    remainingMillisFacebook <= 0
-                  "
                 ></v-textarea>
 
                 <svg
@@ -843,7 +838,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
           >
           </NegotiationStatusesSelector>
           <v-btn
-            @click="reprogramNegotiationStatusMessages"
+            @click="reprogramNegotiationStatusMessages(selectedChat)"
             fab
             small
             color="primary"
@@ -954,7 +949,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
           <div class="mt-4">
             <v-btn
               color="success"
-              @click="saveUserForm"
+              @click="saveUserForm(selectedChat)"
               variant="outlined"
               class="text-capitalize mr-2"
               >Guardar</v-btn
@@ -1158,7 +1153,8 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                   (afterTime.hours * 60 * 60 +
                     afterTime.minutes * 60 +
                     afterTime.seconds) *
-                    1000
+                    1000,
+                  selectedChat
                 );
               "
             >
@@ -1180,6 +1176,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                 <tr>
                   <th class="text-left">Tiempo programado</th>
                   <th class="text-left">Tiempo restante</th>
+                  <th class="text-left">Hora de envío</th>
                   <th class="text-left">Contenido</th>
                   <th class="text-left"></th>
                 </tr>
@@ -1206,6 +1203,16 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                               new Date().getTime()
                           )
                         : "Enviado"
+                    }}
+                  </td>
+                  <td>
+                    {{
+                      formatDate(
+                        new Date(
+                          programmedMessage.startTimeMillis +
+                            programmedMessage.afterTimeMillis
+                        )
+                      )
                     }}
                   </td>
                   <td>
@@ -1966,24 +1973,24 @@ export default {
         this.userForm.todofullLabels = selectedLabels;
       }
     },
-    async saveUserForm() {
+    async saveUserForm(selectedChat) {
       let createdItem;
       if (this.userForm.phone) {
         createdItem = await this.$store.dispatch("cleanLeadsModule/create", {
           telefono: this.userForm.phone,
           estado:
-            this.selectedChat.cleanLeadId &&
-            this.selectedChat.cleanLeadId.estado &&
-            this.selectedChat.cleanLeadId.estado !== "SIN ASIGNAR"
-              ? this.selectedChat.cleanLeadId.estado
-              : (this.selectedChat.cleanLeadId &&
-                  this.selectedChat.cleanLeadId.telefonoId) ||
-                this.selectedChat.leadId.telefonoId
+            selectedChat.cleanLeadId &&
+            selectedChat.cleanLeadId.estado &&
+            selectedChat.cleanLeadId.estado !== "SIN ASIGNAR"
+              ? selectedChat.cleanLeadId.estado
+              : (selectedChat.cleanLeadId &&
+                  selectedChat.cleanLeadId.telefonoId) ||
+                selectedChat.leadId.telefonoId
               ? "RE-CONECTAR"
               : "SIN ASIGNAR",
-          telefonoId: this.selectedChat.leadId.telefonoId
-            ? this.selectedChat.leadId.telefonoId._id
-            : this.selectedChat.cleanLeadId?.telefonoId?._id,
+          telefonoId: selectedChat.leadId.telefonoId
+            ? selectedChat.leadId.telefonoId._id
+            : selectedChat.cleanLeadId?.telefonoId?._id,
 
           todofullLabels: this.getIdTodofullLabels(
             this.userForm.todofullLabels
@@ -1991,30 +1998,29 @@ export default {
           details: [
             {
               type: "CHATBOT",
-              contactId: this.selectedChat.leadId.contactId,
-              fuente: this.selectedChat.leadId.fuente,
+              contactId: selectedChat.leadId.contactId,
+              fuente: selectedChat.leadId.fuente,
               appName:
-                this.selectedChat.leadId.sourceName ||
-                this.selectedChat.leadId.appName,
+                selectedChat.leadId.sourceName || selectedChat.leadId.appName,
               nombre: this.userForm.name,
               email: this.userForm.email,
               ciudad: this.userForm.city,
               nota: this.userForm.notes,
-              pais: this.selectedChat.leadId.pais,
+              pais: selectedChat.leadId.pais,
             },
           ],
         });
         // actualizando referencia a lead y chat
         console.log("🚀 Aqui *** -> createdItem:", createdItem);
-        if (this.selectedChat.platform !== "whatsapp") {
+        if (selectedChat.platform !== "whatsapp") {
           let promises = [
             this.$store.dispatch("leadsModule/update", {
-              id: this.selectedChat.leadId._id,
+              id: selectedChat.leadId._id,
               data: { cleanLeadId: createdItem._id },
               notifyUser: false,
             }),
             this.$store.dispatch("chatsModule/update", {
-              id: this.selectedChat._id,
+              id: selectedChat._id,
               data: { cleanLeadId: createdItem._id },
               notifyUser: false,
             }),
@@ -2023,7 +2029,7 @@ export default {
         }
       } else {
         await this.$store.dispatch("leadsModule/update", {
-          id: this.selectedChat.leadId._id,
+          id: selectedChat.leadId._id,
           data: {
             appName: this.userForm.name,
             email: this.userForm.email,
@@ -2039,17 +2045,16 @@ export default {
         "CONDICIONES: ",
         this.selectedNegotiationStatus &&
           this.selectedNegotiationStatus !==
-            this.selectedChat.negotiationStatusId?._id
+            selectedChat.negotiationStatusId?._id
       );
       this.$store.dispatch("chatsModule/update", {
-        id: this.selectedChat._id,
+        id: selectedChat._id,
         data: { negotiationStatusId: this.selectedNegotiationStatus },
         notifyUser: false,
       });
       if (
         this.selectedNegotiationStatus &&
-        this.selectedNegotiationStatus !==
-          this.selectedChat.negotiationStatusId?._id
+        this.selectedNegotiationStatus !== selectedChat.negotiationStatusId?._id
       ) {
         // send log
         console.log("enviando cambio estado...");
@@ -2059,7 +2064,7 @@ export default {
         // remove previous programmed messages for negotiationStatus
         await this.$store.dispatch(
           "chatsModule/removeNegotiationStatusProgramedMessages",
-          { chatId: this.selectedChat._id }
+          { chatId: selectedChat._id }
         );
         // search for automations
         const automations = this.selectedNegotiationStatusObject.automations;
@@ -2070,33 +2075,34 @@ export default {
             "Agente",
             "text",
             afterTime,
+            selectedChat,
             {
               negotiationStatusId: this.selectedNegotiationStatus,
               notifyUser: false,
             }
           );
         }
-        // this.selectedChat.pendingNegotiationStatusLogId =
+        // selectedChat.pendingNegotiationStatusLogId =
         //   await this.$store.dispatch("negotiationStatusesLogsModule/create", {
         //     negotiationStatusId: this.selectedNegotiationStatus,
         //     isCompleted: false,
-        //     chatId: this.selectedChat._id,
+        //     chatId: selectedChat._id,
         //     cleanLeadId: createdItem?._id,
-        //     leadId: this.selectedChat.leadId._id,
+        //     leadId: selectedChat.leadId._id,
         //     hasCronJob: true,
         //   });
       }
       if (!this.selectedNegotiationStatus) {
-        if (this.selectedChat.negotiationStatusId) {
+        if (selectedChat.negotiationStatusId) {
           await this.sendAgentLogMessage(`Cambio de estado a SIN ESTADO`);
           // remove previous programmed messages for negotiationStatus
           await this.$store.dispatch(
             "chatsModule/removeNegotiationStatusProgramedMessages",
-            { chatId: this.selectedChat._id }
+            { chatId: selectedChat._id }
           );
         }
-        this.selectedChat.pendingNegotiationStatusLogId = null;
-        this.selectedChat.negotiationStatusId = null;
+        selectedChat.pendingNegotiationStatusLogId = null;
+        selectedChat.negotiationStatusId = null;
       }
       // }
     },
@@ -2487,18 +2493,18 @@ export default {
       from = "Agente",
       type = "text",
       afterMillis,
+      chat,
       { url, negotiationStatusId, notifyUser } = {}
     ) {
-      let chatIndex = this.chats.findIndex(
-        (chat) => chat._id === this.selectedChat._id
-      );
       const user = JSON.parse(localStorage.getItem("user"));
+      // await 2 secs
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       // update chat
       if (text.length > 0) {
         let updatedChat = await this.$store.dispatch(
           "chatsModule/addProgrammedMessage",
           {
-            id: this.selectedChat._id,
+            id: chat._id,
             notifyUser,
             data: {
               programmedMessage: {
@@ -2510,7 +2516,7 @@ export default {
                   payload: {},
                   type,
                   from: "Agente",
-                  chatId: this.selectedChat._id,
+                  chatId: chat._id,
                   isRead: false,
                   userId: user._id,
                 },
@@ -2526,6 +2532,8 @@ export default {
         //   updatedAt: new Date(),
         //   isProgrammed: true,
         // });
+        let chatIndex = this.chats.findIndex((chat) => chat._id === chat._id);
+
         if (!this.chats[chatIndex].programmedMessages) {
           this.chats[chatIndex].programmedMessages = [];
         }
@@ -2556,14 +2564,14 @@ export default {
       let programmedMessageIndex = selectedChat.programmedMessages.findIndex(
         (p) => p._id === programmedMessage._id
       );
-      this.$store.dispatch("chatsModule/deleteProgrammedMessage", {
-        chatId: selectedChat._id,
-        programmedMessageId: programmedMessage._id,
-      });
       this.chats[chatIndex].programmedMessages.splice(
         programmedMessageIndex,
         1
       );
+      this.$store.dispatch("chatsModule/deleteProgrammedMessage", {
+        chatId: selectedChat._id,
+        programmedMessageId: programmedMessage._id,
+      });
     },
     getOdooInfo() {
       let data = JSON.stringify({
@@ -2598,7 +2606,7 @@ export default {
           console.log(error);
         });
     },
-    async reprogramNegotiationStatusMessages() {
+    async reprogramNegotiationStatusMessages(chat) {
       createToast("Renovando mensajes programados", {
         timeout: 3000,
         type: "success",
@@ -2607,10 +2615,17 @@ export default {
       const automations = this.selectedNegotiationStatusObject.automations;
       for (const automation of automations) {
         const { message, afterTime } = automation;
-        await this.sendProgrammedMessage(message, "Agente", "text", afterTime, {
-          negotiationStatusId: this.selectedNegotiationStatus,
-          notifyUser: false,
-        });
+        await this.sendProgrammedMessage(
+          message,
+          "Agente",
+          "text",
+          afterTime,
+          chat,
+          {
+            negotiationStatusId: this.selectedNegotiationStatus,
+            notifyUser: false,
+          }
+        );
       }
     },
   },

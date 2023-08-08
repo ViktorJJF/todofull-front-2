@@ -43,7 +43,7 @@
           @click="addNegotiationStatus(negotiationStatuses)"
           color="success"
         >
-          Estados de Negociación
+          Nuevo
           <v-tooltip activator="parent" anchor="bottom">
             Nuevo estado de negociación
           </v-tooltip>
