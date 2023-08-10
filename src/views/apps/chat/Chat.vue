@@ -612,11 +612,13 @@
                   ></path>
                 </svg>
                 <svg
+                  v-if="selectedCountry == 'Chile'"
                   fill="#000000"
                   viewBox="0 0 24 24"
                   role="img"
                   xmlns="http://www.w3.org/2000/svg"
                   @click="generateCompletion"
+                  :class="{ 'rotate-on-load': isGPTLoading }"
                 >
                   <title>OpenAI icon</title>
 
@@ -1455,6 +1457,7 @@ export default {
       isPaused: false,
       odoo_partner_info: null,
       isFetchingMoreMessages: false,
+      isGPTLoading: false,
     };
   },
   created() {
@@ -2601,11 +2604,13 @@ export default {
         });
     },
     generateCompletion() {
+      this.isGPTLoading = true;
       openaiService
         .generateCompletionForConversation(this.selectedChat._id)
         .then((response) => {
           console.log(response.data);
           this.text = response.data.payload.content;
+          this.isGPTLoading = false;
         })
         .catch((error) => {
           console.log(error);
@@ -3057,5 +3062,18 @@ export default {
   padding: 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotate-on-load {
+  animation: rotate 2s linear infinite;
 }
 </style>
