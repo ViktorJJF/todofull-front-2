@@ -644,6 +644,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                   rows="2"
                   variant="outlined"
                   hide-details
+                  auto-grow
                   @keyup.enter.exact.prevent="
                     sendMessage(text, 'Agente', 'text')
                   "
