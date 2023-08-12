@@ -752,6 +752,9 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                         @click.stop="isProgrammingMessage = true"
                         >Hora Personalizada</v-list-item-title
                       >
+                      <v-list-item-title @click.stop="openaiDialog = true"
+                        >Ver GPT Prompt</v-list-item-title
+                      >
                     </v-list-item>
                   </v-list>
                 </v-menu>
@@ -1172,6 +1175,31 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
         </v-card>
       </v-container>
     </v-dialog>
+    <v-dialog v-model="openaiDialog" max-width="500" class="modal">
+      <v-container fluid style="max-height: 600px; overflow-y: auto">
+        <v-card>
+          <v-card-text>
+            <div class="header">
+              <h2>Prompt GPT</h2>
+            </div>
+            <v-row>
+              <v-col
+                cols="12"
+                sm="12"
+                v-for="(openAiMessage, idxGpt) in openAiMessages"
+                :key="idxGpt"
+                class="mb-1"
+              >
+                <div>
+                  <div><b>Rol: </b>{{ openAiMessage.role }}</div>
+                  <div><b>Mensaje: </b>{{ openAiMessage.content }}</div>
+                </div>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-container>
+    </v-dialog>
     <v-dialog v-model="dialogProgrammedMessage" max-width="700" class="modal">
       <v-container fluid>
         <v-card>
@@ -1459,6 +1487,8 @@ export default {
       odoo_partner_info: null,
       isFetchingMoreMessages: false,
       isGPTLoading: false,
+      openAiMessages: [],
+      openaiDialog: false,
     };
   },
   created() {
@@ -2610,7 +2640,12 @@ export default {
         .generateCompletionForConversation(this.selectedChat._id)
         .then((response) => {
           console.log(response.data);
-          this.text = response.data.payload.content;
+          this.text = response.data.payload.response.content;
+          this.openAiMessages = response.data.payload.messages;
+          console.log(
+            "🚀 Aqui *** -> this.openAiMessages:",
+            this.openAiMessages
+          );
           this.isGPTLoading = false;
         })
         .catch((error) => {
