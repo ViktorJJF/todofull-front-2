@@ -752,7 +752,9 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                         @click.stop="isProgrammingMessage = true"
                         >Hora Personalizada</v-list-item-title
                       >
-                      <v-list-item-title @click.stop="openaiDialog = true"
+                      <v-list-item-title
+                        v-if="openAiMessages && openAiMessages.length > 0"
+                        @click.stop="openaiDialog = true"
                         >Ver GPT Prompt</v-list-item-title
                       >
                     </v-list-item>
