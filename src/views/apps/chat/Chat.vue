@@ -612,7 +612,6 @@
                   ></path>
                 </svg>
                 <svg
-                  v-if="selectedCountry == 'Chile'"
                   fill="#000000"
                   viewBox="0 0 24 24"
                   role="img"
@@ -1502,7 +1501,12 @@ export default {
         res.data.payload.length > 0 ? res.data.payload[0] : null;
       this.sellTeams = res.data.payload;
       // init bots
-      await this.$store.dispatch("botsModule/list"), await this.initialize();
+      await this.$store.dispatch("botsModule/list");
+      await this.initialize();
+      // after 3 secs, load more chats
+      if (this.page === 1) {
+        this.loadMore(35);
+      }
       this.isInitialized = true;
     });
     chatsService.listPermissions().then((res) => {
@@ -2194,7 +2198,7 @@ export default {
       let date = new Date(value);
       return formatDistance(new Date(), date, { addSuffix: true, locale: es });
     },
-    async loadMore() {
+    async loadMore(limit = 25) {
       setTimeout(async () => {
         if (this.isLoadingMore === true) {
           return;
@@ -2209,7 +2213,7 @@ export default {
         this.page += 1;
         let payload = {
           page: this.page,
-          limit: 25,
+          limit,
           sort: "updatedAt",
           order: "desc",
         };
@@ -2639,7 +2643,10 @@ export default {
     generateCompletion() {
       this.isGPTLoading = true;
       openaiService
-        .generateCompletionForConversation(this.selectedChat._id)
+        .generateCompletionForConversation(
+          this.selectedChat._id,
+          this.selectedCountry
+        )
         .then((response) => {
           console.log(response.data);
           this.text = response.data.payload.response.content;

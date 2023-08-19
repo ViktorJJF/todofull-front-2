@@ -175,7 +175,10 @@ const module = {
     addChatToEnd(state, data) {
       const index = state.chats.findIndex((chat) => chat._id == data._id);
       if (index == -1) {
-        state.chats.push({ ...data, pending_messages_count: 0 });
+        state.chats.push({
+          ...data,
+          pending_messages_count: data.pending_messages_count || 0,
+        });
       }
     },
     deletedMessage(state, data) {
