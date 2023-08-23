@@ -2645,6 +2645,7 @@ export default {
       openaiService
         .generateCompletionForConversation(
           this.selectedChat._id,
+          this.selectedChat.cleanLeadId._id,
           this.selectedCountry
         )
         .then((response) => {
