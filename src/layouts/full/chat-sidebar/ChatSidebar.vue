@@ -146,67 +146,7 @@
           </v-row>
           <v-row>
             <v-col>
-              <v-row v-if="isLoadingProductImages">
-                <v-col class="text-subtitle-1 text-center" cols="12">
-                  Cargando imágenes/videos...
-                </v-col>
-                <v-col cols="12">
-                  <v-progress-linear
-                    color="deep-purple-accent-4"
-                    indeterminate
-                    rounded
-                    height="12"
-                  ></v-progress-linear>
-                </v-col>
-              </v-row>
-
-              <v-carousel
-                v-if="productImages.length > 0"
-                height="400"
-                hide-delimiter-background
-                show-arrows="hover"
-              >
-                <v-carousel-item
-                  v-model="selectedImageIndex"
-                  v-for="(productImage, i) in productImages"
-                  :key="i"
-                  :value="i"
-                  cover
-                >
-                  <div>
-                    <a
-                      target="_blank"
-                      v-if="productImage.postUrl"
-                      :href="productImage.postUrl"
-                      >Link Post
-                    </a>
-                    <a target="_blank" :href="productImage.postImageUrl"
-                      >Link Media</a
-                    >
-                  </div>
-                  <v-img
-                    v-if="isImageUrl(productImage.postImageUrl)"
-                    :src="productImage.postImageUrl"
-                  ></v-img>
-                  <iframe
-                    v-else-if="
-                      getFormattedYoutubeUrl(productImage.postImageUrl) &&
-                      !productImage.postUrl?.includes('/reel')
-                    "
-                    width="100%"
-                    height="350px"
-                    :src="getFormattedYoutubeUrl(productImage.postImageUrl)"
-                    frameborder="0"
-                  ></iframe>
-                  <iframe
-                    v-else-if="productImage.postUrl.includes('/reel')"
-                    width="100%"
-                    height="350px"
-                    :src="productImage.postImageUrl"
-                    frameborder="0"
-                  ></iframe>
-                </v-carousel-item>
-              </v-carousel>
+              <v-img :src="selected.customImages[0]" />
             </v-col>
           </v-row>
         </div>
@@ -226,10 +166,7 @@ import {
   sendMessage,
   addTodofullLabelsByChildren,
   getExpiryDateTime,
-  getFormattedYoutubeUrl,
-  isImageUrl,
 } from "@/utils/utils";
-import commentsFacebookService from "@/services/api/commentsFacebook";
 
 const isLoading = ref(false);
 const search = ref("");
@@ -237,9 +174,6 @@ const items = ref([]);
 const selected = ref(null);
 const selectedVariations = ref([]);
 const clipboardNotification = ref(false);
-const productImages = ref([]);
-const selectedImageIndex = ref(0);
-const isLoadingProductImages = ref(false);
 
 const chatSidebar = useChatSidebarStore();
 const store = useStore();
@@ -401,29 +335,9 @@ const fetchItems = async () => {
   isLoading.value = false;
 };
 
-watch(selected, async (selected) => {
+watch(selected, (selected) => {
   if (!selected) {
     selectedVariations.value = [];
-  }
-  if (selected) {
-    isLoadingProductImages.value = true;
-    productImages.value = [];
-    const productPostImages = (
-      await commentsFacebookService.getPostImagesRelatedToProduct(selected._id)
-    ).data.payload.images;
-
-    productImages.value = [
-      ...selected.customImages.map((el) => ({
-        postImageUrl: el,
-      })),
-      ...productPostImages
-        .map((el) => ({
-          postImageUrl: el.postImageUrl,
-          postUrl: el.postUrl,
-        }))
-        .filter((el) => el.postImageUrl),
-    ];
-    isLoadingProductImages.value = false;
   }
 });
 

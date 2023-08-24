@@ -473,19 +473,3 @@ export const convertMsToTime = (milliseconds: number) => {
     seconds
   )}`;
 };
-
-export const getFormattedYoutubeUrl = (link: string) => {
-  // The regular expression matches the video ID in the URL
-  const regex =
-    /(?:\?v=|\/embed\/|\/watch\?v=|\/\w+\/\w+\/|youtu\.be\/|shorts\/)([^#&?\n]+)/;
-  const match = link.match(regex);
-  if (match && match[1]) {
-    return `https://www.youtube.com/embed/${match[1]}`; // match[1] is the ID of the YouTube video
-  } else {
-    return null;
-  }
-};
-
-export const isImageUrl = (url: string) => {
-  return url.match(/\.(jpeg|jpg|gif|png)(\?.*)?$/) !== null;
-};
