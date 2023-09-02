@@ -1595,14 +1595,14 @@ export default {
         });
       this.notes = "";
     },
-    async sendAgentLogMessage(message) {
+    async sendAgentLogMessage(message, chat) {
       const user = JSON.parse(localStorage.getItem("user"));
       const TYPE = "log";
       messagesService
         .create({
           text: message,
           from: "Agente",
-          chatId: this.selectedChat._id,
+          chatId: chat._id,
           type: TYPE,
           isRead: true,
           userId: user._id,
@@ -2104,7 +2104,8 @@ export default {
         // send log
         console.log("enviando cambio estado...");
         await this.sendAgentLogMessage(
-          `Cambio de estado a ${this.selectedNegotiationStatusObject.name}`
+          `Cambio de estado a ${this.selectedNegotiationStatusObject.name}`,
+          selectedChat
         );
         // remove previous programmed messages for negotiationStatus
         await this.$store.dispatch(
@@ -2139,7 +2140,10 @@ export default {
       }
       if (!this.selectedNegotiationStatus) {
         if (selectedChat.negotiationStatusId) {
-          await this.sendAgentLogMessage(`Cambio de estado a SIN ESTADO`);
+          await this.sendAgentLogMessage(
+            `Cambio de estado a SIN ESTADO`,
+            selectedChat
+          );
           // remove previous programmed messages for negotiationStatus
           await this.$store.dispatch(
             "chatsModule/removeNegotiationStatusProgramedMessages",
@@ -2667,6 +2671,13 @@ export default {
         timeout: 3000,
         type: "success",
       });
+      const negotiationStatus =
+        this.selectedNegotiationStatusObject?.name ||
+        chat.negotiationStatusId.name;
+      await this.sendAgentLogMessage(
+        `Renovando mensajes de estado de negociación **${negotiationStatus}**`,
+        chat
+      );
       // search for automations
       const automations = this.selectedNegotiationStatusObject.automations;
       for (const automation of automations) {
