@@ -45,6 +45,20 @@ const module = {
           });
       });
     },
+    listOne({ commit }, id) {
+      return new Promise((resolve, reject) => {
+        api
+          .listOne(id)
+          .then((res) => {
+            commit("loadingModule/showLoading", true, { root: true });
+            commit("setSelectedChat", res.data.payload);
+            resolve(res.data.payload);
+          })
+          .catch((error) => {
+            handleError(error, commit, reject);
+          });
+      });
+    },
     create({ commit }, data) {
       return new Promise((resolve, reject) => {
         api

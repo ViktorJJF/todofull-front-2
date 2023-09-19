@@ -10,7 +10,11 @@ function toggleLpart() {
 <template>
   <!---/Left chat list -->
   <div class="mainbox">
-    <div class="left-part" :class="Lpart ? 'showLeftPart' : 'HideLeftPart'">
+    <div
+      v-if="!$store.state.isChatOneToOne"
+      class="left-part showLeftPart"
+      :class="Lpart ? 'showLeftPart' : 'HideLeftPart'"
+    >
       <slot name="channels"></slot>
       <slot name="leftpart"></slot>
     </div>

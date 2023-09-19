@@ -5,6 +5,7 @@ import modules from "./modules";
 export default createStore({
   modules,
   state: {
+    isChatOneToOne: false,
     itemsPerPage: 30,
     snackbar: {
       text: "",
@@ -41,6 +42,9 @@ export default createStore({
   mutations: {
     showOverlay(state, active) {
       state.overlay.active = active;
+    },
+    setIsChatOneToOne(state, isChatOneToOne) {
+      state.isChatOneToOne = isChatOneToOne;
     },
     setSelectedTelefono(state, payload) {
       state.selectedTelefono = payload;

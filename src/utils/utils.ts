@@ -489,3 +489,12 @@ export const getFormattedYoutubeUrl = (link: string) => {
 export const isImageUrl = (url: string) => {
   return url.match(/\.(jpeg|jpg|gif|png)(\?.*)?$/) !== null;
 };
+
+export const getQueryParams = () => {
+  let params: any = new URLSearchParams(window.location.search);
+  let queryParams = {};
+  for (let param of params) {
+    queryParams[param[0]] = param[1];
+  }
+  return queryParams;
+};

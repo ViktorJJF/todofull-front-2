@@ -5,7 +5,7 @@
         <!---/Main Box chat list -->
         <BaseLeftRightPartVue>
           <!---/Left chat list -->
-          <template v-slot:channels>
+          <template v-slot:channels v-if="!$store.state.isChatOneToOne">
             <div class="d-flex justify-space-evenly">
               <v-btn
                 v-for="platform of platformsSource"
@@ -39,7 +39,7 @@
               </v-btn>
             </div>
           </template>
-          <template v-slot:leftpart>
+          <template v-slot:leftpart v-if="!$store.state.isChatOneToOne">
             <div class="pa-3 border-bottom">
               <v-text-field
                 label="Buscar contacto"
@@ -1395,6 +1395,7 @@ export default {
       pageChat: 1,
       totalMessages: 0,
       selectedChat: {},
+      selectedChatId: null,
       selectedPendingMessagesCount: 0,
       text: "",
       isAgentConnected: false,
@@ -1493,6 +1494,8 @@ export default {
     };
   },
   created() {
+    // check filters by queryParams
+    this.checkQueryParamsFilters();
     this.chatSidebar = useChatSidebarStore();
     sellTeamsService.list({ byAgent: true }).then(async (res) => {
       this.selectedSellTeam =
@@ -1706,6 +1709,9 @@ export default {
       }
       if (this.selectedFilterNegotiationStatus) {
         payload.negotiationStatusId = this.selectedFilterNegotiationStatus;
+      }
+      if (this.selectedChatId) {
+        payload.selectedChatId = this.selectedChatId;
       }
       await Promise.all([this.$store.dispatch("chatsModule/list", payload)]);
       this.chats = this.$store.state.chatsModule.chats;
@@ -2693,6 +2699,26 @@ export default {
             notifyUser: false,
           }
         );
+      }
+    },
+    async checkQueryParamsFilters() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatId = urlParams.get("chatId");
+        if (chatId) {
+          this.selectedChatId = chatId;
+          // get chat
+          const chat = await this.$store.dispatch(
+            "chatsModule/listOne",
+            chatId
+          );
+          console.log("🚀 Aqui *** -> chat iframe:", chat);
+          if (chat) {
+            this.selectChat(chat);
+          }
+        }
+      } catch (error) {
+        console.log(error);
       }
     },
   },

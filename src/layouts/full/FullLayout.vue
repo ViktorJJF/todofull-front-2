@@ -1,16 +1,27 @@
 <script setup lang="ts">
+import { onMounted } from "vue";
+import { useStore } from "vuex";
 import { RouterView, useRoute } from "vue-router";
 import VerticalSidebarVue from "./vertical-sidebar/VerticalSidebar.vue";
 import VerticalHeaderVue from "./vertical-header/VerticalHeader.vue";
 import Customizer from "./customizer/Customizer.vue";
-import ChatSidebar from './chat-sidebar/ChatSidebar.vue'
+import ChatSidebar from "./chat-sidebar/ChatSidebar.vue";
 import { useCustomizerStore } from "@/stores/customizer";
-import { useChatSidebarStore } from '@/stores/chatSidebar'
+import { useChatSidebarStore } from "@/stores/chatSidebar";
 import HorizontalHeader from "./horizontal-header/HorizontalHeader.vue";
 import HorizontalSidebar from "./horizontal-sidebar/HorizontalSidebar.vue";
+import { getQueryParams } from "@/utils/utils";
+
 const customizer = useCustomizerStore();
-const chatSidebar = useChatSidebarStore()
-const route = useRoute()
+const chatSidebar = useChatSidebarStore();
+const route = useRoute();
+const store = useStore();
+onMounted(() => {
+  const queryParams = getQueryParams();
+  if (queryParams["isChatOneToOne"]) {
+    store.commit("setIsChatOneToOne", true);
+  }
+});
 </script>
 
 <template>
@@ -23,10 +34,13 @@ const route = useRoute()
   >
     <Customizer />
     <ChatSidebar />
-    <VerticalSidebarVue v-if="!customizer.setHorizontalLayout" />
-    <VerticalHeaderVue v-if="!customizer.setHorizontalLayout" />
+    <VerticalSidebarVue
+      v-if="!customizer.setHorizontalLayout && !store.state.isChatOneToOne"
+    />
+    <VerticalHeaderVue
+      v-if="!customizer.setHorizontalLayout && !store.state.isChatOneToOne"
+    />
     <v-main>
-      <HorizontalHeader v-if="customizer.setHorizontalLayout" />
       <HorizontalSidebar v-if="customizer.setHorizontalLayout" />
       <v-container fluid class="page-wrapper">
         <RouterView />
@@ -37,7 +51,7 @@ const route = useRoute()
           size="large"
           flat
           @click.stop="chatSidebar.SET_SIDEBAR_DRAWER()"
-          v-if="route.name==='Apps'"
+          v-if="route.name === 'Apps'"
         >
         </v-btn>
       </v-container>
