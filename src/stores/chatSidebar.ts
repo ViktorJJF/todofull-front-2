@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
 
 interface State {
-  sidebarDrawer: boolean;
-  bot: any;
+  sidebarDrawer: boolean,
+  bot: any,
 }
 
 export const useChatSidebarStore = defineStore({
@@ -19,6 +19,6 @@ export const useChatSidebarStore = defineStore({
     },
     SET_CURRENT_BOT(payload: any) {
       this.bot = payload;
-    },
+    }
   },
 });
