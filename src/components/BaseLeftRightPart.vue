@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { useStore } from "vuex";
+const store = useStore();
 const Lpart = ref(false);
 
 function toggleLpart() {
@@ -11,7 +13,7 @@ function toggleLpart() {
   <!---/Left chat list -->
   <div class="mainbox">
     <div
-      v-if="!$store.state.isChatOneToOne"
+      v-if="!store.state.isChatOneToOne"
       class="left-part showLeftPart"
       :class="Lpart ? 'showLeftPart' : 'HideLeftPart'"
     >
