@@ -1,1 +1,0 @@
-import{H as r}from"./index.aed0d878.js";const a=r({id:"chatSidebar",state:()=>({sidebarDrawer:!1,bot:null}),getters:{},actions:{SET_SIDEBAR_DRAWER(){this.sidebarDrawer=!this.sidebarDrawer},SET_CURRENT_BOT(e){this.bot=e}}});export{a as u};
