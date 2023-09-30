@@ -114,7 +114,7 @@
                   ? negotiationStatuses.find(
                       (el) =>
                         el._id == negotiationStatus.nextNegotiationStatusId
-                    ).name
+                    )?.name
                   : "Sin estado"
               }}
             </v-card-text>
@@ -310,7 +310,7 @@ export default {
       });
     },
     addNegotiationStatus(negotiationStatuses) {
-      negotiationStatuses.push({
+      negotiationStatuses.unshift({
         isEditing: true,
         name: "Nuevo estado",
         country: this.selectedCountry,

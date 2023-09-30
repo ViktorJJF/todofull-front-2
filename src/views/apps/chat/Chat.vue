@@ -343,6 +343,8 @@
                         :key="message._id"
                         @mouseover="selectedMessage = message"
                       >
+                        <span>{{ formatDate(message.createdAt) }}</span>
+
                         <!-- <span class="tooltiptext">Tooltip text</span> -->
                         <div
                           class="tooltiptext"
