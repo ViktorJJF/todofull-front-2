@@ -14,6 +14,7 @@ import VCalendar from "v-calendar";
 import moshaToasTify from "@/plugins/moshaToastify";
 import VueFeather from "vue-feather";
 import axios from "@/plugins/axios";
+import deepCopy from "@/plugins/deepCopy";
 
 //sweet alert
 import VueSweetalert2 from "vue-sweetalert2";
@@ -31,5 +32,6 @@ app.use(createPinia());
 app.use(VCalendar, {});
 app.use(VueApexCharts);
 app.use(moshaToasTify);
+app.use(deepCopy);
 app.use(router);
 app.use(vuetify).mount("#app");

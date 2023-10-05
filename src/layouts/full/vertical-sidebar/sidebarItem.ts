@@ -48,6 +48,11 @@ const items: SidebarItem[] = [
     to: { name: "NegotiationStatuses" },
   },
   {
+    title: "Archivos",
+    icon: "file",
+    to: { name: "CloudStorageLinks" },
+  },
+  {
     title: "Cerrar sesión",
     icon: "log-in",
   },
