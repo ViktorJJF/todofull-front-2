@@ -2891,7 +2891,7 @@ export default {
   },
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .fromMe {
   flex-direction: row-reverse;
 }

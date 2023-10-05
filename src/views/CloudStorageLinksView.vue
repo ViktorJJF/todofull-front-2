@@ -3,17 +3,13 @@
     <div class="col-12">
       <div class="card box-margin">
         <div class="card-body">
-          <el-button
-            type="primary"
-            color="#5E00D9"
-            class="mb-2"
+          <v-btn
             @click="
               close();
               dialog = true;
             "
+            >Agregar archivo</v-btn
           >
-            Crear Intent
-          </el-button>
           <div class="row my-3">
             <div class="col-sm-12 col-md-5">
               <div
@@ -47,14 +43,34 @@
             <v-table>
               <thead>
                 <tr>
-                  <th class="text-left">Name</th>
-                  <th class="text-left">Calories</th>
+                  <th class="text-left">Fecha de creación</th>
+                  <th class="text-left">URL</th>
+                  <th class="text-left">Nombre</th>
+                  <th class="text-left">Tipo</th>
+                  <th class="text-left"></th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in desserts" :key="item.name">
-                  <td>{{ item.name }}</td>
-                  <td>{{ item.calories }}</td>
+                <tr
+                  v-for="cloudStorageLink in cloudStorageLinks"
+                  :key="cloudStorageLink._id"
+                >
+                  <td>{{ cloudStorageLink.createdAt }}</td>
+                  <td>
+                    <a
+                      :href="cloudStorageLink.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >{{ cloudStorageLink.url }}</a
+                    >
+                  </td>
+                  <td>{{ cloudStorageLink.name }}</td>
+                  <td>{{ cloudStorageLink.fileType }}</td>
+                  <td>
+                    <button class="message-options">
+                      <i class="text-error mdi mdi-delete"></i>
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </v-table>
@@ -91,26 +107,46 @@
         </div>
       </div>
     </div>
-    <el-dialog v-model="dialog" :title="formTitle" width="30%">
-      <el-form label-position="top" label-width="100px">
-        <el-form-item label="Nombre">
-          <el-input v-model="editedItem.intent" />
-        </el-form-item>
-        <el-form-item label="Descripción">
-          <el-input type="textarea" autosize v-model="editedItem.description" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button plain type="danger" @click="dialog = false"
-            >Cancelar</el-button
+    <v-dialog v-model="dialog" width="700px">
+      <v-card>
+        <v-card-title>
+          <v-icon color="primary" class="mr-1">mdi-cloud-upload</v-icon>
+          <span class="headline">{{ formTitle }}</span>
+        </v-card-title>
+        <v-divider></v-divider>
+        <v-container class="pa-5">
+          <v-row dense>
+            <v-col cols="12" sm="12" md="12">
+              <p class="body-1 font-weight-bold">Nombre</p>
+              <v-text-field
+                v-model="editedItem.name"
+                hide-details
+                variant="underlined"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="12" md="12">
+              <p class="body-1 font-weight-bold">URL (Opcional)</p>
+              <v-text-field
+                v-model="editedItem.url"
+                required
+                hide-details
+                variant="underlined"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="12">
+              <div class="drag-message">Arrastra un archivo aquí</div>
+            </v-col>
+          </v-row>
+        </v-container>
+        <v-card-actions rd-actions>
+          <div class="flex-grow-1"></div>
+          <v-btn outlined color="error" text @click="close">Cancelar</v-btn>
+          <v-btn :loading="loadingButton" color="success" @click="save"
+            >Guardar</v-btn
           >
-          <el-button type="success" @click="save" :loading="loadingButton">
-            Guardar
-          </el-button>
-        </span>
-      </template>
-    </el-dialog>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -136,17 +172,32 @@ const pagination = ref<GenericObject>({});
 const page = ref<number>(1);
 const pageCount = ref<number>(0);
 // Search
-const fieldsToSearch = ref<string[]>(["intent"]);
+const fieldsToSearch = ref<string[]>([]);
 const search = ref<string>("");
 // Others
 const loadingButton = ref<boolean>(false);
 const delayTimer = ref<any>(null);
 const editedIndex = ref<number>(-1);
+const headers = ref<any[]>([
+  {
+    text: "Agregado",
+    align: "left",
+    sortable: false,
+    value: "createdAt",
+  },
+  {
+    text: "Nombre",
+    align: "left",
+    sortable: false,
+    value: "name",
+  },
+  { text: "Acciones", value: "action", sortable: false },
+]);
 
 const dialog = ref<boolean>(false);
 
 const formTitle = computed(() => {
-  return editedIndex.value === -1 ? "Crear Intent" : "Editar Intent";
+  return editedIndex.value === -1 ? "Cargar Archivo" : "Editar Archivo";
 });
 
 watch(search, () => {
@@ -164,11 +215,13 @@ onMounted(() => {
 async function initialize(pageNumber: number = 1): Promise<any> {
   let payload = {
     page: page.value || pageNumber,
-    search: search.value,
     fieldsToSearch: fieldsToSearch.value,
-    sort: "updated_at",
+    sort: "createdAt",
     order: "desc",
   };
+  if (search.value) {
+    payload["search"] = search.value;
+  }
   await Promise.all([$store.dispatch("cloudStorageLinksModule/list", payload)]);
   cloudStorageLinks.value = $deepCopy(
     $store.state.cloudStorageLinksModule.cloudStorageLinks

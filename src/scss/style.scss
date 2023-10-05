@@ -51,3 +51,14 @@
   font-weight: 600;
   color: #000000 !important;
 }
+
+.drag-message {
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  border: 2px dotted black;
+  text-align: center;
+}
