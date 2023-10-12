@@ -655,11 +655,6 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                       ? 'No se pueden enviar mensaje pasadas las 24h en WhatsApp'
                       : 'Escribe y presiona Enter'
                   "
-                  :disabled="
-                    selectedChat.isBotActive ||
-                    remainingMillis <= 0 ||
-                    remainingMillisFacebook <= 0
-                  "
                 ></v-textarea>
 
                 <svg
@@ -684,6 +679,12 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                   <v-icon>mdi-message-bulleted</v-icon>
                   <v-tooltip activator="parent" anchor="bottom">
                     Mensajes de Plantilla
+                  </v-tooltip>
+                </v-btn>
+                <v-btn @click="catalogsDialog = true" small color="white">
+                  <v-icon>mdi-format-list-bulleted-type</v-icon>
+                  <v-tooltip activator="parent" anchor="bottom">
+                    Catálogos
                   </v-tooltip>
                 </v-btn>
                 <v-btn
@@ -1100,6 +1101,15 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
         </div>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="catalogsDialog" max-width="900">
+      <v-card style="height: 300px" class="ma-3">
+        <div fluid>
+          <div>
+            <CloudStorageLinksView :showFromChat="true"></CloudStorageLinksView>
+          </div>
+        </div>
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="isProgrammingMessage" max-width="500" class="modal">
       <v-container fluid>
         <v-card>
@@ -1350,6 +1360,7 @@ import templateMessagesService from "@/services/api/templateMessages";
 import { createToast } from "mosha-vue-toastify";
 
 import openaiService from "@/services/api/openai";
+import CloudStorageLinksView from "@/views/CloudStorageLinksView.vue";
 
 export default {
   components: {
@@ -1362,9 +1373,11 @@ export default {
     Countdown,
     SelectorMessage,
     EmojiPicker,
+    CloudStorageLinksView,
   },
   data() {
     return {
+      catalogsDialog: false,
       afterTime: { hours: 0, minutes: 0, seconds: 0 },
       dialogProgrammedMessage: false,
       isProgrammingMessage: false,

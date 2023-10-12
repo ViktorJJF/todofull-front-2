@@ -1,161 +1,224 @@
 <template>
-  <div class="row">
-    <div class="col-12">
-      <div class="card box-margin">
-        <div class="card-body">
-          <v-btn
-            @click="
-              close();
-              dialog = true;
-            "
-            >Agregar archivo</v-btn
-          >
-          <div class="row my-3">
-            <div class="col-sm-12 col-md-5">
-              <div
-                class="dataTables_info"
-                id="datatable-buttons_info"
-                role="status"
-                aria-live="polite"
-              >
-                Mostrando
-                {{
-                  $store.state.itemsPerPage > cloudStorageLinks.length
-                    ? cloudStorageLinks.length
-                    : $store.state.itemsPerPage
-                }}
-                de {{ $store.state.cloudStorageLinksModule.total }} registros
-              </div>
-            </div>
-            <div class="col-sm-12 col-md-7">
-              <el-pagination
-                v-model:current-page="page"
-                @current-change="initialize(page)"
-                background
-                layout="pager"
-                :total="$store.state.cloudStorageLinksModule.total"
-                :page-size="$store.state.itemsPerPage"
-              />
-            </div>
-          </div>
-          <div class="basic-table-area">
-            <!--Basic Table-->
-            <v-table>
-              <thead>
-                <tr>
-                  <th class="text-left">Fecha de creación</th>
-                  <th class="text-left">URL</th>
-                  <th class="text-left">Nombre</th>
-                  <th class="text-left">Tipo</th>
-                  <th class="text-left"></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="cloudStorageLink in cloudStorageLinks"
-                  :key="cloudStorageLink._id"
+  <v-container fluid>
+    <v-row class="mb-3" v-show="!showFromChat">
+      <CountrySelector @onSelectedCountry="onSelectedCountry"></CountrySelector>
+    </v-row>
+    {{ selectedCountry }}
+    <v-row>
+      <div class="col-12">
+        <div class="card box-margin">
+          <div class="card-body">
+            <v-btn
+              v-show="!showFromChat"
+              @click="
+                close();
+                dialog = true;
+              "
+              >Agregar Catálogo</v-btn
+            >
+            <div class="row my-3">
+              <div v-show="!showFromChat" class="col-sm-12 col-md-5">
+                <div
+                  class="dataTables_info"
+                  id="datatable-buttons_info"
+                  role="status"
+                  aria-live="polite"
                 >
-                  <td>{{ cloudStorageLink.createdAt }}</td>
-                  <td>
-                    <a
-                      :href="cloudStorageLink.url"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >{{ cloudStorageLink.url }}</a
-                    >
-                  </td>
-                  <td>{{ cloudStorageLink.name }}</td>
-                  <td>{{ cloudStorageLink.fileType }}</td>
-                  <td>
-                    <button class="message-options">
-                      <i class="text-error mdi mdi-delete"></i>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </v-table>
-            <!--End Basic Table-->
-          </div>
-          <div class="row my-3">
-            <div class="col-sm-12 col-md-5">
-              <div
-                class="dataTables_info"
-                id="datatable-buttons_info"
-                role="status"
-                aria-live="polite"
-              >
-                Mostrando
-                {{
-                  $store.state.itemsPerPage > cloudStorageLinks.length
-                    ? cloudStorageLinks.length
-                    : $store.state.itemsPerPage
-                }}
-                de {{ $store.state.cloudStorageLinksModule.total }} registros
+                  Mostrando
+                  {{
+                    $store.state.itemsPerPage > cloudStorageLinks.length
+                      ? cloudStorageLinks.length
+                      : $store.state.itemsPerPage
+                  }}
+                  de {{ $store.state.cloudStorageLinksModule.total }} registros
+                </div>
+              </div>
+              <div class="col-sm-12 col-md-7">
+                <el-pagination
+                  v-model:current-page="page"
+                  @current-change="initialize(page)"
+                  background
+                  layout="pager"
+                  :total="$store.state.cloudStorageLinksModule.total"
+                  :page-size="$store.state.itemsPerPage"
+                />
               </div>
             </div>
-            <div class="col-sm-12 col-md-7">
-              <el-pagination
-                v-model:current-page="page"
-                @current-change="initialize(page)"
-                background
-                layout="pager"
-                :total="$store.state.cloudStorageLinksModule.total"
-                :page-size="$store.state.itemsPerPage"
-              />
+            <div class="basic-table-area">
+              <!--Basic Table-->
+              <v-table>
+                <thead>
+                  <tr>
+                    <th class="text-left">Fecha de creación</th>
+                    <th class="text-left">URL</th>
+                    <th class="text-left">Nombre</th>
+                    <th class="text-left" v-if="!showFromChat">Activo?</th>
+                    <th class="text-left"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="cloudStorageLink in cloudStorageLinks"
+                    :key="cloudStorageLink._id"
+                  >
+                    <td>{{ cloudStorageLink.createdAt }}</td>
+                    <td>
+                      <a
+                        :href="cloudStorageLink.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >{{ cloudStorageLink.url }}</a
+                      >
+                    </td>
+                    <td>{{ cloudStorageLink.name }}</td>
+                    <td v-if="!showFromChat">
+                      <v-checkbox
+                        v-model="cloudStorageLink.isActive"
+                      ></v-checkbox>
+                    </td>
+                    <td>
+                      <!-- <PDFViewer
+                      :pdfUrl="'https://databot-files.s3.amazonaws.com/Generar+Admin+Token+para+uso+API+Shopify.pdf'"
+                    ></PDFViewer> -->
+                      <template v-if="!showFromChat">
+                        <v-btn
+                          color="primary"
+                          icon="mdi mdi-eye"
+                          size="x-small"
+                          class="mr-2"
+                        ></v-btn>
+                        <v-btn
+                          @click="editItem(cloudStorageLink)"
+                          color="success"
+                          icon="mdi mdi-pencil"
+                          size="x-small"
+                          class="mr-2"
+                        ></v-btn>
+                        <v-btn
+                          color="error"
+                          icon="mdi mdi-delete"
+                          size="x-small"
+                        ></v-btn>
+                      </template>
+                      <template v-else>
+                        <v-btn color="primary" size="small" class="mr-2"
+                          >Enviar</v-btn
+                        >
+                      </template>
+                    </td>
+                  </tr>
+                </tbody>
+              </v-table>
+              <!--End Basic Table-->
+            </div>
+            <div class="row my-3">
+              <div v-show="!showFromChat" class="col-sm-12 col-md-5">
+                <div
+                  class="dataTables_info"
+                  id="datatable-buttons_info"
+                  role="status"
+                  aria-live="polite"
+                >
+                  Mostrando
+                  {{
+                    $store.state.itemsPerPage > cloudStorageLinks.length
+                      ? cloudStorageLinks.length
+                      : $store.state.itemsPerPage
+                  }}
+                  de {{ $store.state.cloudStorageLinksModule.total }} registros
+                </div>
+              </div>
+              <div class="col-sm-12 col-md-7">
+                <el-pagination
+                  v-model:current-page="page"
+                  @current-change="initialize(page)"
+                  background
+                  layout="pager"
+                  :total="$store.state.cloudStorageLinksModule.total"
+                  :page-size="$store.state.itemsPerPage"
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <v-dialog v-model="dialog" width="700px">
-      <v-card>
-        <v-card-title>
-          <v-icon color="primary" class="mr-1">mdi-cloud-upload</v-icon>
-          <span class="headline">{{ formTitle }}</span>
-        </v-card-title>
-        <v-divider></v-divider>
-        <v-container class="pa-5">
-          <v-row dense>
-            <v-col cols="12" sm="12" md="12">
-              <p class="body-1 font-weight-bold">Nombre</p>
-              <v-text-field
-                v-model="editedItem.name"
-                hide-details
-                variant="underlined"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="12" md="12">
-              <p class="body-1 font-weight-bold">URL (Opcional)</p>
-              <v-text-field
-                v-model="editedItem.url"
-                required
-                hide-details
-                variant="underlined"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="12">
-              <div class="drag-message">Arrastra un archivo aquí</div>
-            </v-col>
-          </v-row>
-        </v-container>
-        <v-card-actions rd-actions>
-          <div class="flex-grow-1"></div>
-          <v-btn outlined color="error" text @click="close">Cancelar</v-btn>
-          <v-btn :loading="loadingButton" color="success" @click="save"
-            >Guardar</v-btn
-          >
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </div>
+      <v-dialog v-model="dialog" width="700px">
+        <v-card>
+          <v-card-title>
+            <v-icon color="primary" class="mr-1">mdi-cloud-upload</v-icon>
+            <span class="headline">{{ formTitle }}</span>
+          </v-card-title>
+          <v-divider></v-divider>
+          <v-container class="pa-5">
+            <v-row dense>
+              <v-col cols="12" sm="12" md="12">
+                <p class="body-1 font-weight-bold">Nombre</p>
+                <v-text-field
+                  v-model="editedItem.name"
+                  hide-details
+                  variant="outlined"
+                  density="compact"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="12">
+                <TodofullLabelsSelectorV2
+                  :initialData="editedItem.todofullLabels"
+                  class="my-3"
+                  @onSelectTodofullLabels="onSelectTodofullLabels"
+                ></TodofullLabelsSelectorV2>
+              </v-col>
+              <v-col cols="12" sm="12">
+                <NegotiationStatusesSelector
+                  v-if="dialog"
+                  :initialData="editedItem.negotiationStatusId"
+                  :country="selectedCountry"
+                  class="my-3"
+                  @onSelectNegotiationStatuses="onSelectNegotiationStatuses"
+                >
+                </NegotiationStatusesSelector>
+              </v-col>
+              <v-col cols="12" sm="12" md="12">
+                <p class="body-1 font-weight-bold">URL (Opcional)</p>
+                <v-text-field
+                  v-model="editedItem.url"
+                  required
+                  hide-details
+                  variant="underlined"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="12">
+                <div class="drag-message">Arrastra un Catálogo aquí</div>
+              </v-col>
+            </v-row>
+          </v-container>
+          <v-card-actions rd-actions>
+            <div class="flex-grow-1"></div>
+            <v-btn outlined color="error" text @click="close">Cancelar</v-btn>
+            <v-btn :loading="loadingButton" color="success" @click="save"
+              >Guardar</v-btn
+            >
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
+  </v-container>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, inject, watch } from "vue";
+import { defineProps, ref, onMounted, computed, inject, watch } from "vue";
 import { useStore } from "vuex";
 import { useRoute, useRouter } from "vue-router";
 import type { GenericObject } from "@/types/GenericObject";
 import CloudStorageLink from "@/models/CloudStorageLinks";
+import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
+import TodofullLabelsSelectorV2 from "@/components/TodofullLabelsSelectorV2.vue";
+import NegotiationStatusesSelector from "@/components/NegotiationStatusesSelector.vue";
+import CountrySelector from "@/components/CountrySelector.vue";
+import PDFViewer from "@/components/PDFViewer.vue";
+
+const props = defineProps({
+  showFromChat: { type: Boolean, default: false },
+});
 
 // plugins
 const $formatDate: any = inject("$formatDate");
@@ -178,6 +241,7 @@ const search = ref<string>("");
 const loadingButton = ref<boolean>(false);
 const delayTimer = ref<any>(null);
 const editedIndex = ref<number>(-1);
+const selectedCountry = ref<string>("Chile");
 const headers = ref<any[]>([
   {
     text: "Agregado",
@@ -197,7 +261,7 @@ const headers = ref<any[]>([
 const dialog = ref<boolean>(false);
 
 const formTitle = computed(() => {
-  return editedIndex.value === -1 ? "Cargar Archivo" : "Editar Archivo";
+  return editedIndex.value === -1 ? "Cargar Catálogo" : "Editar Catálogo";
 });
 
 watch(search, () => {
@@ -284,6 +348,22 @@ async function deleteItem(item: GenericObject) {
     await $store.dispatch("cloudStorageLinksModule/delete", id);
     cloudStorageLinks.value.splice(index, 1);
   }
+}
+
+function onSelectNegotiationStatuses(negotiationStatus) {
+  console.log("🚀 Aqui *** -> negotiationStatus:", negotiationStatus);
+  editedItem.value.negotiationStatusId = negotiationStatus;
+}
+
+function onSelectTodofullLabels(selectedLabels) {
+  console.log("🚀 Aqui *** -> selectedLabels:", selectedLabels);
+  if (selectedLabels.length > 0) {
+    editedItem.value.todofullLabels = selectedLabels;
+  }
+}
+
+function onSelectedCountry(country) {
+  selectedCountry.value = country;
 }
 
 async function close() {

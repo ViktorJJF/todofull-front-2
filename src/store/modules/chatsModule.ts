@@ -197,8 +197,9 @@ const module = {
     },
     deletedMessage(state, data) {
       let message = state.messages.find((el) => el.mid === data.mid);
+      let messageIndex = state.messages.findIndex((el) => el.mid === data.mid);
       if (message) {
-        message.isActive = false;
+        message.text = "No se pudo enviar el mensaje";
       }
     },
     updateHasToUpdateSelectedChat(state, data) {

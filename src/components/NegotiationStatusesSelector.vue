@@ -10,6 +10,7 @@
     no-data-text="No se encontraron estados de negociación"
     outlined
     clearable
+    density="compact"
   >
   </v-select>
 </template>

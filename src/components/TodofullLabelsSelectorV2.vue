@@ -7,6 +7,9 @@
     class="mt-3"
     :search-input.sync="searchLabel"
     v-model="selectedTodofullLabels"
+    item-value="_id"
+    item-title="name"
+    :return-object="false"
     :items="filteredTodofullLabels"
     multiple
     no-data-text="No se encontraron etiquetas"
@@ -19,7 +22,7 @@
         @click:close="removeLabels(selectedTodofullLabels, item)"
         color="primary"
       >
-        <strong>{{ getLabelTitle(data.item.value) }}</strong>
+        <strong>{{ data.item.title }}</strong>
       </v-chip>
     </template>
   </v-combobox>
@@ -41,6 +44,7 @@ export default {
     return {
       disabled: false,
       todofullLabels: [],
+      selectedTodofullLabels2: [],
       selectedTodofullLabels: [],
       searchLabel: "",
       isInidialDataLoading: false,
@@ -80,10 +84,9 @@ export default {
     },
   },
   async mounted() {
-    console.log("montando...", this.initialData);
-    this.selectedTodofullLabels = this.initialData.map((el) => {
-      return el._id;
-    });
+    this.selectedTodofullLabels =
+      this.initialData?.map((el) => (typeof el === "string" ? el : el._id)) ||
+      [];
     if (this.$store.state.todofullLabelsModule.todofullLabels.length === 0) {
       await this.$store.dispatch("todofullLabelsModule/list", {
         sort: "name",
@@ -93,8 +96,8 @@ export default {
     }
     this.todofullLabels =
       this.$store.state.todofullLabelsModule.todofullLabels.map((el) => ({
-        value: el._id,
-        title: el.name,
+        _id: el._id,
+        name: el.name,
         is_active: el.is_active,
       }));
   },
