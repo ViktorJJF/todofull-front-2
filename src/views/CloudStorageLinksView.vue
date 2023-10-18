@@ -3,7 +3,6 @@
     <v-row class="mb-3" v-show="!showFromChat">
       <CountrySelector @onSelectedCountry="onSelectedCountry"></CountrySelector>
     </v-row>
-    {{ selectedCountry }}
     <v-row>
       <div class="col-12">
         <div class="card box-margin">
@@ -50,7 +49,7 @@
                 <thead>
                   <tr>
                     <th class="text-left">Fecha de creación</th>
-                    <th class="text-left">URL</th>
+                    <th v-if="!showFromChat" class="text-left">URL</th>
                     <th class="text-left">Nombre</th>
                     <th class="text-left" v-if="!showFromChat">Activo?</th>
                     <th class="text-left"></th>
@@ -61,8 +60,15 @@
                     v-for="cloudStorageLink in cloudStorageLinks"
                     :key="cloudStorageLink._id"
                   >
-                    <td>{{ cloudStorageLink.createdAt }}</td>
                     <td>
+                      {{
+                        getFormat(
+                          cloudStorageLink.createdAt,
+                          "dd/MM/yyyy HH:mm"
+                        )
+                      }}
+                    </td>
+                    <td v-if="!showFromChat">
                       <a
                         :href="cloudStorageLink.url"
                         target="_blank"
@@ -101,7 +107,11 @@
                         ></v-btn>
                       </template>
                       <template v-else>
-                        <v-btn color="primary" size="small" class="mr-2"
+                        <v-btn
+                          color="primary"
+                          size="small"
+                          class="mr-2"
+                          @click="sendCatalog(cloudStorageLink)"
                           >Enviar</v-btn
                         >
                       </template>
@@ -187,7 +197,7 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="12">
-                <div class="drag-message">Arrastra un Catálogo aquí</div>
+                <UploadFiles @onNewFile="onNewFile"></UploadFiles>
               </v-col>
             </v-row>
           </v-container>
@@ -213,15 +223,19 @@ import CloudStorageLink from "@/models/CloudStorageLinks";
 import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
 import TodofullLabelsSelectorV2 from "@/components/TodofullLabelsSelectorV2.vue";
 import NegotiationStatusesSelector from "@/components/NegotiationStatusesSelector.vue";
+import UploadFiles from "@/components/UploadFiles.vue";
 import CountrySelector from "@/components/CountrySelector.vue";
-import PDFViewer from "@/components/PDFViewer.vue";
+// import PDFViewer from "@/components/PDFViewer.vue";
+import filesService from "@/services/api/files";
+import { uploadFile, getFormat } from "@/utils/utils";
 
 const props = defineProps({
   showFromChat: { type: Boolean, default: false },
+  country: { type: String, default: "" },
 });
-
+// emits
+const emit = defineEmits(["onSendCatalog"]);
 // plugins
-const $formatDate: any = inject("$formatDate");
 const $deepCopy: any = inject("$deepCopy");
 const $store = useStore();
 const $route = useRoute();
@@ -283,6 +297,9 @@ async function initialize(pageNumber: number = 1): Promise<any> {
     sort: "createdAt",
     order: "desc",
   };
+  if (selectedCountry.value) {
+    payload["country"] = selectedCountry.value;
+  }
   if (search.value) {
     payload["search"] = search.value;
   }
@@ -295,6 +312,7 @@ async function initialize(pageNumber: number = 1): Promise<any> {
 async function save() {
   loadingButton.value = true;
   if (editedIndex.value > -1) {
+    editedItem.value.country = selectedCountry.value;
     let id = cloudStorageLinks.value[editedIndex.value]._id;
     try {
       await $store.dispatch("cloudStorageLinksModule/update", {
@@ -312,6 +330,11 @@ async function save() {
   } else {
     //create item
     try {
+      // upload file
+      if (editedItem.value.file) {
+        editedItem.value.url = await uploadFile(editedItem.value.file);
+      }
+      editedItem.value.country = selectedCountry.value;
       let newItem = await $store.dispatch(
         "cloudStorageLinksModule/create",
         editedItem.value
@@ -364,6 +387,11 @@ function onSelectTodofullLabels(selectedLabels) {
 
 function onSelectedCountry(country) {
   selectedCountry.value = country;
+  if (props.country) {
+    selectedCountry.value = props.country;
+  }
+  editedItem.value.country = country;
+  initialize();
 }
 
 async function close() {
@@ -372,6 +400,16 @@ async function close() {
     editedItem.value = Object.assign({}, defaultItem.value);
     editedIndex.value = -1;
   }, 300);
+}
+
+async function onNewFile(file) {
+  let formData = new FormData();
+  formData.append("file", file);
+  editedItem.value.file = file; // just temporal, until its uploaded
+}
+
+function sendCatalog(el) {
+  emit("onSendCatalog", el);
 }
 </script>
 

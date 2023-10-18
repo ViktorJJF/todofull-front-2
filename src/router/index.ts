@@ -47,7 +47,7 @@ const router = createRouter({
         },
         {
           name: "CloudStorageLinks",
-          path: "apps/archivos",
+          path: "apps/catalogos",
           component: () => import("@/views/CloudStorageLinksView.vue"),
         },
         {

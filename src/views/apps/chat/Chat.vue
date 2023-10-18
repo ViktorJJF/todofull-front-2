@@ -686,6 +686,12 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                     Mensajes de Plantilla
                   </v-tooltip>
                 </v-btn>
+                <v-btn @click="catalogDialog = true" small color="white">
+                  <v-icon>mdi-format-list-bulleted-type</v-icon>
+                  <v-tooltip activator="parent" anchor="bottom">
+                    Catálogos
+                  </v-tooltip>
+                </v-btn>
                 <v-btn
                   color="white"
                   v-if="!isRecording && !isPaused"
@@ -1305,6 +1311,42 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
         </v-card>
       </v-container>
     </v-dialog>
+    <v-dialog
+      v-model="catalogDialog"
+      v-if="catalogDialog"
+      max-width="700"
+      class="modal"
+    >
+      <v-container fluid>
+        <v-card>
+          <v-card-text>
+            <div class="header">
+              <h2>Catálogos {{ selectedCountry }}</h2>
+            </div>
+            <div>
+              <CloudStorageLinksView
+                v-if="selectedCountry"
+                :showFromChat="true"
+                :country="selectedCountry"
+                @onSendCatalog="onSendCatalog"
+              ></CloudStorageLinksView>
+            </div>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              small
+              outlined
+              dark
+              color="primary"
+              @click="catalogDialog = false"
+            >
+              Listo
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-container>
+    </v-dialog>
   </v-row>
 </template>
 
@@ -1347,6 +1389,7 @@ import EspaniaFlag from "@/assets/images/flags/espania.png";
 import SelectorMessage from "@/components/chat/SelectorMessage.vue";
 import graphApiService from "@/services/api/graphApi";
 import templateMessagesService from "@/services/api/templateMessages";
+import CloudStorageLinksView from "@/views/CloudStorageLinksView.vue";
 import { createToast } from "mosha-vue-toastify";
 
 import openaiService from "@/services/api/openai";
@@ -1362,9 +1405,11 @@ export default {
     Countdown,
     SelectorMessage,
     EmojiPicker,
+    CloudStorageLinksView,
   },
   data() {
     return {
+      catalogDialog: false,
       afterTime: { hours: 0, minutes: 0, seconds: 0 },
       dialogProgrammedMessage: false,
       isProgrammingMessage: false,
@@ -2720,6 +2765,37 @@ export default {
       } catch (error) {
         console.log(error);
       }
+    },
+    onSendCatalog(catalog) {
+      const { url, negotiationStatusId, todofullLabels } = catalog;
+      const imageTypes = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+      const isImage = imageTypes.some((el) => url.includes(el));
+      if (isImage) {
+        this.sendMessage("", "Agente", "image", { url });
+      } else {
+        // if platform is instagram, send simple message with url
+        if (this.selectedChat.platform === "instagram") {
+          this.sendMessage(`📎 ${url}`, "Agente", "text");
+        } else {
+          this.sendMessage("", "Agente", "file", { url });
+        }
+      }
+      createToast("Catálogo enviado...", {
+        timeout: 3000,
+        type: "success",
+      });
+      // assigning negotiationStatus
+      this.selectedNegotiationStatus = negotiationStatusId._id;
+      // assigning todofullLabels
+      if(todofullLabels && todofullLabels.length){
+        this.userForm.todofullLabels = [
+        ...this.userForm.todofullLabels,
+        ...todofullLabels.map(el=>el._id),
+      ];
+      }
+      
+      this.saveUserForm(this.selectedChat);
+      this.catalogDialog = false;
     },
   },
   computed: {

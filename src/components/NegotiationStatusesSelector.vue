@@ -62,7 +62,6 @@ export default {
     },
   },
   async mounted() {
-    console.log("MONTANDO NEGOTIATION");
     if (this.initialData) {
       this.selectedNegotiationStatuses = this.initialData._id;
     }

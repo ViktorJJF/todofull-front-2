@@ -42,9 +42,13 @@ function toggleCountry(country) {
   selectedCountry.value = country.value;
 }
 
-watch(selectedCountry, () => {
-  emit("onSelectedCountry", selectedCountry.value);
-});
+watch(
+  selectedCountry,
+  () => {
+    emit("onSelectedCountry", selectedCountry.value);
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped></style>
