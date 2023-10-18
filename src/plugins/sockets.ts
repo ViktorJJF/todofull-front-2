@@ -122,8 +122,6 @@ socket.on("UPDATE_CHAT", (data) => {
     // chats.splice(chatToUpdateIndex, 1, data);
     chats[chatToUpdateIndex] = data;
     chats = chats.slice();
-    console.log("🚀 Aqui *** -> chatToUpdate", chatToUpdateIndex);
-    console.log("🚀 Aqui *** -> chatsModule.chats", chatsModule.chats);
   }
 });
 

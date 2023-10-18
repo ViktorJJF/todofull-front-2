@@ -6,6 +6,7 @@ import store from "@/store";
 import router from "@/router";
 import leadsApi from "@/services/api/leads";
 import cleanLeadsApi from "@/services/api/cleanLeads";
+import filesService from "@/services/api/files";
 
 // markdown
 const converter = new showdown.Converter({
@@ -497,4 +498,11 @@ export const getQueryParams = () => {
     queryParams[param[0]] = param[1];
   }
   return queryParams;
+};
+
+export const uploadFile = async (file: any) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  let response = await filesService.create(formData);
+  return response.data.payload.url;
 };

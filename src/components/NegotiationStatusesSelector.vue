@@ -10,6 +10,7 @@
     no-data-text="No se encontraron estados de negociación"
     outlined
     clearable
+    density="compact"
   >
   </v-select>
 </template>
@@ -61,7 +62,6 @@ export default {
     },
   },
   async mounted() {
-    console.log("MONTANDO NEGOTIATION");
     if (this.initialData) {
       this.selectedNegotiationStatuses = this.initialData._id;
     }

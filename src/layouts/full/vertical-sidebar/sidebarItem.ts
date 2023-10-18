@@ -48,8 +48,8 @@ const items: SidebarItem[] = [
     to: { name: "NegotiationStatuses" },
   },
   {
-    title: "Archivos",
-    icon: "file",
+    title: "Catálogos",
+    icon: "disc",
     to: { name: "CloudStorageLinks" },
   },
   {
