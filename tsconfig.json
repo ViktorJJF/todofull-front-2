@@ -8,7 +8,8 @@
       "@/*": ["*", "./src/*"]
     },
     "allowJs": true,
-    "lib": ["ES2015", "ES2016", "DOM", "ES2018.Promise"]
+    "lib": ["ES2015", "ES2016", "DOM", "ES2018.Promise"],
+    "ignoreDeprecations": "5.0"
   },
 
   "references": [
