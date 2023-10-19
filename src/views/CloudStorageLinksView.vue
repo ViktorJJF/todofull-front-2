@@ -16,6 +16,13 @@
               >Agregar Catálogo</v-btn
             >
             <div class="row my-3">
+              <div class="col-sm-12 col-md-7">
+                <v-pagination
+                  v-show="!showFromChat"
+                  v-model="page"
+                  :length="$store.state.cloudStorageLinksModule.totalPages"
+                ></v-pagination>
+              </div>
               <div v-show="!showFromChat" class="col-sm-12 col-md-5">
                 <div
                   class="dataTables_info"
@@ -32,17 +39,19 @@
                   de {{ $store.state.cloudStorageLinksModule.total }} registros
                 </div>
               </div>
-              <div class="col-sm-12 col-md-7">
-                <el-pagination
-                  v-model:current-page="page"
-                  @current-change="initialize(page)"
-                  background
-                  layout="pager"
-                  :total="$store.state.cloudStorageLinksModule.total"
-                  :page-size="$store.state.itemsPerPage"
-                />
-              </div>
             </div>
+            <v-col cols="12" sm="8">
+              <v-text-field
+                style="background-color: #fff"
+                dense
+                hide-details
+                v-model="search"
+                placeholder="Escribe el nombre del catálogo"
+                variant="outlined"
+                density="compact"
+                clearable
+              ></v-text-field>
+            </v-col>
             <div class="basic-table-area">
               <!--Basic Table-->
               <v-table>
@@ -51,6 +60,7 @@
                     <th class="text-left">Fecha de creación</th>
                     <th v-if="!showFromChat" class="text-left">URL</th>
                     <th class="text-left">Nombre</th>
+                    <th class="text-left" v-if="!showFromChat">Veces usado</th>
                     <th class="text-left" v-if="!showFromChat">Activo?</th>
                     <th class="text-left"></th>
                   </tr>
@@ -78,7 +88,11 @@
                     </td>
                     <td>{{ cloudStorageLink.name }}</td>
                     <td v-if="!showFromChat">
+                      {{ cloudStorageLink.timesUsed }}
+                    </td>
+                    <td v-if="!showFromChat">
                       <v-checkbox
+                        @change="onIsActiveChange(cloudStorageLink)"
                         v-model="cloudStorageLink.isActive"
                       ></v-checkbox>
                     </td>
@@ -101,6 +115,7 @@
                           class="mr-2"
                         ></v-btn>
                         <v-btn
+                          @click="deleteItem(cloudStorageLink)"
                           color="error"
                           icon="mdi mdi-delete"
                           size="x-small"
@@ -139,14 +154,10 @@
                 </div>
               </div>
               <div class="col-sm-12 col-md-7">
-                <el-pagination
-                  v-model:current-page="page"
-                  @current-change="initialize(page)"
-                  background
-                  layout="pager"
-                  :total="$store.state.cloudStorageLinksModule.total"
-                  :page-size="$store.state.itemsPerPage"
-                />
+                <v-pagination
+                  v-model="page"
+                  :length="$store.state.cloudStorageLinksModule.totalPages"
+                ></v-pagination>
               </div>
             </div>
           </div>
@@ -237,6 +248,7 @@ const props = defineProps({
 const emit = defineEmits(["onSendCatalog"]);
 // plugins
 const $deepCopy: any = inject("$deepCopy");
+const $swal: any = inject("$swal");
 const $store = useStore();
 const $route = useRoute();
 const $router = useRouter();
@@ -249,7 +261,7 @@ const pagination = ref<GenericObject>({});
 const page = ref<number>(1);
 const pageCount = ref<number>(0);
 // Search
-const fieldsToSearch = ref<string[]>([]);
+const fieldsToSearch = ref<string[]>(["name"]);
 const search = ref<string>("");
 // Others
 const loadingButton = ref<boolean>(false);
@@ -286,6 +298,10 @@ watch(search, () => {
   }, 600);
 });
 
+watch(page, () => {
+  initialize(page.value);
+});
+
 onMounted(() => {
   initialize();
 });
@@ -293,15 +309,19 @@ onMounted(() => {
 async function initialize(pageNumber: number = 1): Promise<any> {
   let payload = {
     page: page.value || pageNumber,
-    fieldsToSearch: fieldsToSearch.value,
+    fields: fieldsToSearch.value.join(","),
     sort: "createdAt",
     order: "desc",
+    limit: 10,
   };
   if (selectedCountry.value) {
     payload["country"] = selectedCountry.value;
   }
   if (search.value) {
-    payload["search"] = search.value;
+    payload["filter"] = search.value;
+  }
+  if (props.showFromChat) {
+    payload["isActive"] = true;
   }
   await Promise.all([$store.dispatch("cloudStorageLinksModule/list", payload)]);
   cloudStorageLinks.value = $deepCopy(
@@ -315,6 +335,10 @@ async function save() {
     editedItem.value.country = selectedCountry.value;
     let id = cloudStorageLinks.value[editedIndex.value]._id;
     try {
+      // upload file
+      if (editedItem.value.file) {
+        editedItem.value.url = await uploadFile(editedItem.value.file);
+      }
       await $store.dispatch("cloudStorageLinksModule/update", {
         id,
         data: editedItem.value,
@@ -358,15 +382,14 @@ async function deleteItem(item: GenericObject) {
   const index = cloudStorageLinks.value.indexOf(item);
   let id = cloudStorageLinks.value[index]._id;
   if (
-    await ElMessageBox.confirm(
-      "¿Realmente deseas eliminar este registro?",
-      "Confirmación",
-      {
-        confirmButtonText: "OK",
+    (
+      await $swal({
+        text: "¿Realmente deseas eliminar este registro?",
+        icon: "error",
+        showCancelButton: true,
         cancelButtonText: "Cancelar",
-        type: "warning",
-      }
-    )
+      })
+    ).isConfirmed
   ) {
     await $store.dispatch("cloudStorageLinksModule/delete", id);
     cloudStorageLinks.value.splice(index, 1);
@@ -410,6 +433,13 @@ async function onNewFile(file) {
 
 function sendCatalog(el) {
   emit("onSendCatalog", el);
+}
+
+async function onIsActiveChange(item) {
+  await $store.dispatch("cloudStorageLinksModule/update", {
+    id: item._id,
+    data: item,
+  });
 }
 </script>
 

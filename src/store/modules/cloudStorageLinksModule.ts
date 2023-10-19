@@ -72,6 +72,19 @@ const module = {
           });
       });
     },
+    increaseTimesUsed({ commit }, { id }) {
+      return new Promise((resolve, reject) => {
+        api
+          .increaseTimesUsed(id)
+          .then((res) => {
+            commit("loadingModule/showLoading", true, { root: true });
+            resolve(res.data.payload);
+          })
+          .catch((error) => {
+            handleError(error, commit, reject);
+          });
+      });
+    },
   },
   mutations: {
     list(state, data) {

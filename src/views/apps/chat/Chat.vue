@@ -686,7 +686,16 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                     Mensajes de Plantilla
                   </v-tooltip>
                 </v-btn>
-                <v-btn @click="catalogDialog = true" small color="white">
+                <v-btn
+                  :disabled="
+                    selectedChat.isBotActive ||
+                    remainingMillis <= 0 ||
+                    remainingMillisFacebook <= 0
+                  "
+                  @click="catalogDialog = true"
+                  small
+                  color="white"
+                >
                   <v-icon>mdi-format-list-bulleted-type</v-icon>
                   <v-tooltip activator="parent" anchor="bottom">
                     Catálogos
@@ -2780,6 +2789,10 @@ export default {
           this.sendMessage("", "Agente", "file", { url });
         }
       }
+      // increase counter
+      this.$store.dispatch("cloudStorageLinksModule/increaseTimesUsed", {
+        id: catalog._id,
+      });
       createToast("Catálogo enviado...", {
         timeout: 3000,
         type: "success",
@@ -2787,13 +2800,15 @@ export default {
       // assigning negotiationStatus
       this.selectedNegotiationStatus = negotiationStatusId._id;
       // assigning todofullLabels
-      if(todofullLabels && todofullLabels.length){
-        this.userForm.todofullLabels = [
-        ...this.userForm.todofullLabels,
-        ...todofullLabels.map(el=>el._id),
-      ];
+      if (todofullLabels && todofullLabels.length) {
+        for (const todofullLabel of todofullLabels) {
+          if (!this.userForm.todofullLabels.includes(todofullLabel)) {
+            this.userForm.todofullLabels.push(todofullLabel._id);
+          }
+        }
       }
-      
+      // this.updateLabels += 1;
+      // this.updateNegotiationStatus += 1;
       this.saveUserForm(this.selectedChat);
       this.catalogDialog = false;
     },
