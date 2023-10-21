@@ -81,9 +81,9 @@ export default {
   },
   async mounted() {
     console.log("montando...", this.initialData);
-    this.selectedTodofullLabels = this.initialData.map((el) => {
-      return el._id;
-    });
+    this.selectedTodofullLabels =
+      this.initialData?.map((el) => (typeof el === "string" ? el : el._id)) ||
+      [];
     if (this.$store.state.todofullLabelsModule.todofullLabels.length === 0) {
       await this.$store.dispatch("todofullLabelsModule/list", {
         sort: "name",

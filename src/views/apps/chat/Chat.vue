@@ -849,12 +849,12 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
             class="mb-2"
           ></v-text-field>
           <span>Etiquetas</span>
-          <TodofullLabelsSelector
+          <TodofullLabelsSelectorv2
             :initialData="userForm.todofullLabels"
             class="my-3"
             @onSelectTodofullLabels="onSelectTodofullLabels"
             :key="updateLabels"
-          ></TodofullLabelsSelector>
+          ></TodofullLabelsSelectorv2>
           <span>Estados de Negociación</span>
           <NegotiationStatusesSelector
             :initialData="selectedNegotiationStatus"
@@ -1386,7 +1386,7 @@ import InfiniteScroll from "@/components/InfiniteScroll.vue";
 import BaseLeftRightPartVue from "@/components/BaseLeftRightPart.vue";
 import { buildSuccess, buildAlert } from "@/utils/utils.ts";
 import AgentsSelector from "@/components/AgentsSelector.vue";
-import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
+import TodofullLabelsSelectorv2 from "@/components/TodofullLabelsSelectorv2.vue";
 import Countdown from "@/components/Countdown.vue";
 import NegotiationStatusesSelector from "@/components/NegotiationStatusesSelector.vue";
 import { useChatSidebarStore } from "@/stores/chatSidebar";
@@ -1407,7 +1407,7 @@ export default {
   components: {
     BaseLeftRightPartVue,
     AgentsSelector,
-    TodofullLabelsSelector,
+    TodofullLabelsSelectorv2,
     InfiniteScroll,
     UploadImages,
     NegotiationStatusesSelector,
@@ -2157,47 +2157,11 @@ export default {
         data: { negotiationStatusId: this.selectedNegotiationStatus },
         notifyUser: false,
       });
-      if (
-        this.selectedNegotiationStatus &&
-        this.selectedNegotiationStatus !== selectedChat.negotiationStatusId?._id
-      ) {
-        // send log
-        console.log("enviando cambio estado...");
-        await this.sendAgentLogMessage(
-          `Cambio de estado a ${this.selectedNegotiationStatusObject.name}`,
-          selectedChat
-        );
-        // remove previous programmed messages for negotiationStatus
-        await this.$store.dispatch(
-          "chatsModule/removeNegotiationStatusProgramedMessages",
-          { chatId: selectedChat._id }
-        );
-        // search for automations
-        const automations = this.selectedNegotiationStatusObject.automations;
-        for (const automation of automations) {
-          const { message, afterTime } = automation;
-          await this.sendProgrammedMessage(
-            message,
-            "Agente",
-            "text",
-            afterTime,
-            selectedChat,
-            {
-              negotiationStatusId: this.selectedNegotiationStatus,
-              notifyUser: false,
-            }
-          );
-        }
-        // selectedChat.pendingNegotiationStatusLogId =
-        //   await this.$store.dispatch("negotiationStatusesLogsModule/create", {
-        //     negotiationStatusId: this.selectedNegotiationStatus,
-        //     isCompleted: false,
-        //     chatId: selectedChat._id,
-        //     cleanLeadId: createdItem?._id,
-        //     leadId: selectedChat.leadId._id,
-        //     hasCronJob: true,
-        //   });
-      }
+      this.checkNegotiationStatus(
+        selectedChat,
+        this.selectedNegotiationStatus,
+        this.selectedNegotiationStatusObject
+      );
       if (!this.selectedNegotiationStatus) {
         if (selectedChat.negotiationStatusId) {
           await this.sendAgentLogMessage(
@@ -2213,7 +2177,40 @@ export default {
         selectedChat.pendingNegotiationStatusLogId = null;
         selectedChat.negotiationStatusId = null;
       }
-      // }
+    },
+    async checkNegotiationStatus(selectedChat, selectedNegotiationStatus,selectedNegotiationStatusObject) {
+      if (
+        selectedNegotiationStatus &&
+        selectedNegotiationStatus !== selectedChat.negotiationStatusId?._id
+      ) {
+        // send log
+        console.log("enviando cambio estado...");
+        await this.sendAgentLogMessage(
+          `Cambio de estado a ${selectedNegotiationStatusObject.name}`,
+          selectedChat
+        );
+        // remove previous programmed messages for negotiationStatus
+        await this.$store.dispatch(
+          "chatsModule/removeNegotiationStatusProgramedMessages",
+          { chatId: selectedChat._id }
+        );
+        // search for automations
+        const automations = selectedNegotiationStatusObject.automations;
+        for (const automation of automations) {
+          const { message, afterTime } = automation;
+          await this.sendProgrammedMessage(
+            message,
+            "Agente",
+            "text",
+            afterTime,
+            selectedChat,
+            {
+              negotiationStatusId: selectedNegotiationStatus,
+              notifyUser: false,
+            }
+          );
+        }
+      }
     },
     async listMessagesByChat(page) {
       try {
@@ -2633,14 +2630,15 @@ export default {
             },
           }
         );
-        // this.messages.push({
-        //   ...updatedChat.programmedMessages[
-        //     updatedChat.programmedMessages.length - 1
-        //   ],
-        //   createdAt: new Date(),
-        //   updatedAt: new Date(),
-        //   isProgrammed: true,
-        // });
+        if (this.selectedChat._id === chat._id) {
+          this.messages.push({
+            text,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            isProgrammed: true,
+          });
+        }
+
         let chatIndex = this.chats.findIndex((chat) => chat._id === chat._id);
 
         if (!this.chats[chatIndex].programmedMessages) {
@@ -2798,17 +2796,26 @@ export default {
         type: "success",
       });
       // assigning negotiationStatus
-      this.selectedNegotiationStatus = negotiationStatusId._id;
+      this.selectedNegotiationStatus = negotiationStatusId;
+      this.selectedNegotiationStatusObject = negotiationStatusId;
       // assigning todofullLabels
       if (todofullLabels && todofullLabels.length) {
         for (const todofullLabel of todofullLabels) {
-          if (!this.userForm.todofullLabels.includes(todofullLabel)) {
+          console.log(
+            "🚀 Aqui *** -> this.userForm.todofullLabels:",
+            this.userForm.todofullLabels
+          );
+          if (!this.userForm.todofullLabels.includes(todofullLabel._id)) {
             this.userForm.todofullLabels.push(todofullLabel._id);
           }
         }
       }
-      // this.updateLabels += 1;
-      // this.updateNegotiationStatus += 1;
+      console.log(
+        "🚀 Aqui *** -> this.userForm.todofullLabels:",
+        this.userForm.todofullLabels
+      );
+      this.updateLabels += 1;
+      this.updateNegotiationStatus += 1;
       this.saveUserForm(this.selectedChat);
       this.catalogDialog = false;
     },
