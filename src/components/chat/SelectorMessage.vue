@@ -131,7 +131,10 @@
     <div v-if="message.type === 'template_wtsp'">
       <TemplateWtspChat :message="message"></TemplateWtspChat>
     </div>
-    <div :class="{ 'reply-message': is_reply }" v-if="message.type === 'video'">
+    <div
+      :class="{ 'reply-message': is_reply }"
+      v-if="message.type === 'video' || message.type === 'unsupported_type'"
+    >
       <VideoChat :message="message"></VideoChat>
     </div>
   </div>
@@ -199,6 +202,9 @@ function getDynamicComponent(messageContext) {
         selectedComponent = ImageChat;
         break;
       case "video":
+        selectedComponent = VideoChat;
+        break;
+      case "unsupported_type":
         selectedComponent = VideoChat;
         break;
       case "sticker":
