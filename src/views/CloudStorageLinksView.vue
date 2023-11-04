@@ -80,11 +80,26 @@
                     </td>
                     <td v-if="!showFromChat">
                       <a
+                        v-if="cloudStorageLink.url"
                         :href="cloudStorageLink.url"
                         target="_blank"
                         rel="noopener noreferrer"
                         >{{ cloudStorageLink.url }}</a
                       >
+                      <template v-else>
+                        <div
+                          v-for="(file, fileIndex) in cloudStorageLink.files"
+                          :key="fileIndex"
+                        >
+                          <a
+                            v-if="file.url"
+                            :href="file.url"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            >{{ file.url }}</a
+                          >
+                        </div>
+                      </template>
                     </td>
                     <td>{{ cloudStorageLink.name }}</td>
                     <td v-if="!showFromChat">
@@ -208,7 +223,12 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="12">
-                <UploadFiles @onNewFile="onNewFile"></UploadFiles>
+                <div>
+                  <UploadFiles
+                    v-if="dialog"
+                    @onNewFiles="onNewFiles"
+                  ></UploadFiles>
+                </div>
               </v-col>
             </v-row>
           </v-container>
@@ -355,8 +375,19 @@ async function save() {
     //create item
     try {
       // upload file
-      if (editedItem.value.file) {
-        editedItem.value.url = await uploadFile(editedItem.value.file);
+      if (editedItem.value.preFiles) {
+        editedItem.value.files = await Promise.all(
+          editedItem.value.preFiles.map(async (file) => {
+            return await uploadFile(file);
+          })
+        );
+        // give format
+        editedItem.value.files = editedItem.value.files.map((file, index) => {
+          return {
+            url: file,
+            name: editedItem.value.preFiles[index].name,
+          };
+        });
       }
       editedItem.value.country = selectedCountry.value;
       let newItem = await $store.dispatch(
@@ -425,10 +456,12 @@ async function close() {
   }, 300);
 }
 
-async function onNewFile(file) {
-  let formData = new FormData();
-  formData.append("file", file);
-  editedItem.value.file = file; // just temporal, until its uploaded
+async function onNewFiles(files) {
+  // console.log("🐞 LOG HERE file:", file);
+  // let formData = new FormData();
+  // formData.append("file", file);
+  // editedItem.value.file = file; // just temporal, until its uploaded
+  editedItem.value.preFiles = files;
 }
 
 function sendCatalog(el) {

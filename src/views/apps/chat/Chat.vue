@@ -2459,7 +2459,7 @@ export default {
           let response = await filesService.createAudio(formData);
           const url = response.data.payload.url;
           console.log("🚀 Aqui *** -> url:", url);
-          this.sendMessage(this.text, "Agente", "audio", { url });
+          // this.sendMessage(this.text, "Agente", "audio", { url });
         } catch (error) {
           console.log(error);
         } finally {
@@ -2778,19 +2778,26 @@ export default {
       }
     },
     onSendCatalog(catalog) {
-      const { url, negotiationStatusId, todofullLabels } = catalog;
+      let { url, files, negotiationStatusId, todofullLabels } = catalog;
       const imageTypes = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
-      const isImage = imageTypes.some((el) => url.includes(el));
-      if (isImage) {
-        this.sendMessage("", "Agente", "image", { url });
-      } else {
-        // if platform is instagram, send simple message with url
-        if (this.selectedChat.platform === "instagram") {
-          this.sendMessage(`📎 ${url}`, "Agente", "text");
+      if (!files) {
+        files = [{ url }];
+      }
+      for (const file of files) {
+        const url = file.url;
+        const isImage = imageTypes.some((el) => url.includes(el));
+        if (isImage) {
+          this.sendMessage("", "Agente", "image", { url });
         } else {
-          this.sendMessage("", "Agente", "file", { url });
+          // if platform is instagram, send simple message with url
+          if (this.selectedChat.platform === "instagram") {
+            this.sendMessage(`📎 ${url}`, "Agente", "text");
+          } else {
+            this.sendMessage("", "Agente", "file", { url });
+          }
         }
       }
+
       // increase counter
       this.$store.dispatch("cloudStorageLinksModule/increaseTimesUsed", {
         id: catalog._id,
