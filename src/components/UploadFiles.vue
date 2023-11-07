@@ -49,9 +49,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-
+import { ref, onMounted } from "vue";
+import { toRefs } from "vue";
 const emit = defineEmits(["onNewFiles"]);
+const props = defineProps({
+  files: { type: Array, default: () => [] },
+});
 
 const isDragOver = ref<boolean>(false);
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -60,6 +63,13 @@ const isImageFile = ref<boolean>(false);
 const uploadedFile = ref<any>(null);
 const uploadedFiles = ref<any[]>([]);
 
+onMounted(() => {
+  console.log("🐞 LOG HERE props.files:", props.files);
+  if (props.files) {
+    uploadedFiles.value = [...props.files];
+    console.log("🐞 LOG HERE uploadedFiles.value:", uploadedFiles.value);
+  }
+});
 function onDragOver(e) {
   if (!isDragOver.value) {
     isDragOver.value = true;
