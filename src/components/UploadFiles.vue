@@ -50,7 +50,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { toRefs } from "vue";
 const emit = defineEmits(["onNewFiles"]);
 const props = defineProps({
   files: { type: Array, default: () => [] },
@@ -64,10 +63,8 @@ const uploadedFile = ref<any>(null);
 const uploadedFiles = ref<any[]>([]);
 
 onMounted(() => {
-  console.log("🐞 LOG HERE props.files:", props.files);
   if (props.files) {
     uploadedFiles.value = [...props.files];
-    console.log("🐞 LOG HERE uploadedFiles.value:", uploadedFiles.value);
   }
 });
 function onDragOver(e) {
