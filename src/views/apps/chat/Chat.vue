@@ -1336,7 +1336,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
               <CloudStorageLinksView
                 v-if="selectedCountry"
                 :showFromChat="true"
-                :country="'Chile'"
+                :country="selectedCountry"
                 @onSendCatalog="onSendCatalog"
               ></CloudStorageLinksView>
             </div>
