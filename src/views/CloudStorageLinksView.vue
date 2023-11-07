@@ -213,7 +213,7 @@
                 >
                 </NegotiationStatusesSelector>
               </v-col>
-              <v-col cols="12" sm="12" md="12">
+              <!-- <v-col cols="12" sm="12" md="12">
                 <p class="body-1 font-weight-bold">URL (Opcional)</p>
                 <v-text-field
                   v-model="editedItem.url"
@@ -221,10 +221,11 @@
                   hide-details
                   variant="underlined"
                 ></v-text-field>
-              </v-col>
+              </v-col> -->
               <v-col cols="12" sm="12">
                 <div>
                   <UploadFiles
+                    :files="editedItem.files"
                     v-if="dialog"
                     @onNewFiles="onNewFiles"
                   ></UploadFiles>
@@ -355,10 +356,29 @@ async function save() {
     editedItem.value.country = selectedCountry.value;
     let id = cloudStorageLinks.value[editedIndex.value]._id;
     try {
-      // upload file
-      if (editedItem.value.file) {
-        editedItem.value.url = await uploadFile(editedItem.value.file);
+      if (editedItem.value.preFiles) {
+        editedItem.value.files = await Promise.all(
+          editedItem.value.preFiles.map(async (file) => {
+            if (!file.url) {
+              return await uploadFile(file);
+            }
+            return file.url;
+          })
+        );
+        // give format
+        editedItem.value.files = editedItem.value.files.map((file, index) => {
+          return {
+            url: file,
+            name: editedItem.value.preFiles[index].name,
+            type: editedItem.value.preFiles[index].type,
+            size: editedItem.value.preFiles[index].size,
+          };
+        });
       }
+      // upload file
+      // if (editedItem.value.file) {
+      //   editedItem.value.url = await uploadFile(editedItem.value.file);
+      // }
       await $store.dispatch("cloudStorageLinksModule/update", {
         id,
         data: editedItem.value,
@@ -386,6 +406,8 @@ async function save() {
           return {
             url: file,
             name: editedItem.value.preFiles[index].name,
+            type: editedItem.value.preFiles[index].type,
+            size: editedItem.value.preFiles[index].size,
           };
         });
       }

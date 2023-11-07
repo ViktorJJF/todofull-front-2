@@ -1336,7 +1336,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
               <CloudStorageLinksView
                 v-if="selectedCountry"
                 :showFromChat="true"
-                :country="selectedCountry"
+                :country="'Chile'"
                 @onSendCatalog="onSendCatalog"
               ></CloudStorageLinksView>
             </div>
@@ -1378,6 +1378,7 @@ import {
   parseMarkdown,
   getFormat,
   convertMsToTime,
+  bytesToMB,
 } from "@/utils/utils";
 import config from "@/config";
 import socket from "@/plugins/sockets";
@@ -1885,7 +1886,25 @@ export default {
       this.updateNegotiationStatus += 1;
       this.clear();
     },
-    sendMessage(text, from = "Agente", type = "text", { url } = {}) {
+    sendMessage(
+      text,
+      from = "Agente",
+      type = "text",
+      { url, size, name } = {}
+    ) {
+      let finalParameters = this.checkPlatformRestrictions(
+        this.selectedChat.platform,
+        text,
+        type,
+        url,
+        size,
+        name
+      );
+      text = finalParameters.text;
+      type = finalParameters.type;
+      if (finalParameters.url) {
+        url = finalParameters.url;
+      }
       const user = JSON.parse(localStorage.getItem("user"));
       this.text = "";
       socket.emit("AGENT_MESSAGE", {
@@ -1913,6 +1932,22 @@ export default {
       //       }
       this.messageToReply = null;
       scrollBottom();
+    },
+    checkPlatformRestrictions(platform, text, type, url, size, name) {
+      if (platform === "facebook" && size) {
+        // validation for files 25mb
+        if (type === "file" && bytesToMB(size) > 24.9) {
+          // change type of message to text
+          type = "text";
+          text = `📎 ${url}`;
+          url = "";
+        }
+      }
+      return {
+        text,
+        type,
+        url,
+      };
     },
     clearForm() {
       this.userForm.name = "";
@@ -2784,7 +2819,7 @@ export default {
         files = [{ url }];
       }
       for (const file of files) {
-        const url = file.url;
+        const { url, type, size, name } = file;
         const isImage = imageTypes.some((el) => url.includes(el));
         if (isImage) {
           this.sendMessage("", "Agente", "image", { url });
@@ -2793,7 +2828,7 @@ export default {
           if (this.selectedChat.platform === "instagram") {
             this.sendMessage(`📎 ${url}`, "Agente", "text");
           } else {
-            this.sendMessage("", "Agente", "file", { url });
+            this.sendMessage("", "Agente", "file", { url, type, size, name });
           }
         }
       }

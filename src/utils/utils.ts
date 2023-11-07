@@ -506,3 +506,7 @@ export const uploadFile = async (file: any) => {
   let response = await filesService.create(formData);
   return response.data.payload.url;
 };
+
+export const bytesToMB = (bytes) => {
+  return bytes / 1024 / 1024;
+};
