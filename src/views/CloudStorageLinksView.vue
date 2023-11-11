@@ -4,7 +4,7 @@
       <CountrySelector @onSelectedCountry="onSelectedCountry"></CountrySelector>
     </v-row>
     <v-row>
-      <div class="col-12">
+      <v-col cols="12">
         <div class="card box-margin">
           <div class="card-body">
             <v-btn
@@ -13,17 +13,21 @@
                 close();
                 dialog = true;
               "
-              >Agregar Catálogo</v-btn
+              >{{
+                currentViewType === "files"
+                  ? "Agregar Catálogo"
+                  : "Agregar Audio"
+              }}</v-btn
             >
-            <div class="row my-3">
-              <div class="col-sm-12 col-md-7">
+            <v-row class="my-3">
+              <v-col cols="12">
                 <v-pagination
                   v-show="!showFromChat"
                   v-model="page"
                   :length="$store.state.cloudStorageLinksModule.totalPages"
                 ></v-pagination>
-              </div>
-              <div v-show="!showFromChat" class="col-sm-12 col-md-5">
+              </v-col>
+              <v-col v-show="!showFromChat" cols="12">
                 <div
                   class="dataTables_info"
                   id="datatable-buttons_info"
@@ -38,15 +42,19 @@
                   }}
                   de {{ $store.state.cloudStorageLinksModule.total }} registros
                 </div>
-              </div>
-            </div>
-            <v-col cols="12" sm="8">
+              </v-col>
+            </v-row>
+            <v-col cols="12" sm="12">
               <v-text-field
                 style="background-color: #fff"
                 dense
                 hide-details
                 v-model="search"
-                placeholder="Escribe el nombre del catálogo"
+                :placeholder="
+                  currentViewType === 'files'
+                    ? 'Buscar catálogo'
+                    : 'Buscar audio'
+                "
                 variant="outlined"
                 density="compact"
                 clearable
@@ -78,7 +86,7 @@
                         )
                       }}
                     </td>
-                    <td v-if="!showFromChat">
+                    <td v-if="!showFromChat || currentViewType === 'audios'">
                       <a
                         v-if="cloudStorageLink.url"
                         :href="cloudStorageLink.url"
@@ -92,16 +100,37 @@
                           :key="fileIndex"
                         >
                           <a
-                            v-if="file.url"
+                            v-if="file.url && file.type !== 'audio/wav'"
                             :href="file.url"
                             target="_blank"
                             rel="noopener noreferrer"
                             >{{ file.url }}</a
                           >
+                          <div v-else>
+                            <v-row>
+                              <v-col sm="8">
+                                <audio
+                                  style="max-width: 90%"
+                                  controls
+                                  :src="file.url"
+                                ></audio
+                              ></v-col>
+                              <v-col sm="4">
+                                <div
+                                  class="audio-duration"
+                                  v-if="file.duration"
+                                >
+                                  {{ Math.floor(file.duration / 1000) }} segs
+                                </div></v-col
+                              >
+                            </v-row>
+                          </div>
                         </div>
                       </template>
                     </td>
-                    <td>{{ cloudStorageLink.name }}</td>
+                    <td>
+                      {{ cloudStorageLink.name }}
+                    </td>
                     <td v-if="!showFromChat">
                       {{ cloudStorageLink.timesUsed }}
                     </td>
@@ -117,6 +146,7 @@
                     ></PDFViewer> -->
                       <template v-if="!showFromChat">
                         <v-btn
+                          v-show="cloudStorageLink.type !== 'audios'"
                           color="primary"
                           icon="mdi mdi-eye"
                           size="x-small"
@@ -177,7 +207,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </v-col>
       <v-dialog v-model="dialog" width="700px">
         <v-card>
           <v-card-title>
@@ -223,12 +253,19 @@
                 ></v-text-field>
               </v-col> -->
               <v-col cols="12" sm="12">
-                <div>
+                <div v-if="currentViewType === 'files'">
                   <UploadFiles
                     :files="editedItem.files"
                     v-if="dialog"
                     @onNewFiles="onNewFiles"
                   ></UploadFiles>
+                </div>
+                <div v-else>
+                  <AudioRecording
+                    v-if="dialog"
+                    @onNewAudio="onNewAudio"
+                    :audios="editedItem.files"
+                  ></AudioRecording>
                 </div>
               </v-col>
             </v-row>
@@ -256,6 +293,7 @@ import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
 import TodofullLabelsSelectorV2 from "@/components/TodofullLabelsSelectorV2.vue";
 import NegotiationStatusesSelector from "@/components/NegotiationStatusesSelector.vue";
 import UploadFiles from "@/components/UploadFiles.vue";
+import AudioRecording from "@/components/AudioRecording.vue";
 import CountrySelector from "@/components/CountrySelector.vue";
 // import PDFViewer from "@/components/PDFViewer.vue";
 import filesService from "@/services/api/files";
@@ -264,6 +302,7 @@ import { uploadFile, getFormat } from "@/utils/utils";
 const props = defineProps({
   showFromChat: { type: Boolean, default: false },
   country: { type: String, default: "" },
+  type: { type: String, default: "" },
 });
 // emits
 const emit = defineEmits(["onSendCatalog"]);
@@ -308,7 +347,13 @@ const headers = ref<any[]>([
 const dialog = ref<boolean>(false);
 
 const formTitle = computed(() => {
-  return editedIndex.value === -1 ? "Cargar Catálogo" : "Editar Catálogo";
+  return editedIndex.value === -1
+    ? isFilesView.value
+      ? "Cargar Catálogo"
+      : "Cargar audio"
+    : isFilesView.value
+    ? "Editar Catálogo"
+    : "Editar audio";
 });
 
 watch(search, () => {
@@ -323,6 +368,22 @@ watch(page, () => {
   initialize(page.value);
 });
 
+watch($route, () => {
+  initialize();
+});
+
+const currentViewType = computed(() => {
+  return props.type
+    ? props.type
+    : $route.name === "CloudStorageLinks"
+    ? "files"
+    : "audios";
+});
+
+const isFilesView = computed(() => {
+  return currentViewType.value === "files";
+});
+
 onMounted(() => {
   initialize();
 });
@@ -334,6 +395,7 @@ async function initialize(pageNumber: number = 1): Promise<any> {
     sort: "createdAt",
     order: "desc",
     limit: 10,
+    type: currentViewType.value,
   };
   if (selectedCountry.value) {
     payload["country"] = selectedCountry.value;
@@ -360,7 +422,7 @@ async function save() {
         editedItem.value.files = await Promise.all(
           editedItem.value.preFiles.map(async (file) => {
             if (!file.url) {
-              return await uploadFile(file);
+              return await uploadFile(file, file.duration ? "audio" : "file");
             }
             return file.url;
           })
@@ -372,6 +434,7 @@ async function save() {
             name: editedItem.value.preFiles[index].name,
             type: editedItem.value.preFiles[index].type,
             size: editedItem.value.preFiles[index].size,
+            duration: editedItem.value.preFiles[index].duration,
           };
         });
       }
@@ -381,7 +444,7 @@ async function save() {
       // }
       await $store.dispatch("cloudStorageLinksModule/update", {
         id,
-        data: editedItem.value,
+        data: { type: currentViewType.value, ...editedItem.value },
       });
       Object.assign(
         cloudStorageLinks.value[editedIndex.value],
@@ -398,7 +461,7 @@ async function save() {
       if (editedItem.value.preFiles) {
         editedItem.value.files = await Promise.all(
           editedItem.value.preFiles.map(async (file) => {
-            return await uploadFile(file);
+            return await uploadFile(file, file.duration ? "audio" : "file");
           })
         );
         // give format
@@ -408,14 +471,15 @@ async function save() {
             name: editedItem.value.preFiles[index].name,
             type: editedItem.value.preFiles[index].type,
             size: editedItem.value.preFiles[index].size,
+            duration: editedItem.value.preFiles[index].duration,
           };
         });
       }
       editedItem.value.country = selectedCountry.value;
-      let newItem = await $store.dispatch(
-        "cloudStorageLinksModule/create",
-        editedItem.value
-      );
+      let newItem = await $store.dispatch("cloudStorageLinksModule/create", {
+        type: currentViewType.value,
+        ...editedItem.value,
+      });
       cloudStorageLinks.value.push(newItem);
       close();
       initialize();
@@ -486,6 +550,10 @@ async function onNewFiles(files) {
   editedItem.value.preFiles = files;
 }
 
+function onNewAudio(audio) {
+  editedItem.value.preFiles = [audio];
+}
+
 function sendCatalog(el) {
   emit("onSendCatalog", el);
 }
@@ -498,4 +566,16 @@ async function onIsActiveChange(item) {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.audio-duration {
+  color: #333; /* Text color */
+  font-size: 14px; /* Text size */
+  font-weight: bold; /* Text weight */
+  margin-top: 5px; /* Space above the duration */
+  text-align: center; /* Centering text */
+  background-color: #f0f0f0; /* Background color */
+  padding: 5px; /* Padding inside the box */
+  border-radius: 5px; /* Rounded corners */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adding a subtle shadow */
+}
+</style>

@@ -1,7 +1,7 @@
 export default () => ({
   name: "",
   url: "",
-  files:"",
+  files: [],
   fileType: "",
   country: "",
 });

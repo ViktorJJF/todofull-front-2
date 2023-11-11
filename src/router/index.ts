@@ -51,6 +51,11 @@ const router = createRouter({
           component: () => import("@/views/CloudStorageLinksView.vue"),
         },
         {
+          name: "CloudStorageLinksAudios",
+          path: "apps/audios",
+          component: () => import("@/views/CloudStorageLinksView.vue"),
+        },
+        {
           name: "Categories",
           path: "apps/categorias",
           component: () => import("@/views/categories/Categories.vue"),
