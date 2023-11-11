@@ -8,8 +8,7 @@
       "@/*": ["*", "./src/*"]
     },
     "allowJs": true,
-    "lib": ["ES2015", "ES2016", "DOM", "ES2018.Promise"],
-    "ignoreDeprecations": "5.0"
+    "lib": ["ES2017", "ES2015", "ES2016", "DOM", "ES2018.Promise"]
   },
 
   "references": [
@@ -17,5 +16,5 @@
       "path": "./tsconfig.vite-config.json"
     }
   ],
-  "exclude": ["node_modules", "dist"],
+  "exclude": ["node_modules", "dist"]
 }
