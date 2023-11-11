@@ -53,6 +53,11 @@ const items: SidebarItem[] = [
     to: { name: "CloudStorageLinks" },
   },
   {
+    title: "Audios",
+    icon: "disc",
+    to: { name: "CloudStorageLinksAudios" },
+  },
+  {
     title: "Cerrar sesión",
     icon: "log-in",
   },

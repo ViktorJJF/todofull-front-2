@@ -692,13 +692,34 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                     remainingMillis <= 0 ||
                     remainingMillisFacebook <= 0
                   "
-                  @click="catalogDialog = true"
+                  @click="
+                    catalogDialog = true;
+                    cloudStorageFileType = 'files';
+                  "
                   small
                   color="white"
                 >
                   <v-icon>mdi-format-list-bulleted-type</v-icon>
                   <v-tooltip activator="parent" anchor="bottom">
                     Catálogos
+                  </v-tooltip>
+                </v-btn>
+                <v-btn
+                  :disabled="
+                    selectedChat.isBotActive ||
+                    remainingMillis <= 0 ||
+                    remainingMillisFacebook <= 0
+                  "
+                  @click="
+                    catalogDialog = true;
+                    cloudStorageFileType = 'audios';
+                  "
+                  small
+                  color="white"
+                >
+                  <v-icon>mdi-format-list-bulleted-type</v-icon>
+                  <v-tooltip activator="parent" anchor="bottom">
+                    Audios
                   </v-tooltip>
                 </v-btn>
                 <v-btn
@@ -1337,6 +1358,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                 v-if="selectedCountry"
                 :showFromChat="true"
                 :country="selectedCountry"
+                :type="cloudStorageFileType"
                 @onSendCatalog="onSendCatalog"
               ></CloudStorageLinksView>
             </div>
@@ -1419,6 +1441,7 @@ export default {
   },
   data() {
     return {
+      cloudStorageFileType: null,
       catalogDialog: false,
       afterTime: { hours: 0, minutes: 0, seconds: 0 },
       dialogProgrammedMessage: false,
@@ -2493,8 +2516,7 @@ export default {
           // Send audio to aws
           let response = await filesService.createAudio(formData);
           const url = response.data.payload.url;
-          console.log("🚀 Aqui *** -> url:", url);
-          // this.sendMessage(this.text, "Agente", "audio", { url });
+          this.sendMessage(this.text, "Agente", "audio", { url });
         } catch (error) {
           console.log(error);
         } finally {
@@ -2813,7 +2835,13 @@ export default {
       }
     },
     onSendCatalog(catalog) {
-      let { url, files, negotiationStatusId, todofullLabels } = catalog;
+      let {
+        url,
+        files,
+        negotiationStatusId,
+        todofullLabels,
+        type: fileType,
+      } = catalog;
       const imageTypes = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
       if (!files) {
         files = [{ url }];
@@ -2823,7 +2851,11 @@ export default {
         const isImage = imageTypes.some((el) => url.includes(el));
         if (isImage) {
           this.sendMessage("", "Agente", "image", { url });
+        } else if (fileType === "audios") {
+          console.log("Enviando audio payload...", { url });
+          this.sendMessage("", "Agente", "audio", { url });
         } else {
+          console.log("archivo normales...");
           // if platform is instagram, send simple message with url
           if (this.selectedChat.platform === "instagram") {
             this.sendMessage(`📎 ${url}`, "Agente", "text");
@@ -2837,10 +2869,13 @@ export default {
       this.$store.dispatch("cloudStorageLinksModule/increaseTimesUsed", {
         id: catalog._id,
       });
-      createToast("Catálogo enviado...", {
-        timeout: 3000,
-        type: "success",
-      });
+      createToast(
+        fileType === "audios" ? "Audio enviado" : "Catálogo enviado...",
+        {
+          timeout: 3000,
+          type: "success",
+        }
+      );
       // assigning negotiationStatus
       this.selectedNegotiationStatus = negotiationStatusId;
       this.selectedNegotiationStatusObject = negotiationStatusId;
