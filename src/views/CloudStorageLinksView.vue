@@ -261,11 +261,11 @@
                   ></UploadFiles>
                 </div>
                 <div v-else>
-                  <AudioRecording
+                  <AudioRecordingMany
                     v-if="dialog"
-                    @onNewAudio="onNewAudio"
+                    @onNewAudios="onNewAudios"
                     :audios="editedItem.files"
-                  ></AudioRecording>
+                  ></AudioRecordingMany>
                 </div>
               </v-col>
             </v-row>
@@ -293,7 +293,7 @@ import TodofullLabelsSelector from "@/components/TodofullLabelsSelector.vue";
 import TodofullLabelsSelectorV2 from "@/components/TodofullLabelsSelectorV2.vue";
 import NegotiationStatusesSelector from "@/components/NegotiationStatusesSelector.vue";
 import UploadFiles from "@/components/UploadFiles.vue";
-import AudioRecording from "@/components/AudioRecording.vue";
+import AudioRecordingMany from "@/components/AudioRecordingMany.vue";
 import CountrySelector from "@/components/CountrySelector.vue";
 // import PDFViewer from "@/components/PDFViewer.vue";
 import filesService from "@/services/api/files";
@@ -550,8 +550,9 @@ async function onNewFiles(files) {
   editedItem.value.preFiles = files;
 }
 
-function onNewAudio(audio) {
-  editedItem.value.preFiles = [audio];
+function onNewAudios(audios) {
+  console.log("🐞 LOG HERE audios:", audios);
+  editedItem.value.preFiles = audios;
 }
 
 function sendCatalog(el) {

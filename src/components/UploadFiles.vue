@@ -33,7 +33,7 @@
             @drop="onDrop"
             class="drag-message"
           >
-            <span v-show="!isDragOver">Arrastra una imagen o archivo aquí</span>
+            <span v-show="!isDragOver">{{ text }}</span>
             <span v-show="isDragOver">Suelta los archivos aquí</span>
           </div>
           <input
@@ -53,6 +53,7 @@ import { ref, onMounted } from "vue";
 const emit = defineEmits(["onNewFiles"]);
 const props = defineProps({
   files: { type: Array, default: () => [] },
+  text: { type: String, default: "Arrastra una imagen o archivo aquí" },
 });
 
 const isDragOver = ref<boolean>(false);
