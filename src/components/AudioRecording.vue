@@ -45,7 +45,7 @@ import { ref, watch, onUnmounted, onMounted } from "vue";
 
 const emit = defineEmits(["onNewAudio"]);
 const props = defineProps({
-  audios: { type: Array, default: () => [{}] },
+  audioObject: { type: Array, default: () => [{}] },
 });
 
 const maxRecordingTime = 60 * 5;
@@ -207,9 +207,10 @@ async function playbackRecording() {
 }
 
 onMounted(() => {
-  if (props.audios && props.audios.length) {
+  if (props.audioObject) {
     // just handle 1 audio for now
-    const { duration, url } = props.audios[0] as any;
+    const { duration, url } = props.audioObject as any;
+    if (!duration || !url) return;
     recordingTime.value = Math.floor(duration / 1000);
     audioUploaded.value = new Audio(url);
     progress.value = (recordingTime.value / maxRecordingTime) * 100;
