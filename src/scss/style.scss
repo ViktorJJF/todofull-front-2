@@ -62,3 +62,17 @@
   border: 2px dotted black;
   text-align: center;
 }
+
+.clear-uploaded-file {
+  background: red;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  display: inline;
+  margin: 0 auto;
+  width: 45px; /* Set a fixed width */
+  font-size: 0.75rem; /* Optionally reduce font size */
+}
