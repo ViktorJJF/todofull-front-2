@@ -3,7 +3,7 @@
     <select
       style="width: auto"
       @change="onSelectedAgent($event)"
-      v-model="telefonoId"
+      :value="telefonoId"
     >
       <option value="Sin valor">Sin agente</option>
       <option
