@@ -95,7 +95,7 @@
             </v-col>
             <v-col :cols="3">
               <v-btn
-                @click="handleCopyAnswer('image')"
+                @click="sendImageToChat(selected.customImages[0])"
                 :disabled="!selected.customImages[0]"
                 >Imagen</v-btn
               >
@@ -333,6 +333,15 @@ const fetchItems = async () => {
 
   items.value = res.data.payload;
   isLoading.value = false;
+};
+
+const sendImageToChat = (url) => {
+  sendMessage("", "Agente", "image", { url });
+  chatSidebar.SET_SIDEBAR_DRAWER();
+  store.commit(
+    "chatsModule/updateHasToUpdateSelectedChat",
+    !store.state.chatsModule.hasToUpdateSelectedChat
+  );
 };
 
 watch(selected, (selected) => {
