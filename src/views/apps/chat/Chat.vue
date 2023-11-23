@@ -925,7 +925,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
                       close=""
                       text-color="white"
                       ><span class="v-chip__underlay"></span
-                      >{{ odoo_partner_info.rmf_score }}</span
+                      >{{ odoo_partner_info.team_id }}</span
                     >
                   </td>
                   <td>
