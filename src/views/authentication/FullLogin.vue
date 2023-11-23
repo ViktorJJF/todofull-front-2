@@ -10,13 +10,17 @@
                       <div class="flex-col justify-start items-start gap-2 flex">
                           <div class="w-[383px] h-12 px-4 bg-neutral-50 rounded-lg border border-gray-200 justify-between items-center inline-flex">
                               <div class="text-gray-500 text-sm font-normal font-['Inter'] leading-[18px]">Email</div>
-                              <div class="w-3.5 h-3.5 relative"></div>
+                              <div class="w-3.5 h-3.5 relative">
+                                <img src="@/assets/images/login/envelope.svg"/>
+                              </div>
                           </div>
                       </div>
                       <div class="flex-col justify-start items-start gap-2 flex">
                           <div class="w-[383px] h-12 px-4 bg-neutral-50 rounded-lg border border-gray-200 justify-between items-center inline-flex">
                               <div class="text-gray-500 text-sm font-normal font-['Inter'] leading-[18px]">Contraseña</div>
-                              <div class="w-3.5 h-3.5 relative"></div>
+                              <div class="w-3.5 h-3.5 relative">
+                                <img src="@/assets/images/login/lock.svg"/>
+                              </div>
                           </div>
                       </div>
                   </div>
@@ -28,13 +32,18 @@
                       </div>
                       <div class="w-[383px] h-12 p-2.5 bg-white rounded-[5px] border border-gray-200 flex-col justify-center items-center gap-2.5 flex">
                           <div class="self-stretch justify-center items-center gap-2 inline-flex">
-                              <div class="w-4 h-4 relative"></div>
+                              <div class="w-4 h-4 relative">
+                                <img src="@/assets/images/login/google.svg"/>
+                              </div>
+
                               <div class="text-center text-gray-900 text-sm font-normal font-['Inter'] leading-[18px]">Iniciar Sesión con Google</div>
                           </div>
                       </div>
                       <div class="w-[383px] h-12 p-2.5 bg-white rounded-[5px] border border-gray-200 flex-col justify-center items-center gap-2.5 flex">
                           <div class="self-stretch justify-center items-center gap-2 inline-flex">
-                              <div class="w-4 h-4 relative"></div>
+                              <div class="w-4 h-4 relative">
+                                <img src="@/assets/images/login/facebook.svg"/>
+                              </div>
                               <div class="text-center text-gray-900 text-sm font-normal font-['Inter'] leading-[18px]">Iniciar Sesión con Facebook</div>
                           </div>
                       </div>
@@ -43,7 +52,7 @@
               </div>
           </div>
           <div class="w-[585px] h-[550px] relative">
-              <img class="w-[585px] h-[550px] left-0 top-0 absolute" src="https://via.placeholder.com/585x550" />
+              <img class="w-[585px] h-[550px] left-0 top-0 absolute" src="@/assets/images/login/Rectangle-5017.png" />
               <div class="w-[585px] h-[550px] p-8 left-0 top-0 absolute bg-slate-800 bg-opacity-95 flex-col justify-end items-start gap-2.5 inline-flex">
                   <div class="flex-col justify-center items-start flex">
                       <div class="w-[219px] text-gray-200 text-2xl font-light font-['Inter']">Bienvenidos a</div>
@@ -56,7 +65,7 @@
           <div class="self-stretch justify-start items-center gap-4 inline-flex">
               <div class="justify-start items-end gap-2 flex">
                   <div class="w-6 h-6 relative">
-                      <div class="w-6 h-6 left-0 top-0 absolute bg-zinc-300"></div>
+                    <img src="@/assets/images/login/home_pin.svg" />
                   </div>
                   <div class="text-blue-950 text-base font-normal font-['Inter']">TodoFull, 123 East, 17th Street, St. louis 10001,</div>
               </div>
@@ -68,26 +77,31 @@
               <div class="justify-start items-center gap-[26px] inline-flex">
                   <div class="justify-start items-start gap-6 flex">
                       <div class="w-6 h-6 relative">
-                          <div class="w-6 h-6 left-0 top-0 absolute"></div>
+                          <div class="w-6 h-6 left-0 top-0 absolute">
+                            <img src="@/assets/images/login/facebook-black-1.svg" />
+                          </div>
+                      </div>
+                      <div class="w-6 h-6 relative">
+                          <div class="w-6 h-6 left-0 top-0 absolute">
+                            <img src="@/assets/images/login/twitter-black-1.svg" />
+                          </div>
+                      </div>
+                      <div class="w-6 h-6 relative">
+                          <div class="w-6 h-6 left-0 top-0 absolute">
+                            <img src="@/assets/images/login/linkedin-black-1.svg" />
+                          </div>
                       </div>
                       <div class="w-6 h-6 relative">
                           <div class="w-6 h-6 left-0 top-0 absolute"></div>
+                          <img src="@/assets/images/login/youtube-color-1.svg" />
                       </div>
                       <div class="w-6 h-6 relative">
                           <div class="w-6 h-6 left-0 top-0 absolute"></div>
-                          <img class="w-[18px] h-4 left-[3px] top-[4px] absolute" src="https://via.placeholder.com/18x16" />
+                          <img src="@/assets/images/login/instagram-black-1.svg" />
                       </div>
                       <div class="w-6 h-6 relative">
                           <div class="w-6 h-6 left-0 top-0 absolute"></div>
-                          <img class="w-[18px] h-[13px] left-[3px] top-[6px] absolute" src="https://via.placeholder.com/18x13" />
-                      </div>
-                      <div class="w-6 h-6 relative">
-                          <div class="w-6 h-6 left-0 top-0 absolute"></div>
-                          <img class="w-[18px] h-[18px] left-[3px] top-[3px] absolute" src="https://via.placeholder.com/18x18" />
-                      </div>
-                      <div class="w-6 h-6 relative">
-                          <div class="w-6 h-6 left-0 top-0 absolute"></div>
-                          <img class="w-[18px] h-[11px] left-[3px] top-[7px] absolute" src="https://via.placeholder.com/18x11" />
+                          <img src="@/assets/images/login/googleplus-black-1.svg" />
                       </div>
                   </div>
               </div>
