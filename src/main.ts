@@ -15,6 +15,7 @@ import moshaToasTify from "@/plugins/moshaToastify";
 import VueFeather from "vue-feather";
 import axios from "@/plugins/axios";
 import deepCopy from "@/plugins/deepCopy";
+import './index.css'
 
 //sweet alert
 import VueSweetalert2 from "vue-sweetalert2";
