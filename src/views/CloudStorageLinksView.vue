@@ -87,46 +87,34 @@
                       }}
                     </td>
                     <td v-if="!showFromChat || currentViewType === 'audios'">
-                      <a
-                        v-if="cloudStorageLink.url"
-                        :href="cloudStorageLink.url"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        >{{ cloudStorageLink.url }}</a
+                      <div
+                        v-for="(file, fileIndex) in cloudStorageLink.files"
+                        :key="fileIndex"
                       >
-                      <template v-else>
-                        <div
-                          v-for="(file, fileIndex) in cloudStorageLink.files"
-                          :key="fileIndex"
+                        <a
+                          v-if="file.url && file.type !== 'audio/wav'"
+                          :href="file.url"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          >{{ file.url }}</a
                         >
-                          <a
-                            v-if="file.url && file.type !== 'audio/wav'"
-                            :href="file.url"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            >{{ file.url }}</a
-                          >
-                          <div v-else>
-                            <v-row>
-                              <v-col sm="8">
-                                <audio
-                                  style="max-width: 90%"
-                                  controls
-                                  :src="file.url"
-                                ></audio
-                              ></v-col>
-                              <v-col sm="4">
-                                <div
-                                  class="audio-duration"
-                                  v-if="file.duration"
-                                >
-                                  {{ Math.floor(file.duration / 1000) }} segs
-                                </div></v-col
-                              >
-                            </v-row>
-                          </div>
+                        <div v-else>
+                          <v-row>
+                            <v-col sm="8">
+                              <audio
+                                style="max-width: 90%"
+                                controls
+                                :src="file.url"
+                              ></audio
+                            ></v-col>
+                            <v-col sm="4">
+                              <div class="audio-duration" v-if="file.duration">
+                                {{ Math.floor(file.duration / 1000) }} segs
+                              </div></v-col
+                            >
+                          </v-row>
                         </div>
-                      </template>
+                      </div>
                     </td>
                     <td>
                       {{ cloudStorageLink.name }}
