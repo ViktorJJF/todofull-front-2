@@ -170,6 +170,7 @@
                           {{ chat.pending_messages_count }}
                         </div>
                         <div
+                          style="font-size: 1.5em"
                           v-if="
                             chat.programmedMessages &&
                             chat.programmedMessages.length > 0
@@ -358,6 +359,7 @@
                                 v-bind="props"
                                 icon="mdi-chevron-down mdi"
                                 small
+                                class="button-message-options"
                               >
                               </v-btn>
                             </template>
