@@ -1,6 +1,6 @@
 <template>
-  <div class="w-[1440px] h-[900px] px-[135px] pt-[175px] pb-[90px] bg-sky-50 flex-col justify-end items-center gap-10 inline-flex">
-      <div class="self-stretch shadow justify-start items-start inline-flex">
+  <div class="w-full h-full px-[175px] pt-[80px] pb-[30px] bg-sky-50 flex-col justify-end items-center gap-10 inline-flex ">
+      <div class="w-[1170px] self-stretch shadow justify-start items-start inline-flex">
           <div class="w-[585px] h-[550px] p-2.5 bg-white flex-col justify-center items-center gap-2.5 inline-flex">
               <div class="flex-col justify-start items-center gap-8 flex">
                   <div class="w-[72px] h-[72px] justify-center items-center inline-flex">
