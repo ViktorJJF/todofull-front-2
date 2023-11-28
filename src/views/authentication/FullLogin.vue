@@ -7,17 +7,17 @@
                       <img class="w-[72px] h-[72px]" src="@/assets/images/login/icono.png" />
                   </div>
                   <div class="flex-col justify-start items-center gap-4 flex">
-                      <div class="flex-col justify-start items-start gap-2 flex">
-                          <div class="w-[383px] h-12 px-4 bg-neutral-50 rounded-lg border border-gray-200 justify-between items-center inline-flex">
-                              <div class="text-gray-500 text-sm font-normal font-['Inter'] leading-[18px]">Email</div>
-                              <div class="w-3.5 h-3.5 relative">
+                    <div class="flex-col justify-start items-start gap-2 flex">
+                        <div class="w-[383px] h-12 px-4 bg-neutral-50 rounded-lg border border-gray-200 justify-between items-center inline-flex">
+                            <input type="email" v-model="user.email" class="w-full h-full bg-transparent focus:outline-none text-gray-500 text-sm font-normal font-['Inter'] leading-[18px]" placeholder="Email" />
+                            <div class="w-3.5 h-3.5 relative">
                                 <img src="@/assets/images/login/envelope.svg"/>
-                              </div>
-                          </div>
-                      </div>
+                            </div>
+                        </div>
+                    </div>
                       <div class="flex-col justify-start items-start gap-2 flex">
                           <div class="w-[383px] h-12 px-4 bg-neutral-50 rounded-lg border border-gray-200 justify-between items-center inline-flex">
-                              <div class="text-gray-500 text-sm font-normal font-['Inter'] leading-[18px]">Contraseña</div>
+                              <input type="password" v-model="user.password" class="w-full h-full bg-transparent focus:outline-none text-gray-500 text-sm font-normal font-['Inter'] leading-[18px]" placeholder="Contraseña" />
                               <div class="w-3.5 h-3.5 relative">
                                 <img src="@/assets/images/login/lock.svg"/>
                               </div>
@@ -25,11 +25,13 @@
                       </div>
                   </div>
                   <div class="flex-col justify-start items-center gap-4 flex">
-                      <div class="self-stretch h-12 p-2.5 bg-blue-800 rounded-[5px] shadow flex-col justify-center items-center gap-2.5 flex">
+                      <button @click="login" class="self-stretch h-12 p-2.5 bg-blue-800 rounded-[5px] shadow flex-col justify-center items-center gap-2.5 flex">
                           <div class="justify-start items-center gap-2 inline-flex">
-                              <div class="text-center text-gray-200 text-sm font-semibold font-['Inter']">Iniciar Sesión</div>
+                              <div class="text-center text-gray-200 text-sm font-semibold font-['Inter']">
+                                Iniciar Sesión
+                              </div>
                           </div>
-                      </div>
+                        </button>
                       <div class="w-[383px] h-12 p-2.5 bg-white rounded-[5px] border border-gray-200 flex-col justify-center items-center gap-2.5 flex">
                           <div class="self-stretch justify-center items-center gap-2 inline-flex">
                               <div class="w-4 h-4 relative">
@@ -142,5 +144,5 @@ export default {
 };
 </script>
 
-<style lang="">
+<style scoped lang="">
 </style>
