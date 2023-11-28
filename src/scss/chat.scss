@@ -481,8 +481,13 @@ html {
 
 .tooltip-controls:hover .tooltiptext {
   visibility: visible;
-  left: 88%;
-  bottom: 50%;
+  top: 0;    
+  right: 0;   
+}
+
+.button-message-options{
+  width: 25px !important;
+  height: 25px !important;
 }
 
 .owner {
