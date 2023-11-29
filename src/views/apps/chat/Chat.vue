@@ -911,7 +911,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
             <v-table>
               <thead>
                 <tr>
-                  <th class="" v-if="odoo_partner_info.team_id">Team ID</th>
+                  <th class="" v-if="odoo_partner_info?.team_id">Team ID</th>
                   <th class="">RFM</th>
                   <th class="">Ventas</th>
                   <th class="">Tickets</th>
@@ -920,17 +920,17 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
               </thead>
               <tbody v-if="odoo_partner_info">
                 <tr>
-                  <td v-if="odoo_partner_info.team_id">
+                  <td v-if="odoo_partner_info?.team_id">
                     <span
                       :class="`v-chip v-chip--label v-theme--light text-success v-chip--density-default v-chip--size-default v-chip--variant-tonal`"
                       draggable="false"
                       close=""
                       text-color="white"
                       ><span class="v-chip__underlay"></span
-                      >{{ odoo_partner_info.team_id }}</span
+                      >{{ odoo_partner_info?.team_id }}</span
                     >
                   </td>
-                  <td>
+                  <td v-if="odoo_partner_info?.rmf_score">
                     <span
                       :class="`v-chip v-chip--label v-theme--light ${
                         odoo_partner_info.rmf_score > 5
