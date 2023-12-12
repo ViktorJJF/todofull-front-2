@@ -6,5 +6,4 @@ const DASHBOARD_BASE_URL: string =
     : environment === "development"
       ? "https://dev.todofull.club"
       : "https://todofull.club";
-console.log("DASHBOARD_BASE_URL", DASHBOARD_BASE_URL)
 export default { DASHBOARD_BASE_URL };
