@@ -2,14 +2,15 @@
   "extends": "@vue/tsconfig/tsconfig.web.json",
   "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
   "compilerOptions": {
+    "verbatimModuleSyntax": true,
+    "ignoreDeprecations": "5.0",
     "baseUrl": ".",
     "strict": false, // ir migrando de a poquito y pasar a true
     "paths": {
       "@/*": ["*", "./src/*"]
     },
     "allowJs": true,
-    "lib": ["ES2015", "ES2016", "DOM", "ES2018.Promise"],
-    "ignoreDeprecations": "5.0"
+    "lib": ["ES2017", "ES2015", "ES2016", "DOM", "ES2018.Promise"]
   },
 
   "references": [
@@ -17,5 +18,5 @@
       "path": "./tsconfig.vite-config.json"
     }
   ],
-  "exclude": ["node_modules", "dist"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -95,7 +95,7 @@
             </v-col>
             <v-col :cols="3">
               <v-btn
-                @click="handleCopyAnswer('image')"
+                @click="sendImageToChat(selected.customImages[0])"
                 :disabled="!selected.customImages[0]"
                 >Imagen</v-btn
               >
@@ -193,7 +193,7 @@ const handleClearVariations = () => {
   selectedVariations.value = [];
 };
 
-const handleCopyAnswer = (type: string = "all") => {
+const handleCopyAnswer = async (type: string = "all") => {
   getMessage(type).then((message) => {
     console.log(message);
     navigator.clipboard.writeText(message).then(() => {
@@ -201,6 +201,8 @@ const handleCopyAnswer = (type: string = "all") => {
       store.state.chatsModule.hasPendingNegotiationStatus = true;
     });
   });
+  const categoriesIds = selected.value.categories.map((el) => el._id);
+  await addTodofullLabelsByChildren(categoriesIds);
 };
 
 const copyAnswersAndSend = (type: string = "all") => {
@@ -333,6 +335,17 @@ const fetchItems = async () => {
 
   items.value = res.data.payload;
   isLoading.value = false;
+};
+
+const sendImageToChat = async (url) => {
+  sendMessage("", "Agente", "image", { url });
+  chatSidebar.SET_SIDEBAR_DRAWER();
+  store.commit(
+    "chatsModule/updateHasToUpdateSelectedChat",
+    !store.state.chatsModule.hasToUpdateSelectedChat
+  );
+  const categoriesIds = selected.value.categories.map((el) => el._id);
+  await addTodofullLabelsByChildren(categoriesIds);
 };
 
 watch(selected, (selected) => {

@@ -500,9 +500,23 @@ export const getQueryParams = () => {
   return queryParams;
 };
 
-export const uploadFile = async (file: any) => {
+export const uploadFile = async (file: any, type: string = "") => {
   const formData = new FormData();
-  formData.append("file", file);
-  let response = await filesService.create(formData);
+  if (type === "audio") {
+    // just for audios
+    formData.append("file", file, "audio/wav");
+  } else {
+    formData.append("file", file);
+  }
+  let response;
+  if (type === "audio") {
+    response = await filesService.createAudio(formData);
+  } else {
+    response = await filesService.create(formData);
+  }
   return response.data.payload.url;
+};
+
+export const bytesToMB = (bytes) => {
+  return bytes / 1024 / 1024;
 };

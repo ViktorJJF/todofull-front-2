@@ -2,8 +2,10 @@ import io from "socket.io-client";
 import environment from "@/environment";
 
 let socketUrl =
-  environment === "development"
+  environment === "local"
     ? "http://localhost:3000"
+    : environment === "development"
+    ? "https://dev.chatbot.todofull.club"
     : "https://chatbotmujeron.herokuapp.com";
 const socket = io(socketUrl);
 import store from "@/store/index";
