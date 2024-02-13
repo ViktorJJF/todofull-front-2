@@ -870,12 +870,12 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
             class="mb-2"
           ></v-text-field>
           <span>Etiquetas</span>
-          <TodofullLabelsSelectorv2
+          <TodofullLabelsSelectorV2
             :initialData="userForm.todofullLabels"
             class="my-3"
             @onSelectTodofullLabels="onSelectTodofullLabels"
             :key="updateLabels"
-          ></TodofullLabelsSelectorv2>
+          ></TodofullLabelsSelectorV2>
           <span>Estados de Negociación</span>
           <NegotiationStatusesSelector
             :initialData="selectedNegotiationStatus"
@@ -1433,7 +1433,7 @@ import InfiniteScroll from "@/components/InfiniteScroll.vue";
 import BaseLeftRightPartVue from "@/components/BaseLeftRightPart.vue";
 import { buildSuccess, buildAlert } from "@/utils/utils.ts";
 import AgentsSelector from "@/components/AgentsSelector.vue";
-import TodofullLabelsSelectorv2 from "@/components/TodofullLabelsSelectorv2.vue";
+import TodofullLabelsSelectorV2 from "@/components/TodofullLabelsSelectorV2.vue";
 import Countdown from "@/components/Countdown.vue";
 import NegotiationStatusesSelector from "@/components/NegotiationStatusesSelector.vue";
 import { useChatSidebarStore } from "@/stores/chatSidebar";
@@ -1454,7 +1454,7 @@ export default {
   components: {
     BaseLeftRightPartVue,
     AgentsSelector,
-    TodofullLabelsSelectorv2,
+    TodofullLabelsSelectorV2,
     InfiniteScroll,
     UploadImages,
     NegotiationStatusesSelector,
