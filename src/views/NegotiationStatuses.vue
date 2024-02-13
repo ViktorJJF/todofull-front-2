@@ -254,6 +254,7 @@ export default {
           sort: "createdAt",
           order: "asc",
           country: this.selectedCountry,
+          companyId: this.$store.getters["authModule/getCurrentCompany"].company._id,
         }),
       ]);
       this.negotiationStatuses = JSON.parse(
