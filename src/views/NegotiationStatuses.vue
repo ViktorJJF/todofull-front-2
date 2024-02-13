@@ -272,6 +272,7 @@ export default {
     },
     async save(negotiationStatus, index) {
       negotiationStatus.isEditing = false;
+      negotiationStatus.company = this.$store.getters["authModule/getCurrentCompany"].company._id;
       for (const automation of negotiationStatus.automations) {
         let [hours, minutes, seconds] =
           automation.afterTimeFormatted.split(":"); // 10:30
