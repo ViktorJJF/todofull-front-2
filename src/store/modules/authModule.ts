@@ -5,6 +5,7 @@ import router from "@/router";
 
 const state = () => ({
   user: JSON.parse(localStorage.getItem('user')),
+  companies: [],
   token: !!localStorage.getItem("token") || null,
   isTokenSet: !!localStorage.getItem("token"),
 });
@@ -14,6 +15,7 @@ const getters = {
     state.user ? state.user.first_name + " " + state.user.last_name : " ",
   token: (state) => (state.user ? state.user.token : " "),
   isTokenSet: (state) => state.isTokenSet,
+  getCurrentCompany: (state) => state.companies.find(c => c.selected === true),
 };
 const actions = {
   initialLoad({ commit }) {
@@ -33,6 +35,8 @@ const actions = {
             localStorage.setItem("token", response.data.token);
             commit("saveUser", response.data.user);
             commit("saveToken", response.data.token);
+            commit("setCompanies", response.data.user.companies)
+            console.log("setCompanies 1", response.data.user.companies);
             buildSuccess("Bienvenido");
             resolve(null);
           }
@@ -65,6 +69,14 @@ const actions = {
     const user = JSON.parse(localStorage.getItem("user"));
     commit("saveUser", user);
     commit("saveToken", localStorage.getItem("token"));
+    commit("setCompanies", user.companies)
+    console.log("setCompanies 2", user.companies);
+  },
+  setCurrentCompany({ commit, id }) {
+    commit("setCurrentCompany", id);
+  },
+  setCompanies({ commit }, companies) {
+    commit("setCompanies", companies)
   },
   logout({ commit }) {
     window.localStorage.removeItem("token");
@@ -83,6 +95,20 @@ const mutations = {
     state.user = null;
     state.token = null;
     state.isTokenSet = false;
+  },
+  setCurrentCompany(state, id) {
+    state.companies.map(c => {
+      c.selected = false;
+    });
+    state.companies[id].selected = true;
+  },
+  setCompanies(state, companies) {
+    const companyList = companies.map(c => {
+      c.selected = c.default === true;
+      return c;
+    });
+    console.log("companyList 2", companyList);
+    state.companies = companyList;
   },
   saveUser(state, user) {
     state.user = user;
