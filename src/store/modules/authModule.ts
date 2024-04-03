@@ -16,7 +16,7 @@ const getters = {
     state.user ? state.user.first_name + " " + state.user.last_name : " ",
   token: (state) => (state.user ? state.user.token : " "),
   isTokenSet: (state) => state.isTokenSet,
-  getCurrentCompany: (state) => state.companies.find(c => c.selected === true),
+  getCurrentCompany: (state) => state.selectedCompany,
 };
 const actions = {
   initialLoad({ commit }) {
@@ -41,7 +41,7 @@ const actions = {
             if (index >= 0) {
               commit("setCurrentCompany", response.data.user.corporation.companies[index].company._id);
             }
-            console.log("setCompanies 1", response.data.user.companies);
+            console.log("setCompanies 1", response.data.user.corporation.companies);
             buildSuccess("Bienvenido");
             resolve(null);
           }
