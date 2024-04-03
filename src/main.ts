@@ -1,4 +1,4 @@
-import { createApp } from "vue";
+import { createApp, watchEffect } from "vue";
 import { createPinia } from "pinia";
 import store from "./store";
 import App from "./App.vue";
@@ -23,6 +23,8 @@ import "sweetalert2/dist/sweetalert2.min.css";
 import "@/plugins/sockets";
 
 const app = createApp(App);
+app.config.performance = true;
+
 app.use(VueSweetalert2);
 app.component(VueFeather.name, VueFeather);
 app.use(PerfectScrollbar);
@@ -34,4 +36,15 @@ app.use(VueApexCharts);
 app.use(moshaToasTify);
 app.use(deepCopy);
 app.use(router);
+app.mixin({
+    created() {
+      try {
+        if (this.$store.getters["authModule/isTokenSet"] && this.$store.state.authModule.user) {
+          this.$store.dispatch("authModule/autoLogin");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+});
 app.use(vuetify).mount("#app");

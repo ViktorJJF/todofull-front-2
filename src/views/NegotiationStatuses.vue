@@ -254,6 +254,7 @@ export default {
           sort: "createdAt",
           order: "asc",
           country: this.selectedCountry,
+          companyId: this.$store.getters["authModule/getCurrentCompany"].company._id,
         }),
       ]);
       this.negotiationStatuses = JSON.parse(
@@ -283,6 +284,7 @@ export default {
           data: negotiationStatus,
         });
       } else {
+        negotiationStatus.company = this.$store.getters["authModule/getCurrentCompany"].company._id;
         this.negotiationStatuses[index] = await this.$store.dispatch(
           "negotiationStatusesModule/create",
           {
