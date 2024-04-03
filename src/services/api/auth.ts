@@ -2,10 +2,11 @@ import axios from "axios";
 import config from "@/config";
 
 export default {
-  login(email, password) {
+  login(email, password, corporation) {
     return axios.post(config.DASHBOARD_BASE_URL + "/api/login", {
       email,
       password,
+      corporation,
     });
   },
   editUser(id, payload) {
