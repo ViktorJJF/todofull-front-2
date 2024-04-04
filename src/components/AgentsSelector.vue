@@ -36,7 +36,9 @@ export default {
   },
   methods: {
     async initialize() {
-      await Promise.all([this.$store.dispatch("telefonosModule/list")]);
+      await Promise.all([this.$store.dispatch("telefonosModule/list", {
+        companies: [this.$store.getters["authModule/getCurrentCompany"].company._id],
+      })]);
       this.telefonos = this.$store.state.telefonosModule.telefonos.filter(
         (telefono) => telefono.active == true && telefono.agenteId != null
       );

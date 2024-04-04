@@ -3023,6 +3023,7 @@ export default {
             sort: "name",
             order: "1",
             status: "APPROVED",
+            companies: [this.$store.getters["authModule/getCurrentCompany"].company._id],
             is_active: true,
           })
         ).data.payload;
