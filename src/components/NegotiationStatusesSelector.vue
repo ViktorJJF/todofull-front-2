@@ -73,6 +73,7 @@ export default {
       sort: "name",
       order: "asc",
       country: this.country,
+      company: this.$store.getters["authModule/getCurrentCompany"].company._id,
     });
     // }
     this.negotiationStatuses =

@@ -57,6 +57,13 @@
                   action="/dashboards/analytical"
                 >
                   <v-text-field
+                    v-model="corporation"
+                    label="Corporación"
+                    class="mt-4"
+                    required
+                    variant="outlined"
+                  ></v-text-field>
+                  <v-text-field
                     v-model="user.email"
                     :rules="emailRules"
                     label="E-mail"
@@ -125,6 +132,7 @@ export default {
     return {
       loading: false,
       user: { email: "", password: "" },
+      corporation: null,
     };
   },
   created() {
@@ -135,9 +143,13 @@ export default {
   methods: {
     login() {
       let user = this.user;
+      let corporation = this.corporation;
       // this.loading = true;
       this.$store
-        .dispatch("authModule/login", user)
+        .dispatch("authModule/login", {
+          user,
+          corporation,
+        })
         .then(() => {
           this.$router.push({ name: "dashboard" });
         })
