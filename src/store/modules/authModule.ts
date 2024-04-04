@@ -74,7 +74,11 @@ const actions = {
     const user = JSON.parse(localStorage.getItem("user"));
     commit("saveUser", user);
     commit("saveToken", localStorage.getItem("token"));
-    commit("setCompanies", user.companies)
+    commit("setCompanies", user.corporation.companies)
+    const selectedCompany = JSON.parse(localStorage.getItem("selectedCompany"));
+    if (selectedCompany) {
+      commit("setCurrentCompany", selectedCompany.company._id);
+    }
   },
   setCompanies({ commit }, companies) {
     commit("setCompanies", companies)
