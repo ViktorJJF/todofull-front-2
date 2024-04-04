@@ -1601,14 +1601,19 @@ export default {
     // check filters by queryParams
     this.checkQueryParamsFilters();
     this.chatSidebar = useChatSidebarStore();
-    sellTeamsService.list({ byAgent: true }).then(async (res) => {
+    sellTeamsService.list({
+      byAgent: true,
+      company: this.$store.getters["authModule/getCurrentCompany"].company._id,
+    }).then(async (res) => {
       this.selectedSellTeam =
         res.data.payload.length > 0 ? res.data.payload[0]._id : null;
       this.selectedSellTeamObject =
         res.data.payload.length > 0 ? res.data.payload[0] : null;
       this.sellTeams = res.data.payload;
       // init bots
-      await this.$store.dispatch("botsModule/list");
+      await this.$store.dispatch("botsModule/list", {
+        companies: [this.$store.getters["authModule/getCurrentCompany"].company._id],
+      });
       await this.initialize();
       // after 3 secs, load more chats
       if (this.page === 1) {
@@ -1817,6 +1822,7 @@ export default {
       if (this.selectedChatId) {
         payload.selectedChatId = this.selectedChatId;
       }
+      payload.company = this.$store.getters["authModule/getCurrentCompany"].company._id;
       await Promise.all([this.$store.dispatch("chatsModule/list", payload)]);
       this.chats = this.$store.state.chatsModule.chats;
       this.isDataReady = true;
@@ -2381,6 +2387,7 @@ export default {
         if (this.selectedSellTeam) {
           payload.teamId = this.selectedSellTeam;
         }
+        payload.company = this.$store.getters["authModule/getCurrentCompany"].company._id;
         const response = await chatsService.list(payload);
         for (const chat of response.data.payload) {
           this.$store.commit("chatsModule/addChatToEnd", chat);
@@ -3018,6 +3025,7 @@ export default {
             sort: "name",
             order: "1",
             status: "APPROVED",
+            companies: [this.$store.getters["authModule/getCurrentCompany"].company._id],
             is_active: true,
           })
         ).data.payload;

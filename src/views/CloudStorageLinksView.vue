@@ -384,6 +384,7 @@ async function initialize(pageNumber: number = 1): Promise<any> {
     order: "desc",
     limit: 10,
     type: currentViewType.value,
+    companies: [$store.getters["authModule/getCurrentCompany"].company._id],
   };
   if (selectedCountry.value) {
     payload["country"] = selectedCountry.value;
