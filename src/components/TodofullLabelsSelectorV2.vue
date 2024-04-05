@@ -91,7 +91,6 @@ export default {
       await this.$store.dispatch("todofullLabelsModule/list", {
         sort: "name",
         order: "asc",
-        companies: [this.$store.getters["authModule/getCurrentCompany"].company._id],
         // is_active: true,
       });
     }
