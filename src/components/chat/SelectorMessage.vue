@@ -7,11 +7,15 @@
         : message.isProgrammed
         ? 'chat-programmed-msg-text'
         : '',
+      'chat-msg-container',
     ]"
     class="message-box"
     @mouseover="hover = true"
     @mouseleave="hover = false"
   >
+    <div class="chat-reaction" v-if="message.reaction">
+      {{ message.reaction.emoji }}
+    </div>
     <v-icon v-if="message.isProgrammed">mdi mdi-clock</v-icon>
     <div
       v-if="

@@ -76,3 +76,19 @@
   width: 45px; /* Set a fixed width */
   font-size: 0.75rem; /* Optionally reduce font size */
 }
+
+.chat-msg-container {
+  position: relative;
+  display: inline-block; /* or 'block' depending on your layout */
+}
+
+.chat-reaction {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: white;
+  border-radius: 50%;
+  padding: 3px;
+  font-size: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
