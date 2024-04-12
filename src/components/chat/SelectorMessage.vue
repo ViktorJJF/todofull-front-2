@@ -15,9 +15,10 @@
     <v-icon v-if="message.isProgrammed">mdi mdi-clock</v-icon>
     <div
       v-if="
-        message.context &&
-        Object.keys(message.context).length > 0 &&
-        messageContext
+        (message.context &&
+          Object.keys(message.context).length > 0 &&
+          messageContext) ||
+        message.payload?.reply_to?.mid
       "
     >
       <v-alert
@@ -173,8 +174,11 @@ const emit = defineEmits([
 
 onMounted(() => {
   const context = message.value.context;
-  if (context) {
-    messageContext.value = getMessageByPlatformId(context.id);
+  const replyTo = message.value.payload?.reply_to?.mid;
+  if (context || replyTo) {
+    messageContext.value = getMessageByPlatformId(
+      replyTo ? replyTo : context?.id
+    );
   }
 });
 
