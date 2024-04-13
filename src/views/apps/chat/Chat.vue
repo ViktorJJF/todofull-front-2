@@ -1595,6 +1595,7 @@ export default {
       isGPTLoading: false,
       openAiMessages: [],
       openaiDialog: false,
+      selectedChatPlatformId: null,
     };
   },
   created() {
@@ -1838,6 +1839,9 @@ export default {
           return;
         }
       }
+      this.selectedChatPlatformId = this.$store.state.botsModule.bots.find(
+        (el) => el.fanpageId == chat.pageID
+      )?._id;
       this.remainingMillis = 24 * 60 * 60 * 1000;
       this.remainingMillisFacebook = 24 * 60 * 60 * 1000;
       this.clearForm();
@@ -1906,7 +1910,7 @@ export default {
         this.updateCountdown += 1;
       }
       if (chat.leadId) {
-        this.userForm.name = chat.leadId.sourceName || chat.leadId.appName;
+        this.userForm.name = this.getChatUserName(chat);
         this.userForm.email = chat.leadId.email;
         this.userForm.city = chat.leadId.ciudad;
         this.userForm.todofullLabels = chat.leadId.todofullLabels;
@@ -1919,7 +1923,7 @@ export default {
           (el) => el.fuente === chat.leadId.fuente
         );
         if (detail) {
-          this.userForm.name = detail.nombre;
+          this.userForm.name = this.getChatUserName(chat);
           this.userForm.email = detail.email;
           this.userForm.city = detail.ciudad;
           this.userForm.notes = detail.nota;
@@ -2069,18 +2073,21 @@ export default {
       return userData;
     },
     getChatUserName(chat) {
-      let userData = chat.cleanLeadId
-        ? this.getChatUserData(chat)
-        : chat.leadId
-        ? chat.leadId.sourceName
-        : "Usuario";
-      if (chat.leadId && (chat.leadId.sourceName || chat.leadId.appName)) {
-        return chat.leadId.sourceName || chat.leadId.appName;
+      // check if has cleanLeadId
+      const pageId = chat.pageID;
+      // search bot with pageId
+      const bot = this.$store.state.botsModule.bots.find(
+        (el) => el.fanpageId == pageId
+      );
+      if (chat.cleanLeadId) {
+        const detail = chat.cleanLeadId.details.find(
+          (el) => el.fuente == bot._id
+        );
+        // get chat pageId
+
+        return detail.nombre || detail.appName || "Usuario";
       }
-      if (userData) {
-        return userData.nombre;
-      }
-      return "Usuario";
+      return chat.leadId?.sourceName || chat.leadId?.appName || "Usuario";
     },
     getPlatformIconStyle(platform) {
       const platforms = {
@@ -2158,9 +2165,7 @@ export default {
       }
     },
     onSelectTodofullLabels(selectedLabels) {
-      if (selectedLabels.length > 0) {
-        this.userForm.todofullLabels = selectedLabels;
-      }
+      this.userForm.todofullLabels = selectedLabels;
     },
     async saveUserForm(selectedChat) {
       let createdItem;
