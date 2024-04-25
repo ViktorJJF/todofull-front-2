@@ -47,6 +47,10 @@ const props = defineProps({
   message: { type: Object, default: () => ({}) },
   messages: { type: Array, default: () => [] },
 });
+
+function openUrl(url) {
+  window.open(url, "_blank");
+}
 </script>
 
 <style lang="scss" scoped></style>
