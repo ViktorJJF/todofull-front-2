@@ -71,6 +71,20 @@ const module = {
           });
       });
     },
+    getLabelsByProductCategory({ commit }, { categoriesIds }) {
+      return new Promise((resolve, reject) => {
+        api
+          .getLabelsByProductCategory(categoriesIds)
+          .then(() => {
+            commit("loadingModule/showLoading", true, { root: true });
+            buildSuccess("Etiquetas de producto agregadas");
+            resolve(undefined);
+          })
+          .catch((error) => {
+            handleError(error, commit, reject);
+          });
+      });
+    },
   },
   mutations: {
     list(state, data) {
