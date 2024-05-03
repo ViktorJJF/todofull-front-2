@@ -225,7 +225,6 @@
                 <NegotiationStatusesSelector
                   v-if="dialog"
                   :initialData="editedItem.negotiationStatusId"
-                  :country="selectedCountry"
                   class="my-3"
                   @onSelectNegotiationStatuses="onSelectNegotiationStatuses"
                 >
@@ -289,7 +288,6 @@ import { uploadFile, getFormat } from "@/utils/utils";
 
 const props = defineProps({
   showFromChat: { type: Boolean, default: false },
-  country: { type: String, default: "" },
   company: { type: String, default: "" },
   type: { type: String, default: "" },
 });
@@ -316,7 +314,6 @@ const search = ref<string>("");
 const loadingButton = ref<boolean>(false);
 const delayTimer = ref<any>(null);
 const editedIndex = ref<number>(-1);
-const selectedCountry = ref<string>("Chile");
 const selectedCompany = ref<string>($store.getters["authModule/getCurrentCompany"].company._id);
 const headers = ref<any[]>([
   {

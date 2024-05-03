@@ -879,7 +879,6 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
           <span>Estados de Negociación</span>
           <NegotiationStatusesSelector
             :initialData="selectedNegotiationStatus"
-            :country="selectedCountry"
             class="my-3"
             @onSelectNegotiationStatuses="onSelectNegotiationStatuses"
             :key="updateNegotiationStatus"
