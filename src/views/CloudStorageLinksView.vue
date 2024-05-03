@@ -1,7 +1,6 @@
 <template>
   <v-container fluid>
     <v-row class="mb-3" v-show="!showFromChat">
-      <CountrySelector @onSelectedCountry="onSelectedCountry"></CountrySelector>
       <CompanySelector @onSelectedCompany="onSelectedCompany"></CompanySelector>
     </v-row>
     <v-row>
@@ -283,7 +282,6 @@ import TodofullLabelsSelectorV2 from "@/components/TodofullLabelsSelectorV2.vue"
 import NegotiationStatusesSelector from "@/components/NegotiationStatusesSelector.vue";
 import UploadFiles from "@/components/UploadFiles.vue";
 import AudioRecordingMany from "@/components/AudioRecordingMany.vue";
-import CountrySelector from "@/components/CountrySelector.vue";
 import CompanySelector from "@/components/CompanySelector.vue";
 // import PDFViewer from "@/components/PDFViewer.vue";
 import filesService from "@/services/api/files";
@@ -388,11 +386,7 @@ async function initialize(pageNumber: number = 1): Promise<any> {
     order: "desc",
     limit: 10,
     type: currentViewType.value,
-    // companies: [$store.getters["authModule/getCurrentCompany"].company._id],
   };
-  /*if (selectedCountry.value) {
-    payload["country"] = selectedCountry.value;
-  }*/
   if (selectedCompany.value) {
     payload["company"] = selectedCompany.value;
   }
@@ -519,15 +513,6 @@ function onSelectTodofullLabels(selectedLabels) {
   if (selectedLabels.length > 0) {
     editedItem.value.todofullLabels = selectedLabels;
   }
-}
-
-function onSelectedCountry(country) {
-  selectedCountry.value = country;
-  if (props.country) {
-    selectedCountry.value = props.country;
-  }
-  editedItem.value.country = country;
-  initialize();
 }
 
 function onSelectedCompany(company) {
