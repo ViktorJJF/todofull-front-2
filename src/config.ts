@@ -6,4 +6,10 @@ const DASHBOARD_BASE_URL: string =
     : environment === "development"
       ? "https://dev.todofull.club"
       : "https://todofull.club";
-export default { DASHBOARD_BASE_URL };
+const CHAT_BASE_URL: string =
+  environment === "local"
+    ? "http://localhost:3031"
+    : environment === "development"
+      ? "https://dev.chat-2.todofull.club"
+      : "https://chat-2.todofull.club";
+export default { DASHBOARD_BASE_URL, CHAT_BASE_URL };
