@@ -3,17 +3,17 @@
     <v-row class="mb-3">
       <div class="d-flex justify-space-evenly">
         <v-btn
-          v-for="(country, idx) of countries"
+          v-for="(company, idx) of companies"
           small
           icon
           color="white"
-          @click="toggleCountry(country)"
-          :class="{ selected: selectedCountry === country.value }"
+          @click="toggleCompany(company)"
+          :class="{ selected: selectedCompany === company.company._id }"
           :key="idx"
         >
-          <img style="width: 25px" :src="country.icon" />
+          <img style="width: 25px" :src="company.company.iconUrl" />
           <v-tooltip activator="parent" anchor="bottom">
-            {{ country.value }}
+            {{ company.company.name }}
           </v-tooltip>
         </v-btn>
       </div>
@@ -222,6 +222,7 @@ import PeruFlagR from "@/assets/images/flags/peru.png";
 import ChileFlagR from "@/assets/images/flags/chile.png";
 import ColombiaFlagR from "@/assets/images/flags/colombia.png";
 import EspaniaFlag from "@/assets/images/flags/espania.png";
+import { mapState } from 'vuex';
 
 export default {
   components: {
@@ -230,6 +231,7 @@ export default {
   data() {
     return {
       selectedCountry: "Chile",
+      selectedCompany: this.$store.getters["authModule/getCurrentCompany"].company._id,
       negotiationStatuses: [],
       countries: [
         { value: "Peru", icon: PeruFlagR },
@@ -239,11 +241,19 @@ export default {
       ],
     };
   },
+  computed: {
+    ...mapState({
+      companies: state => state.authModule.companies
+    })
+  },
   mounted() {
     this.initialize();
   },
   watch: {
     selectedCountry() {
+      this.initialize();
+    },
+    selectedCompany() {
       this.initialize();
     },
   },
@@ -253,8 +263,8 @@ export default {
         this.$store.dispatch("negotiationStatusesModule/list", {
           sort: "createdAt",
           order: "asc",
-          country: this.selectedCountry,
-          company: this.$store.getters["authModule/getCurrentCompany"].company._id,
+          // country: this.selectedCountry,
+          company: this.selectedCompany,
         }),
       ]);
       this.negotiationStatuses = JSON.parse(
@@ -341,6 +351,14 @@ export default {
       }
 
       this.selectedCountry = country.value;
+    },
+    toggleCompany(company) {
+      console.log("company", company);
+      if (this.selectedCompany === company.company._id) {
+        return (this.selectedCompany = null);
+      }
+
+      this.selectedCompany = company.company._id;
     },
   },
 };
