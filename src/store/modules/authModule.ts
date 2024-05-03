@@ -17,6 +17,7 @@ const getters = {
   token: (state) => (state.user ? state.user.token : " "),
   isTokenSet: (state) => state.isTokenSet,
   getCurrentCompany: (state) => state.selectedCompany,
+  getCompanies: (state) => state.companies,
 };
 const actions = {
   initialLoad({ commit }) {
