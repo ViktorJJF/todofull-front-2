@@ -218,10 +218,6 @@
 import VueTimepicker from "vue3-timepicker";
 import "vue3-timepicker/dist/VueTimepicker.css";
 import { convertMsToTime } from "@/utils/utils";
-import PeruFlagR from "@/assets/images/flags/peru.png";
-import ChileFlagR from "@/assets/images/flags/chile.png";
-import ColombiaFlagR from "@/assets/images/flags/colombia.png";
-import EspaniaFlag from "@/assets/images/flags/espania.png";
 import { mapState } from 'vuex';
 
 export default {
@@ -230,15 +226,8 @@ export default {
   },
   data() {
     return {
-      selectedCountry: "Chile",
       selectedCompany: this.$store.getters["authModule/getCurrentCompany"].company._id,
       negotiationStatuses: [],
-      countries: [
-        { value: "Peru", icon: PeruFlagR },
-        { value: "Chile", icon: ChileFlagR },
-        { value: "Colombia", icon: ColombiaFlagR },
-        { value: "España", icon: EspaniaFlag },
-      ],
     };
   },
   computed: {
@@ -250,9 +239,6 @@ export default {
     this.initialize();
   },
   watch: {
-    selectedCountry() {
-      this.initialize();
-    },
     selectedCompany() {
       this.initialize();
     },
@@ -263,7 +249,6 @@ export default {
         this.$store.dispatch("negotiationStatusesModule/list", {
           sort: "createdAt",
           order: "asc",
-          // country: this.selectedCountry,
           company: this.selectedCompany,
         }),
       ]);
@@ -325,7 +310,6 @@ export default {
       negotiationStatuses.unshift({
         isEditing: true,
         name: "Nuevo estado",
-        country: this.selectedCountry,
         automations: [
           {
             name: "Nuevo mensaje",
@@ -345,15 +329,7 @@ export default {
       }
       negotiationStatuses.splice(index, 1);
     },
-    toggleCountry(country) {
-      if (this.selectedCountry === country.value) {
-        return (this.selectedCountry = null);
-      }
-
-      this.selectedCountry = country.value;
-    },
     toggleCompany(company) {
-      console.log("company", company);
       if (this.selectedCompany === company.company._id) {
         return (this.selectedCompany = null);
       }
