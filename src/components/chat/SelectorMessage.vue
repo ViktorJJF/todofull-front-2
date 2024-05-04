@@ -108,7 +108,9 @@
             >publicación</a
           > </b
         ><img
-          v-if="message.payload.media_type === 'IMAGE'"
+          v-if="
+            message.payload.media_type === 'IMAGE' || message.payload.media_url
+          "
           :src="message.payload.media_url"
           style="cursor: pointer; height: 60%"
           @click="openUrl(message.payload.post_url)"
