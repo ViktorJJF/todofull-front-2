@@ -1,3 +1,5 @@
+import config from "@/config";
+
 interface sideberItemTo {
   name: string;
 }
@@ -10,7 +12,9 @@ interface SidebarItem {
   model?: boolean;
   children?: SidebarItem[];
   to?: string | sideberItemTo;
+  externalLink?: string;
 }
+const externalLink = config.CHAT_BASE_URL;
 
 const items: SidebarItem[] = [
   { header: "Home" },
@@ -25,7 +29,7 @@ const items: SidebarItem[] = [
   {
     title: "Chat",
     icon: "message-square",
-    to: "/apps/chat",
+    externalLink,
   },
   {
     title: "Estados de negociación",

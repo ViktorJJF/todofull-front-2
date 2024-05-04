@@ -22,6 +22,9 @@ function handleOption(item) {
         console.log("algo salio mal en logout:", err);
       });
   }
+  if (item.externalLink) {
+    window.open(item.externalLink, '_blank');
+  }
 }
 </script>
 
