@@ -10,7 +10,8 @@
       "@/*": ["*", "./src/*"]
     },
     "allowJs": true,
-    "lib": ["ES2017", "ES2015", "ES2016", "DOM", "ES2018.Promise"]
+    "lib": ["ES2017", "ES2015", "ES2016", "DOM", "ES2018.Promise"],
+    "forceConsistentCasingInFileNames": false
   },
 
   "references": [
