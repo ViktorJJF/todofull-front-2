@@ -2088,9 +2088,13 @@ export default {
         const detail = chat.cleanLeadId.details.find(
           (el) => el.fuente == bot._id
         );
+        let name = detail.nombre || detail.appName;
+        if (!name) {
+          name = chat.cleanLeadId.details.find((el) => el.nombre)?.nombre;
+        }
         // get chat pageId
 
-        return detail.nombre || detail.appName || "Usuario";
+        return name || "Usuario";
       }
       return chat.leadId?.sourceName || chat.leadId?.appName || "Usuario";
     },
