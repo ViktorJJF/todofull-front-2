@@ -7,17 +7,22 @@
         : message.isProgrammed
         ? 'chat-programmed-msg-text'
         : '',
+      'chat-msg-container',
     ]"
     class="message-box"
     @mouseover="hover = true"
     @mouseleave="hover = false"
   >
+    <div class="chat-reaction" v-if="message.reaction">
+      {{ message.reaction.emoji }}
+    </div>
     <v-icon v-if="message.isProgrammed">mdi mdi-clock</v-icon>
     <div
       v-if="
-        message.context &&
-        Object.keys(message.context).length > 0 &&
-        messageContext
+        (message.context &&
+          Object.keys(message.context).length > 0 &&
+          messageContext) ||
+        message.payload?.reply_to?.mid
       "
     >
       <v-alert
@@ -103,7 +108,9 @@
             >publicación</a
           > </b
         ><img
-          v-if="message.payload.media_type === 'IMAGE'"
+          v-if="
+            message.payload.media_type === 'IMAGE' || message.payload.media_url
+          "
           :src="message.payload.media_url"
           style="cursor: pointer; height: 60%"
           @click="openUrl(message.payload.post_url)"
@@ -173,8 +180,11 @@ const emit = defineEmits([
 
 onMounted(() => {
   const context = message.value.context;
-  if (context) {
-    messageContext.value = getMessageByPlatformId(context.id);
+  const replyTo = message.value.payload?.reply_to?.mid;
+  if (context || replyTo) {
+    messageContext.value = getMessageByPlatformId(
+      replyTo ? replyTo : context?.id
+    );
   }
 });
 

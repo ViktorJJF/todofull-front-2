@@ -27,4 +27,13 @@ export default {
       config.DASHBOARD_BASE_URL + `/api/todofull-labels/${id}`
     );
   },
+  getLabelsByProductCategory(categoriesIds) {
+    return axios.post(
+      config.DASHBOARD_BASE_URL +
+        `/api/todofull-labels/get-labels-by-product-categories`,
+      {
+        categoriesIds,
+      }
+    );
+  },
 };
