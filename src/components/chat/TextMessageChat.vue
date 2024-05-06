@@ -10,6 +10,27 @@
     ><img style="height: 60%" :src="message.payload.reply_to.story.url" />
     <v-divider class="my-2"></v-divider>
   </div>
+  <div v-if="message.referral">
+    Desde
+    <a :href="message.referral.ad?.preview_shareable_link" target="_blank"
+      >anuncio</a
+    >
+    <div v-if="message.referral.ads_context_data?.video_url">
+      <video
+        style="height: 60%"
+        :src="message.referral.ads_context_data.video_url"
+        controls
+      ></video>
+    </div>
+    <div v-else>
+      <img
+        style="height: 60%"
+        :src="message.referral.ad?.image_url"
+        @click="openUrl(message.referral.ad?.preview_shareable_link)"
+      />
+    </div>
+    <v-divider class="my-2"></v-divider>
+  </div>
 
   <div v-html="parseMarkdown(message.text)" ref="target"></div>
 </template>
@@ -26,6 +47,10 @@ const props = defineProps({
   message: { type: Object, default: () => ({}) },
   messages: { type: Array, default: () => [] },
 });
+
+function openUrl(url) {
+  window.open(url, "_blank");
+}
 </script>
 
 <style lang="scss" scoped></style>

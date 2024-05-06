@@ -170,6 +170,7 @@
                           {{ chat.pending_messages_count }}
                         </div>
                         <div
+                          style="font-size: 1.5em"
                           v-if="
                             chat.programmedMessages &&
                             chat.programmedMessages.length > 0
@@ -358,6 +359,7 @@
                                 v-bind="props"
                                 icon="mdi-chevron-down mdi"
                                 small
+                                class="button-message-options"
                               >
                               </v-btn>
                             </template>
@@ -908,7 +910,7 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
             <v-table>
               <thead>
                 <tr>
-                  <th class="" v-if="odoo_partner_info.team_id">Team ID</th>
+                  <th class="" v-if="odoo_partner_info?.team_id">Team ID</th>
                   <th class="">RFM</th>
                   <th class="">Ventas</th>
                   <th class="">Tickets</th>
@@ -917,17 +919,17 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
               </thead>
               <tbody v-if="odoo_partner_info">
                 <tr>
-                  <td v-if="odoo_partner_info.team_id">
+                  <td v-if="odoo_partner_info?.team_id">
                     <span
                       :class="`v-chip v-chip--label v-theme--light text-success v-chip--density-default v-chip--size-default v-chip--variant-tonal`"
                       draggable="false"
                       close=""
                       text-color="white"
                       ><span class="v-chip__underlay"></span
-                      >{{ odoo_partner_info.team_id }}</span
+                      >{{ odoo_partner_info?.team_id }}</span
                     >
                   </td>
-                  <td>
+                  <td v-if="odoo_partner_info?.rmf_score">
                     <span
                       :class="`v-chip v-chip--label v-theme--light ${
                         odoo_partner_info.rmf_score > 5
@@ -1592,6 +1594,7 @@ export default {
       isGPTLoading: false,
       openAiMessages: [],
       openaiDialog: false,
+      selectedChatPlatformId: null,
     };
   },
   created() {
@@ -1841,6 +1844,9 @@ export default {
           return;
         }
       }
+      this.selectedChatPlatformId = this.$store.state.botsModule.bots.find(
+        (el) => el.fanpageId == chat.pageID
+      )?._id;
       this.remainingMillis = 24 * 60 * 60 * 1000;
       this.remainingMillisFacebook = 24 * 60 * 60 * 1000;
       this.clearForm();
@@ -1909,7 +1915,7 @@ export default {
         this.updateCountdown += 1;
       }
       if (chat.leadId) {
-        this.userForm.name = chat.leadId.sourceName || chat.leadId.appName;
+        this.userForm.name = this.getChatUserName(chat);
         this.userForm.email = chat.leadId.email;
         this.userForm.city = chat.leadId.ciudad;
         this.userForm.todofullLabels = chat.leadId.todofullLabels;
@@ -1922,7 +1928,7 @@ export default {
           (el) => el.fuente === chat.leadId.fuente
         );
         if (detail) {
-          this.userForm.name = detail.nombre;
+          this.userForm.name = this.getChatUserName(chat);
           this.userForm.email = detail.email;
           this.userForm.city = detail.ciudad;
           this.userForm.notes = detail.nota;
@@ -2072,18 +2078,25 @@ export default {
       return userData;
     },
     getChatUserName(chat) {
-      let userData = chat.cleanLeadId
-        ? this.getChatUserData(chat)
-        : chat.leadId
-        ? chat.leadId.sourceName
-        : "Usuario";
-      if (chat.leadId && (chat.leadId.sourceName || chat.leadId.appName)) {
-        return chat.leadId.sourceName || chat.leadId.appName;
+      // check if has cleanLeadId
+      const pageId = chat.pageID;
+      // search bot with pageId
+      const bot = this.$store.state.botsModule.bots.find(
+        (el) => el.fanpageId == pageId
+      );
+      if (chat.cleanLeadId) {
+        const detail = chat.cleanLeadId.details.find(
+          (el) => el.fuente == bot._id
+        );
+        let name = detail.nombre || detail.appName;
+        if (!name) {
+          name = chat.cleanLeadId.details.find((el) => el.nombre)?.nombre;
+        }
+        // get chat pageId
+
+        return name || "Usuario";
       }
-      if (userData) {
-        return userData.nombre;
-      }
-      return "Usuario";
+      return chat.leadId?.sourceName || chat.leadId?.appName || "Usuario";
     },
     getPlatformIconStyle(platform) {
       const platforms = {
@@ -2161,9 +2174,7 @@ export default {
       }
     },
     onSelectTodofullLabels(selectedLabels) {
-      if (selectedLabels.length > 0) {
-        this.userForm.todofullLabels = selectedLabels;
-      }
+      this.userForm.todofullLabels = selectedLabels;
     },
     async saveUserForm(selectedChat) {
       let createdItem;
