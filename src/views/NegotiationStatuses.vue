@@ -279,7 +279,7 @@ export default {
           data: negotiationStatus,
         });
       } else {
-        negotiationStatus.company = this.$store.getters["authModule/getCurrentCompany"].company._id;
+        negotiationStatus.company = this.selectedCompany;
         this.negotiationStatuses[index] = await this.$store.dispatch(
           "negotiationStatusesModule/create",
           {
