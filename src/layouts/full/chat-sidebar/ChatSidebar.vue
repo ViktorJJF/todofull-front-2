@@ -241,8 +241,9 @@ const buildUrl = async () => {
 const getMessage = async (type: string) => {
   const ref = selected.value.ref || selected.value.sku.split("-")[0];
   const size = selectedVariations.value?.map((variation) => variation.label);
+  const firstVariation = selected.value.variations[0]
   const price = new Intl.NumberFormat().format(
-    selected.value.variations[0].regular_price
+    firstVariation.sale_price ?? firstVariation.regular_price
   );
 
   const url = ["url", "all", "mayor"].includes(type) ? await buildUrl() : "";
