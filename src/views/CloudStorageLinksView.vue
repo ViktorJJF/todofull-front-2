@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-row class="mb-3" v-show="!showFromChat">
-      <CountrySelector @onSelectedCountry="onSelectedCountry"></CountrySelector>
+      <CompanySelector @onSelectedCompany="onSelectedCompany"></CompanySelector>
     </v-row>
     <v-row>
       <v-col cols="12">
@@ -225,7 +225,6 @@
                 <NegotiationStatusesSelector
                   v-if="dialog"
                   :initialData="editedItem.negotiationStatusId"
-                  :country="selectedCountry"
                   class="my-3"
                   @onSelectNegotiationStatuses="onSelectNegotiationStatuses"
                 >
@@ -282,14 +281,14 @@ import TodofullLabelsSelectorV2 from "@/components/TodofullLabelsSelectorV2.vue"
 import NegotiationStatusesSelector from "@/components/NegotiationStatusesSelector.vue";
 import UploadFiles from "@/components/UploadFiles.vue";
 import AudioRecordingMany from "@/components/AudioRecordingMany.vue";
-import CountrySelector from "@/components/CountrySelector.vue";
+import CompanySelector from "@/components/CompanySelector.vue";
 // import PDFViewer from "@/components/PDFViewer.vue";
 import filesService from "@/services/api/files";
 import { uploadFile, getFormat } from "@/utils/utils";
 
 const props = defineProps({
   showFromChat: { type: Boolean, default: false },
-  country: { type: String, default: "" },
+  company: { type: String, default: "" },
   type: { type: String, default: "" },
 });
 // emits
@@ -315,7 +314,7 @@ const search = ref<string>("");
 const loadingButton = ref<boolean>(false);
 const delayTimer = ref<any>(null);
 const editedIndex = ref<number>(-1);
-const selectedCountry = ref<string>("Chile");
+const selectedCompany = ref<string>($store.getters["authModule/getCurrentCompany"].company._id);
 const headers = ref<any[]>([
   {
     text: "Agregado",
@@ -385,8 +384,8 @@ async function initialize(pageNumber: number = 1): Promise<any> {
     limit: 10,
     type: currentViewType.value,
   };
-  if (selectedCountry.value) {
-    payload["country"] = selectedCountry.value;
+  if (selectedCompany.value) {
+    payload["company"] = selectedCompany.value;
   }
   if (search.value) {
     payload["filter"] = search.value;
@@ -403,7 +402,7 @@ async function initialize(pageNumber: number = 1): Promise<any> {
 async function save() {
   loadingButton.value = true;
   if (editedIndex.value > -1) {
-    editedItem.value.country = selectedCountry.value;
+    editedItem.value.company = selectedCompany.value;
     let id = cloudStorageLinks.value[editedIndex.value]._id;
     try {
       if (editedItem.value.preFiles) {
@@ -463,7 +462,7 @@ async function save() {
           };
         });
       }
-      editedItem.value.country = selectedCountry.value;
+      editedItem.value.company = selectedCompany.value;
       let newItem = await $store.dispatch("cloudStorageLinksModule/create", {
         type: currentViewType.value,
         ...editedItem.value,
@@ -513,12 +512,12 @@ function onSelectTodofullLabels(selectedLabels) {
   }
 }
 
-function onSelectedCountry(country) {
-  selectedCountry.value = country;
-  if (props.country) {
-    selectedCountry.value = props.country;
+function onSelectedCompany(company) {
+  selectedCompany.value = company;
+  if (props.company) {
+    selectedCompany.value = props.company;
   }
-  editedItem.value.country = country;
+  editedItem.value.company = company;
   initialize();
 }
 

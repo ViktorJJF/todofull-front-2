@@ -3,5 +3,4 @@ export default () => ({
   url: "",
   files: [],
   fileType: "",
-  country: "",
 });
