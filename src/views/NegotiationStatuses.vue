@@ -3,17 +3,17 @@
     <v-row class="mb-3">
       <div class="d-flex justify-space-evenly">
         <v-btn
-          v-for="(country, idx) of countries"
+          v-for="(company, idx) of companies"
           small
           icon
           color="white"
-          @click="toggleCountry(country)"
-          :class="{ selected: selectedCountry === country.value }"
+          @click="toggleCompany(company)"
+          :class="{ selected: selectedCompany === company.company._id }"
           :key="idx"
         >
-          <img style="width: 25px" :src="country.icon" />
+          <img style="width: 25px" :src="company.company.iconUrl" />
           <v-tooltip activator="parent" anchor="bottom">
-            {{ country.value }}
+            {{ company.company.name }}
           </v-tooltip>
         </v-btn>
       </div>
@@ -218,10 +218,7 @@
 import VueTimepicker from "vue3-timepicker";
 import "vue3-timepicker/dist/VueTimepicker.css";
 import { convertMsToTime } from "@/utils/utils";
-import PeruFlagR from "@/assets/images/flags/peru.png";
-import ChileFlagR from "@/assets/images/flags/chile.png";
-import ColombiaFlagR from "@/assets/images/flags/colombia.png";
-import EspaniaFlag from "@/assets/images/flags/espania.png";
+import { mapState } from 'vuex';
 
 export default {
   components: {
@@ -229,21 +226,20 @@ export default {
   },
   data() {
     return {
-      selectedCountry: "Chile",
+      selectedCompany: this.$store.getters["authModule/getCurrentCompany"].company._id,
       negotiationStatuses: [],
-      countries: [
-        { value: "Peru", icon: PeruFlagR },
-        { value: "Chile", icon: ChileFlagR },
-        { value: "Colombia", icon: ColombiaFlagR },
-        { value: "España", icon: EspaniaFlag },
-      ],
     };
+  },
+  computed: {
+    ...mapState({
+      companies: state => state.authModule.companies
+    })
   },
   mounted() {
     this.initialize();
   },
   watch: {
-    selectedCountry() {
+    selectedCompany() {
       this.initialize();
     },
   },
@@ -253,7 +249,7 @@ export default {
         this.$store.dispatch("negotiationStatusesModule/list", {
           sort: "createdAt",
           order: "asc",
-          country: this.selectedCountry,
+          company: this.selectedCompany,
         }),
       ]);
       this.negotiationStatuses = JSON.parse(
@@ -283,6 +279,7 @@ export default {
           data: negotiationStatus,
         });
       } else {
+        negotiationStatus.company = this.selectedCompany;
         this.negotiationStatuses[index] = await this.$store.dispatch(
           "negotiationStatusesModule/create",
           {
@@ -313,7 +310,6 @@ export default {
       negotiationStatuses.unshift({
         isEditing: true,
         name: "Nuevo estado",
-        country: this.selectedCountry,
         automations: [
           {
             name: "Nuevo mensaje",
@@ -333,12 +329,12 @@ export default {
       }
       negotiationStatuses.splice(index, 1);
     },
-    toggleCountry(country) {
-      if (this.selectedCountry === country.value) {
-        return (this.selectedCountry = null);
+    toggleCompany(company) {
+      if (this.selectedCompany === company.company._id) {
+        return (this.selectedCompany = null);
       }
 
-      this.selectedCountry = country.value;
+      this.selectedCompany = company.company._id;
     },
   },
 };

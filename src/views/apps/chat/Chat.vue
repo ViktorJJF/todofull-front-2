@@ -872,16 +872,15 @@ text/plain, application/pdf, video/mp4,video/x-m4v,video/*"
             class="mb-2"
           ></v-text-field>
           <span>Etiquetas</span>
-          <TodofullLabelsSelectorv2
+          <TodofullLabelsSelectorV2
             :initialData="userForm.todofullLabels"
             class="my-3"
             @onSelectTodofullLabels="onSelectTodofullLabels"
             :key="updateLabels"
-          ></TodofullLabelsSelectorv2>
+          ></TodofullLabelsSelectorV2>
           <span>Estados de Negociación</span>
           <NegotiationStatusesSelector
             :initialData="selectedNegotiationStatus"
-            :country="selectedCountry"
             class="my-3"
             @onSelectNegotiationStatuses="onSelectNegotiationStatuses"
             :key="updateNegotiationStatus"
@@ -1435,7 +1434,7 @@ import InfiniteScroll from "@/components/InfiniteScroll.vue";
 import BaseLeftRightPartVue from "@/components/BaseLeftRightPart.vue";
 import { buildSuccess, buildAlert } from "@/utils/utils.ts";
 import AgentsSelector from "@/components/AgentsSelector.vue";
-import TodofullLabelsSelectorv2 from "@/components/TodofullLabelsSelectorv2.vue";
+import TodofullLabelsSelectorV2 from "@/components/TodofullLabelsSelectorV2.vue";
 import Countdown from "@/components/Countdown.vue";
 import NegotiationStatusesSelector from "@/components/NegotiationStatusesSelector.vue";
 import { useChatSidebarStore } from "@/stores/chatSidebar";
@@ -1456,7 +1455,7 @@ export default {
   components: {
     BaseLeftRightPartVue,
     AgentsSelector,
-    TodofullLabelsSelectorv2,
+    TodofullLabelsSelectorV2,
     InfiniteScroll,
     UploadImages,
     NegotiationStatusesSelector,
@@ -1602,14 +1601,19 @@ export default {
     // check filters by queryParams
     this.checkQueryParamsFilters();
     this.chatSidebar = useChatSidebarStore();
-    sellTeamsService.list({ byAgent: true }).then(async (res) => {
+    sellTeamsService.list({
+      byAgent: true,
+      company: this.$store.getters["authModule/getCurrentCompany"].company._id,
+    }).then(async (res) => {
       this.selectedSellTeam =
         res.data.payload.length > 0 ? res.data.payload[0]._id : null;
       this.selectedSellTeamObject =
         res.data.payload.length > 0 ? res.data.payload[0] : null;
       this.sellTeams = res.data.payload;
       // init bots
-      await this.$store.dispatch("botsModule/list");
+      await this.$store.dispatch("botsModule/list", {
+        companies: [this.$store.getters["authModule/getCurrentCompany"].company._id],
+      });
       await this.initialize();
       // after 3 secs, load more chats
       if (this.page === 1) {
@@ -1818,6 +1822,7 @@ export default {
       if (this.selectedChatId) {
         payload.selectedChatId = this.selectedChatId;
       }
+      payload.company = this.$store.getters["authModule/getCurrentCompany"].company._id;
       await Promise.all([this.$store.dispatch("chatsModule/list", payload)]);
       this.chats = this.$store.state.chatsModule.chats;
       this.isDataReady = true;
@@ -2390,6 +2395,7 @@ export default {
         if (this.selectedSellTeam) {
           payload.teamId = this.selectedSellTeam;
         }
+        payload.company = this.$store.getters["authModule/getCurrentCompany"].company._id;
         const response = await chatsService.list(payload);
         for (const chat of response.data.payload) {
           this.$store.commit("chatsModule/addChatToEnd", chat);
@@ -3027,6 +3033,7 @@ export default {
             sort: "name",
             order: "1",
             status: "APPROVED",
+            companies: [this.$store.getters["authModule/getCurrentCompany"].company._id],
             is_active: true,
           })
         ).data.payload;
