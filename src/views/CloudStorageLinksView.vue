@@ -517,6 +517,7 @@ function onSelectedCompany(company) {
   if (props.company) {
     selectedCompany.value = props.company;
   }
+  $store.dispatch("authModule/setCurrentCompany", selectedCompany.value);
   editedItem.value.company = company;
   initialize();
 }
