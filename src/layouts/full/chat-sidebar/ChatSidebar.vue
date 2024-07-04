@@ -95,18 +95,18 @@
             </v-col>
             <v-col :cols="3">
               <v-btn
-                @click="sendImageToChat(selected.customImages[0])"
-                :disabled="!selected.customImages[0]"
+                @click="sendImageToChat(selected.multimedia[0].url)"
+                :disabled="!selected.multimedia.length"
                 >Imagen</v-btn
               >
             </v-col>
             <v-col :cols="3">
               <v-btn
                 v-if="
-                  selected.customImages.find((el) => el.includes('youtube'))
+                  selected.multimedia.find((media) => media.url.includes('youtube'))
                 "
                 @click="handleCopyAnswer('youtube')"
-                :disabled="!selected.customImages[0]"
+                :disabled="!selected.multimedia.length"
                 >Youtube</v-btn
               >
             </v-col>
@@ -146,7 +146,7 @@
           </v-row>
           <v-row>
             <v-col>
-              <v-img :src="selected.customImages[0]" />
+              <v-img :src="selected.multimedia[0].url" />
             </v-col>
           </v-row>
         </div>
@@ -250,9 +250,9 @@ const getMessage = async (type: string) => {
 
   const args = [ref];
 
-  const featuredImagesIndexes = selected.value.featured_images;
-  const featuredImages = selected.value.customImages.filter((el, index) =>
-    featuredImagesIndexes?.map((el) => el.index).includes(index)
+  const featuredImagesIndexes = selected.value.featured_images?.map(el => el.index);
+  const featuredImages = selected.value.multimedia.map(media => media.url).filter((_, index) =>
+    featuredImagesIndexes?.includes(index)
   );
   const featuredYoutube = featuredImages.find((el) => el.includes("youtube"));
 
@@ -262,7 +262,7 @@ const getMessage = async (type: string) => {
   if (type === "all") args.push(size, price, url);
   if (type === "mayor") args.push(size);
   if (type === "image") {
-    return selected.value.customImages[0];
+    return selected.value.multimedia[0].url;
   }
   if (type === "youtube") {
     return featuredYoutube;
